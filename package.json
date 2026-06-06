@@ -1,0 +1,23 @@
+{
+  "name": "mahjongkaki",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @mahjongkaki/app",
+    "build": "npm run build -w @mahjongkaki/engine && npm run build -w @mahjongkaki/app",
+    "test": "npm run test -w @mahjongkaki/engine",
+    "test:watch": "npm run test:watch -w @mahjongkaki/engine",
+    "lint": "eslint packages/*/src --ext .ts,.tsx",
+    "typecheck": "tsc -b",
+    "clean": "rm -rf packages/*/dist"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.7.0"
+  }
+}

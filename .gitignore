@@ -1,0 +1,27 @@
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Capacitor
+android/
+ios/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage/
+
+# Build
+*.log
