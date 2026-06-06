@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Calculator } from './components/Calculator';
+import { ChipTracker } from './components/ChipTracker';
+import { TableUtils } from './components/TableUtils';
 
 type Tab = 'calculator' | 'chips' | 'table';
 
@@ -14,8 +16,8 @@ export function App() {
 
       <main className="flex-1 overflow-y-auto p-4">
         {tab === 'calculator' && <Calculator />}
-        {tab === 'chips' && <Placeholder label="Chip Tracker" />}
-        {tab === 'table' && <Placeholder label="Table Utilities" />}
+        {tab === 'chips' && <ChipTracker />}
+        {tab === 'table' && <TableUtils />}
       </main>
 
       <nav className="flex border-t border-slate-700 bg-slate-800 pb-safe">
@@ -40,11 +42,3 @@ function TabButton({ label, active, onClick }: { label: string; active: boolean;
   );
 }
 
-function Placeholder({ label }: { label: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center h-full text-slate-500">
-      <p className="text-xl font-semibold">{label}</p>
-      <p className="text-sm mt-1">Coming soon</p>
-    </div>
-  );
-}
