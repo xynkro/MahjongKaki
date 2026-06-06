@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Calculator } from './components/Calculator';
 
 type Tab = 'calculator' | 'chips' | 'table';
 
@@ -12,9 +13,9 @@ export function App() {
       </header>
 
       <main className="flex-1 overflow-y-auto p-4">
-        {tab === 'calculator' && <CalculatorPlaceholder />}
-        {tab === 'chips' && <ChipsPlaceholder />}
-        {tab === 'table' && <TablePlaceholder />}
+        {tab === 'calculator' && <Calculator />}
+        {tab === 'chips' && <Placeholder label="Chip Tracker" />}
+        {tab === 'table' && <Placeholder label="Table Utilities" />}
       </main>
 
       <nav className="flex border-t border-slate-700 bg-slate-800 pb-safe">
@@ -39,28 +40,10 @@ function TabButton({ label, active, onClick }: { label: string; active: boolean;
   );
 }
 
-function CalculatorPlaceholder() {
+function Placeholder({ label }: { label: string }) {
   return (
     <div className="flex flex-col items-center justify-center h-full text-slate-500">
-      <p className="text-xl font-semibold">Tai Calculator</p>
-      <p className="text-sm mt-1">Coming next</p>
-    </div>
-  );
-}
-
-function ChipsPlaceholder() {
-  return (
-    <div className="flex flex-col items-center justify-center h-full text-slate-500">
-      <p className="text-xl font-semibold">Chip Tracker</p>
-      <p className="text-sm mt-1">Coming soon</p>
-    </div>
-  );
-}
-
-function TablePlaceholder() {
-  return (
-    <div className="flex flex-col items-center justify-center h-full text-slate-500">
-      <p className="text-xl font-semibold">Table Utilities</p>
+      <p className="text-xl font-semibold">{label}</p>
       <p className="text-sm mt-1">Coming soon</p>
     </div>
   );
