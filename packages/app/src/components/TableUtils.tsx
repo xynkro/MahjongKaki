@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { haptics } from '../lib/haptics';
 
 const WINDS = ['East', 'South', 'West', 'North'] as const;
 const WIND_ZH: Record<string, string> = { East: '東', South: '南', West: '西', North: '北' };
@@ -27,14 +28,17 @@ export function TableUtils() {
   const [dealerIndex, setDealerIndex] = useState(0);
 
   const handleRollDice = useCallback(() => {
+    haptics.tap();
     setDice(rollDice());
   }, []);
 
   const handleShuffleSeats = useCallback(() => {
+    haptics.tap();
     setSeats(shuffleSeats());
   }, []);
 
   const nextDealer = useCallback(() => {
+    haptics.select();
     setDealerIndex(prev => {
       const next = (prev + 1) % 4;
       if (next === 0) setWindRound(wr => Math.min(wr + 1, 3));
@@ -43,6 +47,7 @@ export function TableUtils() {
   }, []);
 
   const prevDealer = useCallback(() => {
+    haptics.select();
     setDealerIndex(prev => {
       const next = (prev - 1 + 4) % 4;
       if (prev === 0) setWindRound(wr => Math.max(wr - 1, 0));
@@ -57,13 +62,13 @@ export function TableUtils() {
 
   return (
     <div className="space-y-4 pb-4">
-      <section className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
-        <h2 className="text-sm font-semibold text-slate-300 mb-3">Dice Roller</h2>
-        <div className="flex items-center gap-4">
+      <section className="card p-4">
+        <h3 className="section-title">Dice Roller</h3>
+        <div className="flex items-center gap-4 mt-3" aria-live="polite">
           <button
             type="button"
             onClick={handleRollDice}
-            className="px-4 py-2 text-sm font-medium bg-emerald-700 text-white rounded-lg active:bg-emerald-600"
+            className="px-4 py-2 min-h-[44px] text-sm font-medium bg-emerald-700 text-white rounded-lg active:bg-emerald-600"
           >
             Roll 3 Dice
           </button>
@@ -72,7 +77,7 @@ export function TableUtils() {
               {dice.map((d, i) => (
                 <DiceFace key={i} value={d} />
               ))}
-              <span className="text-sm text-slate-400 self-center ml-1">
+              <span className="text-2xl font-bold text-amber-400 self-center ml-1">
                 = {dice[0] + dice[1] + dice[2]}
               </span>
             </div>
@@ -80,16 +85,16 @@ export function TableUtils() {
         </div>
       </section>
 
-      <section className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
-        <h2 className="text-sm font-semibold text-slate-300 mb-3">Seat Randomizer</h2>
+      <section className="card p-4">
+        <h3 className="section-title">Seat Randomizer</h3>
         <button
           type="button"
           onClick={handleShuffleSeats}
-          className="px-4 py-2 text-sm font-medium bg-emerald-700 text-white rounded-lg active:bg-emerald-600 mb-3"
+          className="px-4 py-2 min-h-[44px] text-sm font-medium bg-emerald-700 text-white rounded-lg active:bg-emerald-600 mb-3 mt-3"
         >
           Shuffle Seats
         </button>
-        {seats && (
+        {seats ? (
           <div className="grid grid-cols-3 gap-2 max-w-[200px] mx-auto">
             <div />
             <SeatCard wind={seats[2]} position="Top" />
@@ -103,12 +108,17 @@ export function TableUtils() {
             <SeatCard wind={seats[0]} position="Bottom" />
             <div />
           </div>
+        ) : (
+          <div className="empty-state">
+            <div className="text-3xl opacity-40">🀄</div>
+            <p>Shuffle to assign everyone a seat.</p>
+          </div>
         )}
       </section>
 
-      <section className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+      <section className="card p-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-slate-300">Wind Round Tracker</h2>
+          <h3 className="section-title">Wind Round Tracker</h3>
           <button
             type="button"
             onClick={resetWind}
@@ -136,7 +146,7 @@ export function TableUtils() {
           ))}
         </div>
 
-        <div className="text-center mb-3">
+        <div className="text-center mb-3" aria-live="polite">
           <div className="text-xs text-slate-400">
             Prevailing Wind: <span className="text-emerald-400 font-medium">{WIND_ZH[WINDS[windRound]]} {WINDS[windRound]}</span>
           </div>
@@ -149,14 +159,14 @@ export function TableUtils() {
           <button
             type="button"
             onClick={prevDealer}
-            className="px-3 py-1.5 text-xs bg-slate-700 text-slate-300 rounded-lg active:bg-slate-600"
+            className="px-3 py-1.5 min-h-[44px] text-xs bg-slate-700 text-slate-300 rounded-lg active:bg-slate-600"
           >
             Prev Dealer
           </button>
           <button
             type="button"
             onClick={nextDealer}
-            className="px-3 py-1.5 text-xs bg-emerald-700 text-white rounded-lg active:bg-emerald-600"
+            className="px-3 py-1.5 min-h-[44px] text-xs bg-emerald-700 text-white rounded-lg active:bg-emerald-600"
           >
             Next Dealer
           </button>

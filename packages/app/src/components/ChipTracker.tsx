@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useActiveSession } from '../lib/use-sessions';
 import { formatCurrency, STAKE_PRESETS } from '@mahjongkaki/engine';
+import { haptics } from '../lib/haptics';
 import { NewSession } from './NewSession';
 import { AddRound } from './AddRound';
 
@@ -22,10 +23,10 @@ export function ChipTracker() {
 
   return (
     <div className="space-y-4 pb-4">
-      <section className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+      <section className="card p-4">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-sm font-semibold text-slate-300">Session</h2>
+            <h3 className="section-title">Session</h3>
             <div className="text-[10px] text-slate-500 mt-0.5">
               {session.stakeLabel} &middot; {rounds.length} round{rounds.length !== 1 ? 's' : ''}
             </div>
@@ -33,7 +34,7 @@ export function ChipTracker() {
           {!confirmEnd ? (
             <button
               type="button"
-              onClick={() => setConfirmEnd(true)}
+              onClick={() => { haptics.select(); setConfirmEnd(true); }}
               className="px-3 py-1 text-xs text-slate-400 rounded-md border border-slate-700 active:bg-slate-700"
             >
               End Session
@@ -58,7 +59,7 @@ export function ChipTracker() {
           )}
         </div>
 
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-4 gap-2" aria-live="polite">
           {session.playerNames.map((name, i) => (
             <div key={i} className="text-center">
               <div className="text-xs text-slate-400 truncate">{name}</div>
@@ -76,8 +77,8 @@ export function ChipTracker() {
       {!showAddRound && (
         <button
           type="button"
-          onClick={() => setShowAddRound(true)}
-          className="w-full py-3 text-sm font-medium bg-emerald-700 text-white rounded-xl active:bg-emerald-600"
+          onClick={() => { haptics.tap(); setShowAddRound(true); }}
+          className="w-full min-h-[44px] py-3 text-sm font-medium bg-emerald-700 text-white rounded-xl active:bg-emerald-600"
         >
           + Record Round
         </button>
@@ -87,18 +88,18 @@ export function ChipTracker() {
         <AddRound
           playerNames={session.playerNames}
           stakeLabel={session.stakeLabel}
-          onAdd={(round) => { addRound(round); setShowAddRound(false); }}
+          onAdd={(round) => { haptics.success(); addRound(round); setShowAddRound(false); }}
           onCancel={() => setShowAddRound(false)}
         />
       )}
 
-      {rounds.length > 0 && (
+      {rounds.length > 0 ? (
         <section className="space-y-1.5">
-          <h3 className="text-xs text-slate-400 font-medium">Round History</h3>
+          <h3 className="section-title">Round History</h3>
           {[...rounds].reverse().map((round, idx) => (
             <div
               key={round.id}
-              className="flex items-center justify-between bg-slate-800 rounded-lg px-3 py-2 border border-slate-700/50"
+              className="card flex items-center justify-between px-3 py-2"
             >
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-slate-300">
@@ -126,6 +127,11 @@ export function ChipTracker() {
             </div>
           ))}
         </section>
+      ) : (
+        <div className="empty-state">
+          <span className="text-4xl opacity-40">🀄</span>
+          <p>No rounds yet — record your first</p>
+        </div>
       )}
     </div>
   );

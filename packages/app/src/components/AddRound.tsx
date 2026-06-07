@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { calculatePayout, formatCurrency, STAKE_PRESETS, DEFAULT_RULES } from '@mahjongkaki/engine';
+import { haptics } from '../lib/haptics';
 import type { Round } from '../lib/db';
 
 interface AddRoundProps {
@@ -49,22 +50,23 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
   const shooterOptions = Array.from({ length: 4 }, (_, i) => i).filter(i => i !== winnerIndex);
 
   return (
-    <section className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-3">
+    <section className="card p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-300">Record Round</h3>
+        <h3 className="section-title">Record Round</h3>
         <button type="button" onClick={onCancel} className="text-xs text-slate-400 active:text-slate-200">
           Cancel
         </button>
       </div>
 
       <div>
-        <div className="text-xs text-slate-400 mb-1">Winner</div>
+        <h3 className="section-title mb-1">Winner</h3>
         <div className="grid grid-cols-4 gap-1">
           {playerNames.map((name, i) => (
             <button
               key={i}
               type="button"
               onClick={() => {
+                haptics.select();
                 setWinnerIndex(i);
                 if (shooterIndex === i) {
                   const others = [0, 1, 2, 3].filter(j => j !== i);
@@ -84,11 +86,11 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
       </div>
 
       <div>
-        <div className="text-xs text-slate-400 mb-1">Tai</div>
+        <h3 className="section-title mb-1">Tai</h3>
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setTai(t => Math.max(1, t - 1))}
+            onClick={() => { haptics.tap(); setTai(t => Math.max(1, t - 1)); }}
             className="w-8 h-8 text-lg bg-slate-700 rounded-lg text-slate-300 active:bg-slate-600"
           >
             -
@@ -96,7 +98,7 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
           <span className="text-lg font-bold text-slate-200 w-8 text-center font-mono">{tai}</span>
           <button
             type="button"
-            onClick={() => setTai(t => Math.min(DEFAULT_RULES.taiCap ?? 13, t + 1))}
+            onClick={() => { haptics.tap(); setTai(t => Math.min(DEFAULT_RULES.taiCap ?? 13, t + 1)); }}
             className="w-8 h-8 text-lg bg-slate-700 rounded-lg text-slate-300 active:bg-slate-600"
           >
             +
@@ -106,7 +108,7 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
               <button
                 key={v}
                 type="button"
-                onClick={() => setTai(v)}
+                onClick={() => { haptics.select(); setTai(v); }}
                 className={`px-2 py-1 text-xs rounded-md ${
                   tai === v ? 'bg-emerald-700 text-white' : 'bg-slate-700 text-slate-400'
                 }`}
@@ -119,13 +121,13 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
       </div>
 
       <div>
-        <div className="text-xs text-slate-400 mb-1">Win Type</div>
+        <h3 className="section-title mb-1">Win Type</h3>
         <div className="flex gap-1">
           {(['discard', 'zimo'] as const).map(wt => (
             <button
               key={wt}
               type="button"
-              onClick={() => setWinType(wt)}
+              onClick={() => { haptics.select(); setWinType(wt); }}
               className={`flex-1 py-1.5 text-xs rounded-lg transition-colors ${
                 winType === wt
                   ? 'bg-emerald-700 text-white'
@@ -140,13 +142,13 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
 
       {winType === 'discard' && (
         <div>
-          <div className="text-xs text-slate-400 mb-1">Shooter</div>
+          <h3 className="section-title mb-1">Shooter</h3>
           <div className="grid grid-cols-3 gap-1">
             {shooterOptions.map(i => (
               <button
                 key={i}
                 type="button"
-                onClick={() => setShooterIndex(i)}
+                onClick={() => { haptics.select(); setShooterIndex(i); }}
                 className={`px-2 py-1.5 text-xs rounded-lg truncate transition-colors ${
                   shooterIndex === i
                     ? 'bg-red-700/80 text-white'
@@ -160,8 +162,8 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
         </div>
       )}
 
-      <div className="bg-slate-900/50 rounded-lg p-2">
-        <div className="text-xs text-slate-500 mb-1">Payout Preview</div>
+      <div className="card p-2" aria-live="polite">
+        <h3 className="section-title mb-1">Payout Preview</h3>
         <div className="grid grid-cols-4 gap-2">
           {playerNames.map((name, i) => (
             <div key={i} className="text-center">
@@ -179,7 +181,7 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
       <button
         type="button"
         onClick={handleSubmit}
-        className="w-full py-2.5 text-sm font-medium bg-emerald-700 text-white rounded-xl active:bg-emerald-600"
+        className="w-full min-h-[44px] py-2.5 text-sm font-medium bg-emerald-700 text-white rounded-xl active:bg-emerald-600"
       >
         Add Round
       </button>

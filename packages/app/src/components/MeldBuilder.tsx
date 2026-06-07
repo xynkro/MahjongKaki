@@ -3,6 +3,7 @@ import type { PlayTile, Meld, Suit } from '@mahjongkaki/engine';
 import { pung, kong, chow, eyes } from '@mahjongkaki/engine';
 import { TileKeyboard } from './TileKeyboard';
 import { tileLabel, tileColor } from '../lib/tile-labels';
+import { haptics } from '../lib/haptics';
 
 type MeldType = 'chow' | 'pung' | 'kong' | 'eyes';
 
@@ -18,6 +19,7 @@ export function MeldBuilder({ onAdd, onCancel, hasEyes, setCount }: MeldBuilderP
   const [exposed, setExposed] = useState(true);
 
   function handleTileSelect(tile: PlayTile) {
+    haptics.tap();
     switch (meldType) {
       case 'pung':
         onAdd(pung(tile, exposed));
@@ -53,7 +55,7 @@ export function MeldBuilder({ onAdd, onCancel, hasEyes, setCount }: MeldBuilderP
               key={key}
               type="button"
               disabled={disabled}
-              onClick={() => setMeldType(key)}
+              onClick={() => { haptics.select(); setMeldType(key); }}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors
                 ${meldType === key
                   ? 'bg-emerald-600 text-white'
@@ -79,7 +81,7 @@ export function MeldBuilder({ onAdd, onCancel, hasEyes, setCount }: MeldBuilderP
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setExposed(!exposed)}
+            onClick={() => { haptics.select(); setExposed(!exposed); }}
             className={`px-3 py-1 text-xs rounded-md ${
               exposed ? 'bg-amber-700 text-amber-100' : 'bg-slate-700 text-slate-300'
             }`}

@@ -1,5 +1,6 @@
 import type { Wind } from '@mahjongkaki/engine';
 import { WIND_LABEL, WIND_OPTIONS } from '../lib/tile-labels';
+import { haptics } from '../lib/haptics';
 
 interface WinContextProps {
   seatWind: Wind;
@@ -18,8 +19,8 @@ interface WinContextProps {
 
 export function WinContextPanel(props: WinContextProps) {
   return (
-    <div className="space-y-3">
-      <div className="text-xs text-slate-400 font-medium">Win Context</div>
+    <div className="card p-4 space-y-3">
+      <h3 className="section-title">Win Context</h3>
 
       <div className="grid grid-cols-2 gap-3">
         <WindSelect label="Seat Wind" value={props.seatWind} onChange={props.onSeatWind} />
@@ -27,14 +28,14 @@ export function WinContextPanel(props: WinContextProps) {
       </div>
 
       <div className="flex gap-2">
-        <TogglePill label="Discard" active={props.winType === 'discard'} onClick={() => props.onWinType('discard')} />
-        <TogglePill label="Self-Draw" active={props.winType === 'zimo'} onClick={() => props.onWinType('zimo')} />
+        <TogglePill label="Discard" active={props.winType === 'discard'} onClick={() => { haptics.select(); props.onWinType('discard'); }} />
+        <TogglePill label="Self-Draw" active={props.winType === 'zimo'} onClick={() => { haptics.select(); props.onWinType('zimo'); }} />
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <FlagChip label="Kong Replace" active={props.isKongReplacement} onClick={() => props.onKongReplacement(!props.isKongReplacement)} />
-        <FlagChip label="Last Tile" active={props.isLastTile} onClick={() => props.onLastTile(!props.isLastTile)} />
-        <FlagChip label="Rob Kong" active={props.isRobbingKong} onClick={() => props.onRobbingKong(!props.isRobbingKong)} />
+        <FlagChip label="Kong Replace" active={props.isKongReplacement} onClick={() => { haptics.select(); props.onKongReplacement(!props.isKongReplacement); }} />
+        <FlagChip label="Last Tile" active={props.isLastTile} onClick={() => { haptics.select(); props.onLastTile(!props.isLastTile); }} />
+        <FlagChip label="Rob Kong" active={props.isRobbingKong} onClick={() => { haptics.select(); props.onRobbingKong(!props.isRobbingKong); }} />
       </div>
     </div>
   );
@@ -43,13 +44,13 @@ export function WinContextPanel(props: WinContextProps) {
 function WindSelect({ label, value, onChange }: { label: string; value: Wind; onChange: (w: Wind) => void }) {
   return (
     <div>
-      <div className="text-[10px] text-slate-500 mb-1">{label}</div>
+      <h3 className="section-title mb-1">{label}</h3>
       <div className="flex gap-1">
         {WIND_OPTIONS.map((w) => (
           <button
             key={w}
             type="button"
-            onClick={() => onChange(w)}
+            onClick={() => { haptics.select(); onChange(w); }}
             className={`flex-1 py-1.5 text-sm font-bold rounded-md transition-colors ${
               value === w
                 ? 'bg-slate-600 text-white'

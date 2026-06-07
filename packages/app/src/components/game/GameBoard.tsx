@@ -3,6 +3,7 @@ import { type GameState, type GameAction } from '@mahjongkaki/game';
 import { tileToIndex, type Meld, type Wind, type BonusTile, WINDS } from '@mahjongkaki/engine';
 import { TileRow } from './TileRow';
 import { TileFace } from './TileFace';
+import { haptics } from '../../lib/haptics';
 
 const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西', north: '北' };
 const IVORY = 'linear-gradient(to bottom, #FBF4E4 0%, #F1E7D2 55%, #E4D2AC 100%)';
@@ -108,6 +109,7 @@ export function GameBoard({
   useEffect(() => {
     if (flowerCount > prevFlowers.current) {
       const added = state.flowers[hs].slice(prevFlowers.current);
+      haptics.flower();
       popNonce.current += 1;
       setFlowerPop({ tiles: added, nonce: popNonce.current });
       prevFlowers.current = flowerCount;
@@ -131,10 +133,12 @@ export function GameBoard({
   function handleTileClick(tile: number, idx: number) {
     if (!isHumanTurn) return;
     if (selectedIdx === idx) {
+      haptics.select();
       onDiscard(tile);
       setSelectedIdx(null);
       setSelectedTileValue(null);
     } else {
+      haptics.tap();
       setSelectedIdx(idx);
       setSelectedTileValue(tile);
     }
@@ -219,7 +223,7 @@ export function GameBoard({
           <div className="anim-pop flex gap-2 mt-2 justify-center">
             {selectedTileValue !== null && (
               <button
-                onClick={() => { onDiscard(selectedTileValue); setSelectedIdx(null); setSelectedTileValue(null); }}
+                onClick={() => { haptics.select(); onDiscard(selectedTileValue); setSelectedIdx(null); setSelectedTileValue(null); }}
                 className="px-5 py-2 bg-emerald-700 text-white rounded-lg text-sm font-medium active:scale-95 active:bg-emerald-600"
               >
                 Discard
@@ -228,7 +232,7 @@ export function GameBoard({
             {kongActions.map((a, i) => (
               <button
                 key={i}
-                onClick={() => { if (a.type === 'declare_kong') onDeclareKong(a.tile); }}
+                onClick={() => { if (a.type === 'declare_kong') { haptics.select(); onDeclareKong(a.tile); } }}
                 className="px-5 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium active:scale-95 active:bg-amber-500"
               >
                 Kong
@@ -236,7 +240,7 @@ export function GameBoard({
             ))}
             {canTsumo && (
               <button
-                onClick={onTsumo}
+                onClick={() => { haptics.success(); onTsumo(); }}
                 className="anim-tsumo px-5 py-2 bg-red-600 text-white rounded-lg text-sm font-bold shadow-[0_0_18px_rgba(218,90,68,0.5)] active:scale-95 active:bg-red-500"
               >
                 Tsumo!

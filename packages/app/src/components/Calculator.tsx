@@ -11,6 +11,7 @@ import { MeldBuilder } from './MeldBuilder';
 import { BonusTiles } from './BonusTiles';
 import { WinContextPanel } from './WinContext';
 import { ScorePanel } from './ScorePanel';
+import { haptics } from '../lib/haptics';
 
 export function Calculator() {
   const [adding, setAdding] = useState(false);
@@ -40,6 +41,7 @@ export function Calculator() {
       const setCount = prev.filter(m => m.type !== 'eyes').length;
       if (meld.type === 'eyes' && eyesCount >= 1) return prev;
       if (meld.type !== 'eyes' && setCount >= 4) return prev;
+      haptics.select();
       return [...prev, meld];
     });
   }, []);
@@ -117,19 +119,19 @@ export function Calculator() {
 
   return (
     <div className="space-y-4 pb-4">
-      <section className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+      <section className="card p-3">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-semibold text-slate-300">
+          <h3 className="section-title">
             Hand
-            <span className="text-slate-500 ml-1 font-normal">
+            <span className="text-slate-500 ml-1 font-normal normal-case">
               ({setCount}/4 sets{hasEyes ? ' + eyes' : ''})
             </span>
-          </h2>
+          </h3>
           <div className="flex gap-2">
             {!adding && !handFull && (
               <button
                 type="button"
-                onClick={() => setAdding(true)}
+                onClick={() => { haptics.tap(); setAdding(true); }}
                 className="px-3 py-1 text-xs font-medium bg-emerald-700 text-white rounded-md active:bg-emerald-600"
               >
                 + Add
@@ -138,7 +140,7 @@ export function Calculator() {
             {melds.length > 0 && (
               <button
                 type="button"
-                onClick={reset}
+                onClick={() => { haptics.tap(); reset(); }}
                 className="px-3 py-1 text-xs text-slate-400 rounded-md active:bg-slate-700"
               >
                 Clear

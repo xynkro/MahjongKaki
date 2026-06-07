@@ -7,6 +7,7 @@ import {
 import type { Wind } from '@mahjongkaki/engine';
 import { TileRow } from '../game/TileRow';
 import { db } from '../../lib/db';
+import { haptics } from '../../lib/haptics';
 
 const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西', north: '北' };
 
@@ -28,6 +29,7 @@ export function CallDrill({ onBack }: Props) {
     if (!drill || result) return;
     const grade = gradeCall(drill, choice);
     setResult(grade);
+    grade.correct ? haptics.success() : haptics.error();
     if (grade.correct) setStreak(s => s + 1);
     else setStreak(0);
 
@@ -59,7 +61,7 @@ export function CallDrill({ onBack }: Props) {
         <span className="text-xs text-slate-500">Streak: {streak}</span>
       </div>
 
-      <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+      <div className="card p-4">
         <h3 className="text-sm font-semibold text-slate-300 mb-1">Eat or Pass?</h3>
         <p className="text-xs text-slate-400 mb-3">
           An opponent discarded this tile. You can <span className="text-emerald-400 font-semibold">{callLabel}</span> it.
@@ -104,7 +106,7 @@ export function CallDrill({ onBack }: Props) {
       )}
 
       {result && (
-        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-2">
+        <div className="card p-4 space-y-2">
           <div className={`text-lg font-bold ${result.correct ? 'text-emerald-400' : 'text-amber-400'}`}>
             {result.correct ? 'Correct!' : 'Not the best play'}
           </div>

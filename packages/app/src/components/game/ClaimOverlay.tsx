@@ -1,5 +1,6 @@
 import { type Claim } from '@mahjongkaki/game';
 import { TileRow } from './TileRow';
+import { haptics } from '../../lib/haptics';
 
 interface ClaimOverlayProps {
   claims: Claim[];
@@ -26,14 +27,14 @@ export function ClaimOverlay({ claims, lastDiscardTile, onClaim, onSkip }: Claim
         {claims.map((claim, i) => (
           <button
             key={`${claim.claimType}-${i}`}
-            onClick={() => onClaim(claim)}
+            onClick={() => { claim.claimType === 'win' ? haptics.success() : haptics.select(); onClaim(claim); }}
             className={`px-5 py-2.5 text-white rounded-lg font-semibold text-sm active:scale-95 ${CLAIM_COLORS[claim.claimType]}`}
           >
             {claim.claimType === 'win' ? 'Hu!' : claim.claimType.charAt(0).toUpperCase() + claim.claimType.slice(1)}
           </button>
         ))}
         <button
-          onClick={onSkip}
+          onClick={() => { haptics.tap(); onSkip(); }}
           className="px-5 py-2.5 bg-slate-700 text-slate-300 rounded-lg text-sm active:scale-95"
         >
           Skip

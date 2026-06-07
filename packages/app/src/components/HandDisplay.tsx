@@ -12,7 +12,8 @@ interface HandDisplayProps {
 export function HandDisplay({ melds, flowers, seasons, animals, onRemoveMeld }: HandDisplayProps) {
   if (melds.length === 0 && flowers.length === 0 && seasons.length === 0 && animals.length === 0) {
     return (
-      <div className="text-center py-6 text-slate-500 text-sm">
+      <div className="empty-state">
+        <div className="text-3xl opacity-60 mb-1">🀄</div>
         Tap + to add melds to the hand
       </div>
     );

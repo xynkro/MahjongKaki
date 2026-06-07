@@ -7,6 +7,7 @@ import {
 import { indexToTile, tileKey } from '@mahjongkaki/engine';
 import { TileRow } from '../game/TileRow';
 import { db } from '../../lib/db';
+import { haptics } from '../../lib/haptics';
 
 interface Props {
   onBack: () => void;
@@ -26,6 +27,7 @@ export function EfficiencyDrill({ onBack }: Props) {
     if (!drill || result) return;
     const grade = gradeEfficiency(drill, tile);
     setResult(grade);
+    grade.isOptimal ? haptics.success() : haptics.error();
     if (grade.isOptimal) setStreak(s => s + 1);
     else setStreak(0);
 
@@ -55,7 +57,7 @@ export function EfficiencyDrill({ onBack }: Props) {
         <span className="text-xs text-slate-500">Streak: {streak}</span>
       </div>
 
-      <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+      <div className="card p-4">
         <h3 className="text-sm font-semibold text-slate-300 mb-1">
           Tile Efficiency ({drill.shantenValue}-shanten)
         </h3>
@@ -70,7 +72,7 @@ export function EfficiencyDrill({ onBack }: Props) {
       </div>
 
       {result && (
-        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-2">
+        <div className="card p-4 space-y-2">
           <div className={`text-lg font-bold ${result.isOptimal ? 'text-emerald-400' : 'text-amber-400'}`}>
             {result.isOptimal ? 'Optimal!' : `${Math.round(result.ratio * 100)}% efficiency`}
           </div>

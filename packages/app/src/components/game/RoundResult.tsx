@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { type GameState, scoreWinForSeat } from '@mahjongkaki/game';
 import {
   tileToIndex, type Wind, WINDS,
   calculatePayout, formatSettlement, STAKE_PRESETS,
 } from '@mahjongkaki/engine';
 import { TileRow } from './TileRow';
+import { haptics } from '../../lib/haptics';
 
 const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西', north: '北' };
 const DEMO_STAKE = STAKE_PRESETS.find(s => s.label === '50¢/$1') ?? STAKE_PRESETS[0];
@@ -25,6 +27,10 @@ export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultPr
   const isHumanWin = state.winner === state.humanSeat;
   const scoring = state.winner !== null ? scoreWinForSeat(state, state.winner) : null;
 
+  useEffect(() => {
+    if (isHumanWin) haptics.success();
+  }, [isHumanWin]);
+
   const names = [0, 1, 2, 3].map(i =>
     i === state.humanSeat ? 'You' : WIND_CHARS[seatWind(i, state.dealerSeat)],
   ) as [string, string, string, string];
@@ -42,7 +48,7 @@ export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultPr
   return (
     <div className="space-y-4 pb-4">
       <section
-        className="anim-rise relative overflow-hidden bg-slate-800/50 rounded-xl p-6 border border-slate-700/50 text-center"
+        className="anim-rise card relative overflow-hidden p-6 text-center"
         style={delay(0)}
       >
         {isHumanWin && (
@@ -76,8 +82,8 @@ export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultPr
 
       {scoring && state.winner !== null && (
         <>
-          <section className="anim-rise bg-slate-800/50 rounded-xl p-4 border border-slate-700/50" style={delay(80)}>
-            <h3 className="text-sm font-semibold text-slate-300 mb-2">Winning Hand</h3>
+          <section className="anim-rise card p-4" style={delay(80)}>
+            <h3 className="section-title mb-2">Winning Hand</h3>
             <TileRow tiles={state.hands[state.winner]} sortTiles={true} />
             {state.melds[state.winner].length > 0 && (
               <div className="mt-2">
@@ -92,8 +98,8 @@ export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultPr
             )}
           </section>
 
-          <section className="anim-rise bg-slate-800/50 rounded-xl p-4 border border-slate-700/50" style={delay(160)}>
-            <h3 className="text-sm font-semibold text-slate-300 mb-2">Scoring</h3>
+          <section className="anim-rise card p-4" style={delay(160)} aria-live="polite">
+            <h3 className="section-title mb-2">Scoring</h3>
             {scoring.elements.length === 0 ? (
               <p className="text-xs text-slate-500">No tai elements.</p>
             ) : (
@@ -115,9 +121,9 @@ export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultPr
           </section>
 
           {settlement.length > 0 && (
-            <section className="anim-rise bg-slate-800/50 rounded-xl p-4 border border-slate-700/50" style={delay(240)}>
-              <h3 className="text-sm font-semibold text-slate-300 mb-1">
-                Settlement <span className="text-xs font-normal text-slate-500">· example at {DEMO_STAKE.label}</span>
+            <section className="anim-rise card p-4" style={delay(240)}>
+              <h3 className="section-title mb-1">
+                Settlement <span className="text-xs font-normal text-slate-500 normal-case">· example at {DEMO_STAKE.label}</span>
               </h3>
               <div className="space-y-0.5">
                 {settlement.map((line, i) => (
@@ -129,8 +135,8 @@ export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultPr
         </>
       )}
 
-      <section className="anim-rise bg-slate-800/50 rounded-xl p-4 border border-slate-700/50" style={delay(320)}>
-        <h3 className="text-sm font-semibold text-slate-300 mb-2">Game Stats</h3>
+      <section className="anim-rise card p-4" style={delay(320)}>
+        <h3 className="section-title mb-2">Game Stats</h3>
         <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
           <div>Turns played: {state.turnCount}</div>
           <div>Wall remaining: {state.wall.length}</div>

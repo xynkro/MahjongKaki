@@ -23,10 +23,10 @@ export function ScorePanel({
   return (
     <div className="space-y-4">
       {scoring && (
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="card p-4">
           <div className="flex items-baseline justify-between mb-3">
-            <h3 className="text-sm font-semibold text-slate-300">Tai Breakdown</h3>
-            <div className="flex items-baseline gap-1">
+            <h3 className="section-title">Tai Breakdown</h3>
+            <div className="flex items-baseline gap-1" aria-live="polite">
               <span className={`text-2xl font-bold ${scoring.isValid ? 'text-emerald-400' : 'text-red-400'}`}>
                 {scoring.cappedTai}
               </span>
@@ -53,18 +53,18 @@ export function ScorePanel({
               </div>
             ))}
             {scoring.elements.length === 0 && (
-              <div className="text-xs text-slate-500">No tai elements (chicken hand)</div>
+              <div className="empty-state">No tai elements (chicken hand)</div>
             )}
           </div>
         </div>
       )}
 
       {scoring?.isValid && (
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700 space-y-3">
-          <h3 className="text-sm font-semibold text-slate-300">Settlement</h3>
+        <div className="card p-4 space-y-3">
+          <h3 className="section-title">Settlement</h3>
 
           <div>
-            <div className="text-[10px] text-slate-500 mb-1">Stake</div>
+            <h3 className="section-title mb-1">Stake</h3>
             <div className="flex gap-1 flex-wrap">
               {STAKE_PRESETS.map((preset, i) => (
                 <button
@@ -84,7 +84,7 @@ export function ScorePanel({
           </div>
 
           <div className="space-y-1.5">
-            <div className="text-[10px] text-slate-500">Players</div>
+            <h3 className="section-title">Players</h3>
             {playerNames.map((name, i) => (
               <div key={i} className="flex items-center gap-2">
                 <input
@@ -119,7 +119,7 @@ export function ScorePanel({
           </div>
 
           {payout && (
-            <div className="pt-2 border-t border-slate-700 space-y-1">
+            <div className="pt-2 border-t border-slate-700 space-y-1" aria-live="polite">
               {payout.payments.map((p, i) => (
                 <div key={i} className="flex justify-between text-xs">
                   <span className="text-slate-300">{p.name}</span>
@@ -136,7 +136,7 @@ export function ScorePanel({
               </div>
 
               <div className="pt-2 border-t border-slate-700">
-                <div className="text-[10px] text-slate-500 mb-1">Transfers</div>
+                <h3 className="section-title mb-1">Transfers</h3>
                 {formatSettlement(payout.netPerPlayer).map((line, i) => (
                   <div key={i} className="text-xs text-slate-300">{line}</div>
                 ))}

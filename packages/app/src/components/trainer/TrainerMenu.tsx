@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../lib/db';
+import { haptics } from '../../lib/haptics';
 
 export type DrillType =
   | 'efficiency' | 'waits' | 'defense'
@@ -44,8 +45,8 @@ export function TrainerMenu({ onSelect }: TrainerMenuProps) {
     return (
       <button
         key={d.type}
-        onClick={() => onSelect(d.type)}
-        className="w-full text-left bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 active:bg-slate-700/50"
+        onClick={() => { haptics.tap(); onSelect(d.type); }}
+        className="w-full text-left card p-4 active:bg-slate-700/50"
       >
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-slate-200">{d.label}</span>
@@ -65,10 +66,10 @@ export function TrainerMenu({ onSelect }: TrainerMenuProps) {
       <h2 className="text-lg font-bold text-slate-200">Training Drills</h2>
       <p className="text-xs text-slate-400">Practice specific mahjong skills</p>
 
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 pt-2">Fundamentals</h3>
+      <h3 className="section-title pt-2">Fundamentals</h3>
       {FUNDAMENTALS.map(renderDrill)}
 
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 pt-2">Strategy</h3>
+      <h3 className="section-title pt-2">Strategy</h3>
       {STRATEGY.map(renderDrill)}
     </div>
   );

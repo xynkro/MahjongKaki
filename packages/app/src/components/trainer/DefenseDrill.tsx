@@ -7,6 +7,7 @@ import {
 import { indexToTile, tileKey } from '@mahjongkaki/engine';
 import { TileRow } from '../game/TileRow';
 import { db } from '../../lib/db';
+import { haptics } from '../../lib/haptics';
 
 interface Props {
   onBack: () => void;
@@ -29,6 +30,8 @@ export function DefenseDrill({ onBack }: Props) {
     setChosenTile(tile);
     const grade = gradeDefense(drill, tile);
     setResult(grade);
+
+    grade.isOptimal ? haptics.success() : haptics.error();
 
     if (grade.isOptimal) setStreak(s => s + 1);
     else setStreak(0);
@@ -59,7 +62,7 @@ export function DefenseDrill({ onBack }: Props) {
         <span className="text-xs text-slate-500">Streak: {streak}</span>
       </div>
 
-      <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+      <div className="card p-4">
         <h3 className="text-sm font-semibold text-slate-300 mb-1">Defense Training</h3>
         <p className="text-xs text-slate-400 mb-3">
           An opponent may be tenpai. Pick the safest discard.
@@ -87,7 +90,7 @@ export function DefenseDrill({ onBack }: Props) {
       </div>
 
       {result && chosenTile !== null && (
-        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-2">
+        <div className="card p-4 space-y-2">
           <div className={`text-lg font-bold ${result.isOptimal ? 'text-emerald-400' : 'text-amber-400'}`}>
             {result.isOptimal ? 'Safest choice!' : 'Not optimal'}
           </div>

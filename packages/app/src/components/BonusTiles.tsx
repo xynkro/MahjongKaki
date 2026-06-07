@@ -1,6 +1,7 @@
 import type { FlowerTile, SeasonTile, AnimalTile, FlowerName, SeasonName, AnimalName } from '@mahjongkaki/engine';
 import { flower, season, animal } from '@mahjongkaki/engine';
 import { FLOWER_LABELS, SEASON_LABELS, ANIMAL_LABELS } from '../lib/tile-labels';
+import { haptics } from '../lib/haptics';
 
 interface BonusTilesProps {
   flowers: FlowerTile[];
@@ -21,7 +22,7 @@ export function BonusTiles({
 }: BonusTilesProps) {
   return (
     <div className="space-y-2">
-      <div className="text-xs text-slate-400 font-medium">Bonus Tiles</div>
+      <h3 className="section-title">Bonus Tiles</h3>
       <div className="space-y-1.5">
         <Row label="Flowers">
           {FLOWERS.map((f) => {
@@ -33,7 +34,7 @@ export function BonusTiles({
                 sublabel={f === 'bamboo_flower' ? 'bamboo' : f}
                 active={active}
                 color="amber"
-                onClick={() => onToggleFlower(flower(f))}
+                onClick={() => { haptics.select(); onToggleFlower(flower(f)); }}
               />
             );
           })}
@@ -48,7 +49,7 @@ export function BonusTiles({
                 sublabel={s}
                 active={active}
                 color="emerald"
-                onClick={() => onToggleSeason(season(s))}
+                onClick={() => { haptics.select(); onToggleSeason(season(s)); }}
               />
             );
           })}
@@ -63,7 +64,7 @@ export function BonusTiles({
                 sublabel={a}
                 active={active}
                 color="yellow"
-                onClick={() => onToggleAnimal(animal(a))}
+                onClick={() => { haptics.select(); onToggleAnimal(animal(a)); }}
               />
             );
           })}

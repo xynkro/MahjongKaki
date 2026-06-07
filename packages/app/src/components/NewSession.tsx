@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { STAKE_PRESETS } from '@mahjongkaki/engine';
+import { haptics } from '../lib/haptics';
 
 interface NewSessionProps {
   onStart: (names: [string, string, string, string], stakeLabel: string) => void;
@@ -12,6 +13,7 @@ export function NewSession({ onStart }: NewSessionProps) {
   const windLabels = ['East', 'South', 'West', 'North'];
 
   function handleStart() {
+    haptics.select();
     const filled = names.map((n, i) => n.trim() || `Player ${i + 1}`) as [string, string, string, string];
     onStart(filled, STAKE_PRESETS[stakeIdx].label);
   }
@@ -23,7 +25,7 @@ export function NewSession({ onStart }: NewSessionProps) {
         <p className="text-xs text-slate-500 mt-1">Enter player names and stake</p>
       </div>
 
-      <section className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-3">
+      <section className="card p-4 space-y-3">
         {names.map((name, i) => (
           <div key={i} className="flex items-center gap-2">
             <span className="text-xs text-slate-500 w-10 shrink-0">{windLabels[i]}</span>
@@ -43,14 +45,14 @@ export function NewSession({ onStart }: NewSessionProps) {
         ))}
       </section>
 
-      <section className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
-        <div className="text-xs text-slate-400 mb-2">Stake</div>
+      <section className="card p-4">
+        <h3 className="section-title mb-2">Stake</h3>
         <div className="flex gap-1 flex-wrap">
           {STAKE_PRESETS.map((preset, i) => (
             <button
               key={i}
               type="button"
-              onClick={() => setStakeIdx(i)}
+              onClick={() => { haptics.select(); setStakeIdx(i); }}
               className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
                 stakeIdx === i
                   ? 'bg-emerald-700 text-white'
@@ -66,7 +68,7 @@ export function NewSession({ onStart }: NewSessionProps) {
       <button
         type="button"
         onClick={handleStart}
-        className="w-full py-3 text-sm font-medium bg-emerald-700 text-white rounded-xl active:bg-emerald-600"
+        className="w-full min-h-[44px] py-3 text-sm font-medium bg-emerald-700 text-white rounded-xl active:bg-emerald-600"
       >
         Start Session
       </button>

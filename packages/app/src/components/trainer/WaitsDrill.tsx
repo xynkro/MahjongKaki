@@ -7,6 +7,7 @@ import {
 import { indexToTile, tileKey } from '@mahjongkaki/engine';
 import { TileRow } from '../game/TileRow';
 import { db } from '../../lib/db';
+import { haptics } from '../../lib/haptics';
 
 interface Props {
   onBack: () => void;
@@ -42,6 +43,7 @@ export function WaitsDrill({ onBack }: Props) {
     setResult(grade);
 
     const isCorrect = grade.score === 1;
+    isCorrect ? haptics.success() : haptics.error();
     if (isCorrect) setStreak(s => s + 1);
     else setStreak(0);
 
@@ -71,7 +73,7 @@ export function WaitsDrill({ onBack }: Props) {
         <span className="text-xs text-slate-500">Streak: {streak}</span>
       </div>
 
-      <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+      <div className="card p-4">
         <h3 className="text-sm font-semibold text-slate-300 mb-1">Wait Training</h3>
         <p className="text-xs text-slate-400 mb-3">
           This hand is tenpai. Select all tiles that complete it.
@@ -79,7 +81,7 @@ export function WaitsDrill({ onBack }: Props) {
         <TileRow tiles={drill.hand} sortTiles={true} />
       </div>
 
-      <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+      <div className="card p-4">
         <h4 className="text-xs font-semibold text-slate-500 mb-2">Tap waiting tiles</h4>
         <TileRow
           tiles={ALL_TILES}
@@ -100,7 +102,7 @@ export function WaitsDrill({ onBack }: Props) {
       </div>
 
       {result && (
-        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-2">
+        <div className="card p-4 space-y-2">
           <div className={`text-lg font-bold ${result.score === 1 ? 'text-emerald-400' : 'text-amber-400'}`}>
             {result.score === 1 ? 'Perfect!' : `${Math.round(result.score * 100)}%`}
           </div>

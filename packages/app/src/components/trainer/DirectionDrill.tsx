@@ -6,6 +6,7 @@ import {
 } from '@mahjongkaki/game';
 import { TileRow } from '../game/TileRow';
 import { db } from '../../lib/db';
+import { haptics } from '../../lib/haptics';
 
 interface Props {
   onBack: () => void;
@@ -28,6 +29,7 @@ export function DirectionDrill({ onBack }: Props) {
     if (!drill || result) return;
     const grade = gradeDirection(drill, key);
     setResult(grade);
+    grade.correct ? haptics.success() : haptics.error();
     if (grade.correct) setStreak(s => s + 1);
     else setStreak(0);
 
@@ -61,7 +63,7 @@ export function DirectionDrill({ onBack }: Props) {
         <span className="text-xs text-slate-500">Streak: {streak}</span>
       </div>
 
-      <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+      <div className="card p-4">
         <h3 className="text-sm font-semibold text-slate-300 mb-1">What's the plan?</h3>
         <p className="text-xs text-slate-400 mb-3">
           You were dealt this hand. Which target gives the best value you can realistically reach?
@@ -85,7 +87,7 @@ export function DirectionDrill({ onBack }: Props) {
       )}
 
       {result && (
-        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-2">
+        <div className="card p-4 space-y-2">
           <div className={`text-lg font-bold ${result.correct ? 'text-emerald-400' : 'text-amber-400'}`}>
             {result.correct ? 'Correct!' : 'Not the best target'}
           </div>
