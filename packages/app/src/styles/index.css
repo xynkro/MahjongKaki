@@ -35,3 +35,29 @@
       repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.05) 0 2px, transparent 2px 4px);
   }
 }
+
+/* CSS-driven motion (compositor-based, reliable — no rAF freeze).
+   Entrance animations use fill-mode both so they always settle visible. */
+/* Transform-only entrances: a paused/idle renderer leaves the element at the
+   "from" transform — still fully VISIBLE (opacity stays 1), never blank. */
+@keyframes tileIn { from { transform: translateY(8px) scale(0.82); } to { transform: none; } }
+@keyframes popIn  { from { transform: translateY(10px) scale(0.94); } to { transform: none; } }
+@keyframes riseIn { from { transform: translateY(14px); } to { transform: none; } }
+@keyframes slideTab { from { transform: translateX(14px); } to { transform: none; } }
+@keyframes tsumoPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes countWin { from { transform: scale(0.7); } to { transform: scale(1); } }
+
+@layer utilities {
+  .anim-tile { animation: tileIn 0.34s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .anim-pop  { animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .anim-rise { animation: riseIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .anim-tab  { animation: slideTab 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .anim-win  { animation: countWin 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .anim-tsumo { animation: tsumoPulse 1.1s ease-in-out infinite; }
+  .glow-turn { box-shadow: inset 0 1px 0 rgba(201, 162, 75, 0.55), 0 -8px 28px rgba(201, 162, 75, 0.16); }
+  .glow-seat { box-shadow: 0 0 16px rgba(63, 182, 131, 0.4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-tile, .anim-pop, .anim-rise, .anim-tab, .anim-win, .anim-tsumo { animation: none; }
+}

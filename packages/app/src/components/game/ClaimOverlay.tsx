@@ -1,5 +1,5 @@
 import { type Claim } from '@mahjongkaki/game';
-import { indexToTile } from '@mahjongkaki/engine';
+import { TileRow } from './TileRow';
 
 interface ClaimOverlayProps {
   claims: Claim[];
@@ -15,32 +15,26 @@ const CLAIM_COLORS: Record<string, string> = {
   chow: 'bg-blue-600 active:bg-blue-500',
 };
 
-function tileName(idx: number): string {
-  const t = indexToTile(idx);
-  if (t.kind === 'suit') return `${t.value} ${t.suit[0].toUpperCase()}`;
-  if (t.kind === 'wind') return t.wind;
-  return t.dragon;
-}
-
 export function ClaimOverlay({ claims, lastDiscardTile, onClaim, onSkip }: ClaimOverlayProps) {
   return (
-    <div className="bg-slate-800 border-t border-slate-600 p-4 pb-safe">
-      <p className="text-center text-slate-400 text-xs mb-2">
-        Claim: {tileName(lastDiscardTile)}
-      </p>
+    <div className="anim-pop bg-slate-900/95 border-t border-amber-400/20 p-4 pb-safe backdrop-blur">
+      <div className="flex items-center justify-center gap-2 mb-3">
+        <span className="text-slate-400 text-xs">Claim this tile?</span>
+        <TileRow tiles={[lastDiscardTile]} size="sm" sortTiles={false} animateEntrance={false} />
+      </div>
       <div className="flex gap-2 justify-center">
         {claims.map((claim, i) => (
           <button
             key={`${claim.claimType}-${i}`}
             onClick={() => onClaim(claim)}
-            className={`px-5 py-2.5 text-white rounded-lg font-semibold text-sm ${CLAIM_COLORS[claim.claimType]}`}
+            className={`px-5 py-2.5 text-white rounded-lg font-semibold text-sm active:scale-95 ${CLAIM_COLORS[claim.claimType]}`}
           >
             {claim.claimType === 'win' ? 'Hu!' : claim.claimType.charAt(0).toUpperCase() + claim.claimType.slice(1)}
           </button>
         ))}
         <button
           onClick={onSkip}
-          className="px-5 py-2.5 bg-slate-700 text-slate-300 rounded-lg text-sm"
+          className="px-5 py-2.5 bg-slate-700 text-slate-300 rounded-lg text-sm active:scale-95"
         >
           Skip
         </button>

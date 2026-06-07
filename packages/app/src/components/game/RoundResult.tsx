@@ -1,28 +1,12 @@
-import { useEffect, useState } from 'react';
-import { motion, animate } from 'framer-motion';
 import { type GameState, scoreWinForSeat } from '@mahjongkaki/game';
 import {
   tileToIndex, type Wind, WINDS,
   calculatePayout, formatSettlement, STAKE_PRESETS,
 } from '@mahjongkaki/engine';
 import { TileRow } from './TileRow';
-import { fadeUp, staggerContainer, spring, springSoft } from '../../lib/motion';
 
 const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西', north: '北' };
 const DEMO_STAKE = STAKE_PRESETS.find(s => s.label === '50¢/$1') ?? STAKE_PRESETS[0];
-
-function CountUp({ to }: { to: number }) {
-  const [v, setV] = useState(0);
-  useEffect(() => {
-    const controls = animate(0, to, {
-      duration: 0.9,
-      ease: [0.16, 1, 0.3, 1],
-      onUpdate: x => setV(Math.round(x)),
-    });
-    return () => controls.stop();
-  }, [to]);
-  return <>{v}</>;
-}
 
 interface RoundResultProps {
   state: GameState;
@@ -33,6 +17,8 @@ interface RoundResultProps {
 function seatWind(seat: number, dealerSeat: number): Wind {
   return WINDS[(seat - dealerSeat + 4) % 4];
 }
+
+const delay = (ms: number) => ({ animationDelay: `${ms}ms` });
 
 export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultProps) {
   const isDraw = state.winner === null;
@@ -54,23 +40,15 @@ export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultPr
   }
 
   return (
-    <motion.div
-      className="space-y-4 pb-4"
-      variants={staggerContainer(0.09, 0.05)}
-      initial="hidden"
-      animate="show"
-    >
-      <motion.section
-        variants={fadeUp}
-        className="relative overflow-hidden bg-slate-800/50 rounded-xl p-6 border border-slate-700/50 text-center"
+    <div className="space-y-4 pb-4">
+      <section
+        className="anim-rise relative overflow-hidden bg-slate-800/50 rounded-xl p-6 border border-slate-700/50 text-center"
+        style={delay(0)}
       >
         {isHumanWin && (
-          <motion.div
+          <div
             className="pointer-events-none absolute inset-0"
-            style={{ background: 'radial-gradient(60% 60% at 50% 35%, rgba(201,162,75,0.22), transparent 70%)' }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 1, 0.6] }}
-            transition={{ duration: 1.2, ease: 'easeOut' }}
+            style={{ background: 'radial-gradient(60% 60% at 50% 35%, rgba(201,162,75,0.20), transparent 70%)' }}
           />
         )}
         {isDraw ? (
@@ -79,7 +57,7 @@ export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultPr
             <p className="text-slate-400 text-sm">Wall exhausted</p>
           </>
         ) : (
-          <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={springSoft}>
+          <>
             <h2 className={`text-2xl font-bold mb-1 ${isHumanWin ? 'text-emerald-400' : 'text-red-400'}`}>
               {isHumanWin ? 'You Win!' : `${WIND_CHARS[seatWind(state.winner!, state.dealerSeat)]} Wins`}
             </h2>
@@ -87,18 +65,18 @@ export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultPr
               {state.winType === 'zimo' ? 'Self-drawn (Zimo)' : 'Discard win'}
             </p>
             {scoring && (
-              <div className="relative text-5xl font-extrabold text-amber-400 drop-shadow-[0_2px_12px_rgba(201,162,75,0.45)]">
-                <CountUp to={scoring.cappedTai} />
+              <div className="anim-win relative text-5xl font-extrabold text-amber-400 drop-shadow-[0_2px_12px_rgba(201,162,75,0.45)]">
+                {scoring.cappedTai}
                 <span className="text-lg font-semibold text-amber-500/80"> tai</span>
               </div>
             )}
-          </motion.div>
+          </>
         )}
-      </motion.section>
+      </section>
 
       {scoring && state.winner !== null && (
         <>
-          <motion.section variants={fadeUp} className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+          <section className="anim-rise bg-slate-800/50 rounded-xl p-4 border border-slate-700/50" style={delay(80)}>
             <h3 className="text-sm font-semibold text-slate-300 mb-2">Winning Hand</h3>
             <TileRow tiles={state.hands[state.winner]} sortTiles={true} />
             {state.melds[state.winner].length > 0 && (
@@ -108,28 +86,23 @@ export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultPr
                   tiles={state.melds[state.winner].flatMap(m => m.tiles.map(t => tileToIndex(t)))}
                   size="sm"
                   sortTiles={false}
+                  animateEntrance={false}
                 />
               </div>
             )}
-          </motion.section>
+          </section>
 
-          <motion.section variants={fadeUp} className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+          <section className="anim-rise bg-slate-800/50 rounded-xl p-4 border border-slate-700/50" style={delay(160)}>
             <h3 className="text-sm font-semibold text-slate-300 mb-2">Scoring</h3>
             {scoring.elements.length === 0 ? (
               <p className="text-xs text-slate-500">No tai elements.</p>
             ) : (
               <div className="space-y-1">
                 {scoring.elements.map((e, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.35 + i * 0.06, ...spring }}
-                    className="flex justify-between text-xs"
-                  >
+                  <div key={i} className="flex justify-between text-xs">
                     <span className="text-slate-300">{e.name} <span className="text-slate-500">{e.nameZh}</span></span>
                     <span className="text-amber-400 font-medium">+{e.tai}</span>
-                  </motion.div>
+                  </div>
                 ))}
                 <div className="flex justify-between text-sm font-semibold pt-1 border-t border-slate-700/50 mt-1">
                   <span className="text-slate-200">
@@ -139,10 +112,10 @@ export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultPr
                 </div>
               </div>
             )}
-          </motion.section>
+          </section>
 
           {settlement.length > 0 && (
-            <motion.section variants={fadeUp} className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+            <section className="anim-rise bg-slate-800/50 rounded-xl p-4 border border-slate-700/50" style={delay(240)}>
               <h3 className="text-sm font-semibold text-slate-300 mb-1">
                 Settlement <span className="text-xs font-normal text-slate-500">· example at {DEMO_STAKE.label}</span>
               </h3>
@@ -151,35 +124,33 @@ export function RoundResult({ state, onPlayAgain, onBackToSetup }: RoundResultPr
                   <p key={i} className="text-xs text-slate-400">{line}</p>
                 ))}
               </div>
-            </motion.section>
+            </section>
           )}
         </>
       )}
 
-      <motion.section variants={fadeUp} className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+      <section className="anim-rise bg-slate-800/50 rounded-xl p-4 border border-slate-700/50" style={delay(320)}>
         <h3 className="text-sm font-semibold text-slate-300 mb-2">Game Stats</h3>
         <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
           <div>Turns played: {state.turnCount}</div>
           <div>Wall remaining: {state.wall.length}</div>
         </div>
-      </motion.section>
+      </section>
 
-      <motion.div variants={fadeUp} className="flex gap-2">
-        <motion.button
-          whileTap={{ scale: 0.96 }}
+      <div className="anim-rise flex gap-2" style={delay(400)}>
+        <button
           onClick={onPlayAgain}
-          className="flex-1 py-3 text-sm font-medium bg-emerald-700 text-white rounded-xl active:bg-emerald-600"
+          className="flex-1 py-3 text-sm font-medium bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
         >
           Play Again
-        </motion.button>
-        <motion.button
-          whileTap={{ scale: 0.96 }}
+        </button>
+        <button
           onClick={onBackToSetup}
-          className="flex-1 py-3 text-sm font-medium bg-slate-700 text-slate-300 rounded-xl active:bg-slate-600"
+          className="flex-1 py-3 text-sm font-medium bg-slate-700 text-slate-300 rounded-xl active:scale-95 active:bg-slate-600"
         >
           New Setup
-        </motion.button>
-      </motion.div>
-    </motion.div>
+        </button>
+      </div>
+    </div>
   );
 }
