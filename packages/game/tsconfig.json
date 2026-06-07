@@ -6,8 +6,8 @@
     "composite": true
   },
   "include": ["src/**/*.ts"],
+  "exclude": ["__tests__", "dist"],
   "references": [
-    { "path": "../engine" },
-    { "path": "../game" }
+    { "path": "../engine" }
   ]
 }

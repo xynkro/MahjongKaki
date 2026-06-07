@@ -11,10 +11,11 @@ ios/
 .env
 .env.local
 
-# IDE
+# IDE / tooling
 .vscode/
 .idea/
 *.swp
+.claude/
 
 # OS
 .DS_Store

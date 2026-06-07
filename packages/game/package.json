@@ -1,5 +1,5 @@
 {
-  "name": "@mahjongkaki/ai",
+  "name": "@mahjongkaki/game",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -15,8 +15,7 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
-    "@mahjongkaki/engine": "*",
-    "@mahjongkaki/game": "*"
+    "@mahjongkaki/engine": "*"
   },
   "devDependencies": {
     "vitest": "^3.0.0"

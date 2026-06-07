@@ -20,15 +20,41 @@ export interface Session {
   isActive: 0 | 1;
 }
 
+export interface GameSave {
+  id?: number;
+  createdAt: number;
+  updatedAt: number;
+  state: string;
+  difficulty: string;
+  speed: string;
+  isActive: 0 | 1;
+}
+
+export interface TrainerStat {
+  id?: number;
+  drillType: string;
+  timestamp: number;
+  isCorrect: 0 | 1;
+  score: number;
+}
+
 class MahjongKakiDB extends Dexie {
   sessions!: Dexie.Table<Session, number>;
   rounds!: Dexie.Table<Round, number>;
+  gameSaves!: Dexie.Table<GameSave, number>;
+  trainerStats!: Dexie.Table<TrainerStat, number>;
 
   constructor() {
     super('mahjongkaki');
     this.version(1).stores({
       sessions: '++id, createdAt, isActive',
       rounds: '++id, sessionId, timestamp',
+    });
+    this.version(2).stores({
+      sessions: '++id, createdAt, isActive',
+      rounds: '++id, sessionId, timestamp',
+      gameSaves: '++id, createdAt, isActive',
+      trainerStats: '++id, drillType, timestamp',
     });
   }
 }

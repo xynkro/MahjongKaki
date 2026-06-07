@@ -1,7 +1,7 @@
 import type {
   Suit, Wind, Dragon, FlowerName, SeasonName, AnimalName,
   SuitTile, WindTile, DragonTile, FlowerTile, SeasonTile, AnimalTile,
-  PlayTile, Meld,
+  PlayTile, BonusTile, Meld,
 } from './types.js';
 
 export const WINDS: Wind[] = ['east', 'south', 'west', 'north'];
@@ -107,4 +107,48 @@ export function getMeldSuit(meld: Meld): Suit | null {
 
 export function getMeldRepresentativeTile(meld: Meld): PlayTile {
   return meld.tiles[0];
+}
+
+// --- Tile Index Utilities ---
+// 34 play-tile indices:
+//   0-8   = bamboo 1-9
+//   9-17  = character 1-9
+//   18-26 = dot 1-9
+//   27-30 = east/south/west/north
+//   31-33 = red/green/white
+
+const SUIT_OFFSET: Record<Suit, number> = { bamboo: 0, character: 9, dot: 18 };
+const WIND_OFFSET: Record<Wind, number> = { east: 27, south: 28, west: 29, north: 30 };
+const DRAGON_OFFSET: Record<Dragon, number> = { red: 31, green: 32, white: 33 };
+
+export function tileToIndex(tile: PlayTile): number {
+  if (tile.kind === 'suit') return SUIT_OFFSET[tile.suit] + tile.value - 1;
+  if (tile.kind === 'wind') return WIND_OFFSET[tile.wind];
+  return DRAGON_OFFSET[tile.dragon];
+}
+
+export function indexToTile(index: number): PlayTile {
+  if (index < 9) return { kind: 'suit', suit: 'bamboo', value: (index + 1) as SuitTile['value'] };
+  if (index < 18) return { kind: 'suit', suit: 'character', value: (index - 8) as SuitTile['value'] };
+  if (index < 27) return { kind: 'suit', suit: 'dot', value: (index - 17) as SuitTile['value'] };
+  if (index < 31) return { kind: 'wind', wind: WINDS[index - 27] };
+  return { kind: 'dragon', dragon: DRAGONS[index - 31] };
+}
+
+export function tileKey(tile: PlayTile): string {
+  if (tile.kind === 'suit') return `${tile.suit[0]}${tile.value}`;
+  if (tile.kind === 'wind') return `w${tile.wind[0]}`;
+  return `d${tile.dragon[0]}`;
+}
+
+export function allPlayTiles(): PlayTile[] {
+  const tiles: PlayTile[] = [];
+  for (let i = 0; i < 34; i++) tiles.push(indexToTile(i));
+  return tiles;
+}
+
+export function bonusTileKey(tile: BonusTile): string {
+  if (tile.kind === 'flower') return `f_${tile.flower}`;
+  if (tile.kind === 'season') return `s_${tile.season}`;
+  return `a_${tile.animal}`;
 }
