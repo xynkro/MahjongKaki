@@ -1,4 +1,6 @@
+import { motion } from 'framer-motion';
 import { indexToTile } from '@mahjongkaki/engine';
+import { tileEntrance } from '../../lib/motion';
 
 function getTileLabel(idx: number): { short: string; suit: string } {
   const tile = indexToTile(idx);
@@ -28,6 +30,8 @@ interface TileRowProps {
   highlightTiles?: Set<number>;
   size?: 'sm' | 'md';
   sortTiles?: boolean;
+  /** Stagger the entrance like a deal. Default true. */
+  animateEntrance?: boolean;
 }
 
 export function TileRow({
@@ -37,6 +41,7 @@ export function TileRow({
   highlightTiles,
   size = 'md',
   sortTiles = true,
+  animateEntrance = true,
 }: TileRowProps) {
   const displayTiles = sortTiles ? [...tiles].sort((a, b) => a - b) : tiles;
 
@@ -50,27 +55,36 @@ export function TileRow({
         const isHighlight = highlightTiles?.has(tile);
 
         return (
-          <button
+          // Outer: framer controls entrance + layout glide (transform).
+          <motion.div
             key={i}
-            type="button"
-            onClick={() => onTileClick?.(tile, i)}
-            style={{
-              backgroundImage: 'linear-gradient(to bottom, #FBF4E4 0%, #F1E7D2 55%, #E4D2AC 100%)',
-            }}
-            className={`${sizeClass} relative rounded-[7px] flex flex-col items-center justify-center font-bold
-              border border-[#C6AE84] shadow-tile transition-all duration-100
-              ${isSelected ? '-translate-y-1.5 ring-2 ring-amber-400 shadow-tile-up' : ''}
-              ${isHighlight ? 'ring-2 ring-amber-400/70' : ''}
-              ${onTileClick ? 'active:translate-y-0 active:scale-95 cursor-pointer' : 'cursor-default'}
-            `}
+            layout
+            initial={animateEntrance ? { opacity: 0, scale: 0.7, y: 8 } : false}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={tileEntrance(i)}
           >
-            <span className={`leading-none ${SUIT_COLORS[label.suit] ?? 'text-slate-900'}`}>
-              {label.short}
-            </span>
-            <span className="text-[7px] font-semibold leading-none mt-0.5 tracking-wide text-[#9A8A6A]">
-              {label.suit}
-            </span>
-          </button>
+            {/* Inner: CSS controls press + selection (transform) — no conflict with framer. */}
+            <button
+              type="button"
+              onClick={() => onTileClick?.(tile, i)}
+              style={{
+                backgroundImage: 'linear-gradient(to bottom, #FBF4E4 0%, #F1E7D2 55%, #E4D2AC 100%)',
+              }}
+              className={`${sizeClass} relative rounded-[7px] flex flex-col items-center justify-center font-bold
+                border border-[#C6AE84] shadow-tile transition-transform duration-150 ease-out will-change-transform
+                ${isSelected ? '-translate-y-1.5 ring-2 ring-amber-400 shadow-tile-up' : ''}
+                ${isHighlight ? 'ring-2 ring-amber-400/70' : ''}
+                ${onTileClick ? 'active:scale-90 cursor-pointer' : 'cursor-default'}
+              `}
+            >
+              <span className={`leading-none ${SUIT_COLORS[label.suit] ?? 'text-slate-900'}`}>
+                {label.short}
+              </span>
+              <span className="text-[7px] font-semibold leading-none mt-0.5 tracking-wide text-[#9A8A6A]">
+                {label.suit}
+              </span>
+            </button>
+          </motion.div>
         );
       })}
     </div>

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { type GameState, type GameAction } from '@mahjongkaki/game';
 import { tileToIndex, type Meld, type Wind, WINDS } from '@mahjongkaki/engine';
 import { TileRow } from './TileRow';
+import { spring } from '../../lib/motion';
 
 const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西', north: '北' };
 
@@ -94,8 +96,15 @@ export function GameBoard({
           const w = seatWind(seat, state.dealerSeat);
           const isCurrent = state.currentPlayer === seat;
           return (
-            <div
+            <motion.div
               key={seat}
+              animate={{
+                scale: isCurrent ? 1.03 : 1,
+                boxShadow: isCurrent
+                  ? '0 0 16px rgba(63,182,131,0.35)'
+                  : '0 0 0px rgba(63,182,131,0)',
+              }}
+              transition={spring}
               className={`rounded-lg p-2 text-center border ${
                 isCurrent
                   ? 'bg-slate-700 border-emerald-500/50'
@@ -122,7 +131,7 @@ export function GameBoard({
                   +{state.flowers[seat].length}
                 </div>
               )}
-            </div>
+            </motion.div>
           );
         })}
       </div>
@@ -152,7 +161,15 @@ export function GameBoard({
       </div>
 
       {/* Player area */}
-      <div className="border-t border-slate-700/50 bg-slate-800/50 px-2 pt-2 pb-2">
+      <motion.div
+        animate={{
+          boxShadow: isHumanTurn
+            ? 'inset 0 1px 0 rgba(201,162,75,0.5), 0 -8px 28px rgba(201,162,75,0.14)'
+            : 'inset 0 1px 0 rgba(201,162,75,0), 0 -8px 28px rgba(201,162,75,0)',
+        }}
+        transition={{ duration: 0.5 }}
+        className="border-t border-slate-700/50 bg-slate-800/50 px-2 pt-2 pb-2"
+      >
         <div className="flex items-center gap-2 mb-1.5 min-h-[20px]">
           <span className="text-xs font-bold text-emerald-400">
             {WIND_CHARS[seatWind(hs, state.dealerSeat)]} You
@@ -183,42 +200,55 @@ export function GameBoard({
           }
         />
 
-        {isHumanTurn && (
-          <div className="flex gap-2 mt-2 justify-center">
-            {selectedTileValue !== null && (
-              <button
-                onClick={() => {
-                  onDiscard(selectedTileValue);
-                  setSelectedIdx(null);
-                  setSelectedTileValue(null);
-                }}
-                className="px-4 py-2 bg-emerald-700 text-white rounded-lg text-sm font-medium active:bg-emerald-600"
-              >
-                Discard
-              </button>
-            )}
-            {kongActions.map((a, i) => (
-              <button
-                key={i}
-                onClick={() => {
-                  if (a.type === 'declare_kong') onDeclareKong(a.tile);
-                }}
-                className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium active:bg-amber-500"
-              >
-                Kong
-              </button>
-            ))}
-            {canTsumo && (
-              <button
-                onClick={onTsumo}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold active:bg-red-500"
-              >
-                Tsumo!
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+        <AnimatePresence>
+          {isHumanTurn && (selectedTileValue !== null || kongActions.length > 0 || canTsumo) && (
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 14 }}
+              transition={spring}
+              className="flex gap-2 mt-2 justify-center"
+            >
+              {selectedTileValue !== null && (
+                <motion.button
+                  whileTap={{ scale: 0.94 }}
+                  onClick={() => {
+                    onDiscard(selectedTileValue);
+                    setSelectedIdx(null);
+                    setSelectedTileValue(null);
+                  }}
+                  className="px-4 py-2 bg-emerald-700 text-white rounded-lg text-sm font-medium active:bg-emerald-600"
+                >
+                  Discard
+                </motion.button>
+              )}
+              {kongActions.map((a, i) => (
+                <motion.button
+                  key={i}
+                  whileTap={{ scale: 0.94 }}
+                  onClick={() => {
+                    if (a.type === 'declare_kong') onDeclareKong(a.tile);
+                  }}
+                  className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium active:bg-amber-500"
+                >
+                  Kong
+                </motion.button>
+              ))}
+              {canTsumo && (
+                <motion.button
+                  whileTap={{ scale: 0.94 }}
+                  animate={{ scale: [1, 1.06, 1] }}
+                  transition={{ repeat: Infinity, duration: 1.1, ease: 'easeInOut' }}
+                  onClick={onTsumo}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold shadow-[0_0_18px_rgba(218,90,68,0.5)] active:bg-red-500"
+                >
+                  Tsumo!
+                </motion.button>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }
