@@ -92,10 +92,10 @@ function BambooFace({ value }: { value: number }) {
 function CharacterFace({ value, size }: { value: number; size: 'sm' | 'md' }) {
   return (
     <div className="flex flex-col items-center justify-center leading-none" style={{ color: INK.character }}>
-      <span className={size === 'sm' ? 'text-[11px]' : 'text-base'} style={{ fontWeight: 700 }}>
+      <span className={size === 'sm' ? 'text-sm' : 'text-xl'} style={{ fontWeight: 700 }}>
         {CN_NUM[value]}
       </span>
-      <span className={size === 'sm' ? 'text-[9px]' : 'text-xs'} style={{ fontWeight: 700, marginTop: 1 }}>
+      <span className={size === 'sm' ? 'text-[10px]' : 'text-sm'} style={{ fontWeight: 700, marginTop: 1 }}>
         萬
       </span>
     </div>
@@ -105,7 +105,7 @@ function CharacterFace({ value, size }: { value: number; size: 'sm' | 'md' }) {
 function HonorFace({ char, color, size }: { char: string; color: string; size: 'sm' | 'md' }) {
   return (
     <div
-      className={`flex items-center justify-center leading-none font-bold ${size === 'sm' ? 'text-base' : 'text-xl'}`}
+      className={`flex items-center justify-center leading-none font-bold ${size === 'sm' ? 'text-lg' : 'text-3xl'}`}
       style={{ color }}
     >
       {char}

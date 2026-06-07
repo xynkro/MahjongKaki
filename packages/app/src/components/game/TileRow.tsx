@@ -24,7 +24,7 @@ export function TileRow({
   drawnTile,
 }: TileRowProps) {
   const displayTiles = sortTiles ? [...tiles].sort((a, b) => a - b) : tiles;
-  const sizeClass = size === 'sm' ? 'w-7 h-10' : 'w-9 h-12';
+  const sizeClass = size === 'sm' ? 'w-9 h-12' : 'w-12 h-16';
 
   return (
     <div className="flex flex-wrap gap-1">

@@ -23,17 +23,22 @@ export function App() {
 
   return (
     <div className="flex flex-col h-dvh">
-      <header className="relative flex items-center justify-center py-3 bg-slate-900/80 backdrop-blur border-b border-amber-400/15">
-        <h1 className="font-display text-xl font-semibold tracking-wide text-slate-100">
-          Mahjong<span className="text-amber-400">Kaki</span>
-        </h1>
-        <button
-          onClick={() => setLegalOpen(true)}
-          aria-label="About and legal"
-          className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 grid place-items-center rounded-full border border-slate-700/60 text-slate-400 active:scale-90"
-        >
-          <span className="font-serif text-sm font-semibold leading-none italic">i</span>
-        </button>
+      <header
+        className="relative pb-3 bg-slate-900/80 backdrop-blur border-b border-amber-400/15"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}
+      >
+        <div className="relative flex items-center justify-center">
+          <h1 className="font-display text-2xl font-semibold tracking-wide text-slate-100">
+            Mahjong<span className="text-amber-400">Kaki</span>
+          </h1>
+          <button
+            onClick={() => setLegalOpen(true)}
+            aria-label="About and legal"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 grid place-items-center rounded-full border border-slate-700/60 text-slate-400 active:scale-90"
+          >
+            <span className="font-serif text-base font-semibold leading-none italic">i</span>
+          </button>
+        </div>
       </header>
 
       <main className="flex-1 overflow-y-auto overflow-x-hidden">
