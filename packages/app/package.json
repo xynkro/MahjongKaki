@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource-variable/fraunces": "^5.2.9",
+    "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
     "@mahjongkaki/ai": "*",
     "@mahjongkaki/engine": "*",
     "@mahjongkaki/game": "*",

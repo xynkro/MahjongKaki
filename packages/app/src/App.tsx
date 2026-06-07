@@ -4,6 +4,7 @@ import { ChipTracker } from './components/ChipTracker';
 import { TableUtils } from './components/TableUtils';
 import { PlayTab } from './components/game/PlayTab';
 import { TrainTab } from './components/trainer/TrainTab';
+import { LegalSheet, FirstRunDisclaimer, useFirstRunDisclaimer } from './components/LegalSheet';
 
 type Tab = 'calculator' | 'chips' | 'table' | 'play' | 'train';
 
@@ -17,13 +18,22 @@ const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
 
 export function App() {
   const [tab, setTab] = useState<Tab>('calculator');
+  const [legalOpen, setLegalOpen] = useState(false);
+  const disclaimer = useFirstRunDisclaimer();
 
   return (
     <div className="flex flex-col h-dvh">
-      <header className="flex items-center justify-center py-3 bg-slate-900/80 backdrop-blur border-b border-amber-400/15">
+      <header className="relative flex items-center justify-center py-3 bg-slate-900/80 backdrop-blur border-b border-amber-400/15">
         <h1 className="font-display text-xl font-semibold tracking-wide text-slate-100">
           Mahjong<span className="text-amber-400">Kaki</span>
         </h1>
+        <button
+          onClick={() => setLegalOpen(true)}
+          aria-label="About and legal"
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 grid place-items-center rounded-full border border-slate-700/60 text-slate-400 active:scale-90"
+        >
+          <span className="font-serif text-sm font-semibold leading-none italic">i</span>
+        </button>
       </header>
 
       <main className="flex-1 overflow-y-auto overflow-x-hidden">
@@ -56,6 +66,9 @@ export function App() {
           );
         })}
       </nav>
+
+      <LegalSheet open={legalOpen} onClose={() => setLegalOpen(false)} />
+      {disclaimer.show && <FirstRunDisclaimer onAccept={disclaimer.accept} />}
     </div>
   );
 }

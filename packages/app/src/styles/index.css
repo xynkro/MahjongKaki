@@ -9,7 +9,7 @@
 
   body {
     @apply antialiased;
-    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
     /* Jade Parlour: warm charcoal with a soft jade lamp-glow vignette */
@@ -22,7 +22,7 @@
 
   /* Display serif for large titles; small labels stay in the clean sans. */
   h1, h2 {
-    font-family: 'Fraunces', ui-serif, Georgia, serif;
+    font-family: 'Fraunces Variable', 'Fraunces', ui-serif, Georgia, serif;
   }
 
   /* Accessibility: visible keyboard focus (gold ring), hidden for mouse users. */
