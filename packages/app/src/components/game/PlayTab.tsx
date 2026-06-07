@@ -230,6 +230,7 @@ export function PlayTab() {
           onDeclareKong={handleDeclareKong}
           onTsumo={handleTsumo}
           onQuit={() => setView('setup')}
+          animateDiscards={speedMs >= 1000}
         />
       </div>
       {showClaimOverlay && (

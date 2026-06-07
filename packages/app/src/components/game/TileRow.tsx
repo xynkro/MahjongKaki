@@ -9,6 +9,8 @@ interface TileRowProps {
   sortTiles?: boolean;
   /** Stagger the entrance like a deal. Default true. */
   animateEntrance?: boolean;
+  /** Tile value just drawn — plays a one-shot settle on matching tile(s). */
+  drawnTile?: number;
 }
 
 export function TileRow({
@@ -19,6 +21,7 @@ export function TileRow({
   size = 'md',
   sortTiles = true,
   animateEntrance = true,
+  drawnTile,
 }: TileRowProps) {
   const displayTiles = sortTiles ? [...tiles].sort((a, b) => a - b) : tiles;
   const sizeClass = size === 'sm' ? 'w-7 h-10' : 'w-9 h-12';
@@ -41,6 +44,7 @@ export function TileRow({
             className={`${sizeClass} relative rounded-[7px] flex items-center justify-center overflow-hidden
               border border-[#C6AE84] shadow-tile transition-transform duration-150 ease-out will-change-transform
               ${animateEntrance ? 'anim-tile' : ''}
+              ${drawnTile !== undefined && tile === drawnTile ? 'anim-draw' : ''}
               ${isSelected ? '-translate-y-1.5 ring-2 ring-amber-400 shadow-tile-up' : ''}
               ${isHighlight ? 'ring-2 ring-amber-400/70' : ''}
               ${onTileClick ? 'active:scale-90 cursor-pointer' : 'cursor-default'}

@@ -1,9 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { type GameState, type GameAction } from '@mahjongkaki/game';
-import { tileToIndex, type Meld, type Wind, WINDS } from '@mahjongkaki/engine';
+import { tileToIndex, type Meld, type Wind, type BonusTile, WINDS } from '@mahjongkaki/engine';
 import { TileRow } from './TileRow';
+import { TileFace } from './TileFace';
 
 const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西', north: '北' };
+const IVORY = 'linear-gradient(to bottom, #FBF4E4 0%, #F1E7D2 55%, #E4D2AC 100%)';
+
+const BONUS_CHARS: Record<string, string> = {
+  plum: '梅', orchid: '蘭', chrysanthemum: '菊', bamboo_flower: '竹',
+  spring: '春', summer: '夏', autumn: '秋', winter: '冬',
+  cat: '猫', rat: '鼠', rooster: '雞', centipede: '蜈',
+};
+function bonusChar(b: BonusTile): string {
+  if (b.kind === 'flower') return BONUS_CHARS[b.flower];
+  if (b.kind === 'season') return BONUS_CHARS[b.season];
+  return BONUS_CHARS[b.animal];
+}
 
 interface GameBoardProps {
   state: GameState;
@@ -12,6 +25,8 @@ interface GameBoardProps {
   onDeclareKong: (tile: number) => void;
   onTsumo: () => void;
   onQuit: () => void;
+  /** Play the born-home discard settle (suppressed at fast/instant speed). */
+  animateDiscards?: boolean;
 }
 
 function seatWind(seat: number, dealerSeat: number): Wind {
@@ -20,6 +35,13 @@ function seatWind(seat: number, dealerSeat: number): Wind {
 
 function meldToIndices(meld: Meld): number[] {
   return meld.tiles.map(t => tileToIndex(t));
+}
+
+function discDir(player: number, hs: number): string {
+  if (player === hs) return 'disc-bottom';
+  if (player === (hs + 2) % 4) return 'disc-top';
+  if (player === (hs + 1) % 4) return 'disc-right';
+  return 'disc-left';
 }
 
 function TileBack({ count }: { count: number }) {
@@ -65,7 +87,7 @@ function Seat({
 }
 
 export function GameBoard({
-  state, availableActions, onDiscard, onDeclareKong, onTsumo, onQuit,
+  state, availableActions, onDiscard, onDeclareKong, onTsumo, onQuit, animateDiscards = true,
 }: GameBoardProps) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [selectedTileValue, setSelectedTileValue] = useState<number | null>(null);
@@ -78,17 +100,33 @@ export function GameBoard({
     setSelectedTileValue(null);
   }, [state.turnCount, state.phase]);
 
+  // Flower pop: fire when the human's flower count grows.
+  const prevFlowers = useRef(state.flowers[hs].length);
+  const popNonce = useRef(0);
+  const [flowerPop, setFlowerPop] = useState<{ tiles: BonusTile[]; nonce: number } | null>(null);
+  const flowerCount = state.flowers[hs].length;
+  useEffect(() => {
+    if (flowerCount > prevFlowers.current) {
+      const added = state.flowers[hs].slice(prevFlowers.current);
+      popNonce.current += 1;
+      setFlowerPop({ tiles: added, nonce: popNonce.current });
+      prevFlowers.current = flowerCount;
+      const id = setTimeout(() => setFlowerPop(null), 1200);
+      return () => clearTimeout(id);
+    }
+    prevFlowers.current = flowerCount;
+  }, [flowerCount]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const rightSeat = (hs + 1) % 4;
   const acrossSeat = (hs + 2) % 4;
   const leftSeat = (hs + 3) % 4;
 
   const kongActions = availableActions.filter(a => a.type === 'declare_kong');
   const canTsumo = availableActions.some(a => a.type === 'claim' && a.claimType === 'win');
-
-  // Central pool: every discard on the table, latest highlighted.
-  const pool = [0, 1, 2, 3].flatMap(s => state.discards[s]);
-  const lastTile = state.lastDiscard?.tile;
   const showActions = isHumanTurn && (selectedTileValue !== null || kongActions.length > 0 || canTsumo);
+
+  const lastIdx = state.discardLog.length - 1;
+  const drawnTile = isHumanTurn && state.lastDraw?.player === hs ? state.lastDraw.tile : undefined;
 
   function handleTileClick(tile: number, idx: number) {
     if (!isHumanTurn) return;
@@ -103,7 +141,7 @@ export function GameBoard({
   }
 
   return (
-    <div className="flex flex-col h-full felt">
+    <div className="relative flex flex-col h-full felt">
       {/* Status bar */}
       <div className="flex items-center justify-between px-3 py-2 bg-slate-900/60 border-b border-amber-400/10 text-xs text-slate-400 backdrop-blur">
         <button onClick={onQuit} className="text-slate-500 active:text-slate-300 text-base leading-none active:scale-90">✕</button>
@@ -115,32 +153,36 @@ export function GameBoard({
 
       {/* The table */}
       <div className="flex-1 flex flex-col min-h-0 px-2 py-2 gap-2">
-        {/* Across opponent */}
         <div className="flex justify-center">
           <div className="w-44"><Seat state={state} seat={acrossSeat} label="across" showBacks /></div>
         </div>
 
-        {/* Left | pool | right */}
         <div className="flex-1 flex items-stretch gap-2 min-h-0">
           <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={leftSeat} label="left" /></div></div>
 
-          {/* Centre discard pool */}
+          {/* Centre discard pool — born-home tiles, latest leans in from its seat */}
           <div className="flex-1 relative rounded-2xl border border-emerald-950/40 bg-emerald-950/20 p-2 overflow-y-auto">
             <div className="absolute top-1.5 right-2 text-[10px] text-slate-500 bg-slate-900/50 rounded-full px-2 py-0.5 z-10">
               wall {state.wall.length}
             </div>
-            {pool.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-[11px] text-slate-600">
-                discards land here
-              </div>
+            {state.discardLog.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-[11px] text-slate-600">discards land here</div>
             ) : (
               <div className="flex flex-wrap gap-1 justify-center content-start pt-5">
-                <TileRow
-                  tiles={pool}
-                  size="sm"
-                  sortTiles={false}
-                  highlightTiles={lastTile !== undefined ? new Set([lastTile]) : undefined}
-                />
+                {state.discardLog.map((d, i) => {
+                  const isLast = i === lastIdx;
+                  return (
+                    <div key={i} className={isLast && animateDiscards ? discDir(d.player, hs) : ''}>
+                      <div
+                        style={{ backgroundImage: IVORY }}
+                        className={`w-7 h-10 relative rounded-[6px] flex items-center justify-center overflow-hidden border border-[#C6AE84] shadow-tile
+                          ${isLast ? 'ring-2 ring-amber-400' : ''}`}
+                      >
+                        <TileFace index={d.tile} size="sm" />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -150,14 +192,13 @@ export function GameBoard({
       </div>
 
       {/* Player area */}
-      <div
-        className={`border-t border-slate-700/50 bg-slate-900/50 px-2 pt-2 pb-2 backdrop-blur transition-shadow duration-500
-          ${isHumanTurn ? 'glow-turn' : ''}`}
-      >
+      <div className={`border-t border-slate-700/50 bg-slate-900/50 px-2 pt-2 pb-2 backdrop-blur transition-shadow duration-500 ${isHumanTurn ? 'glow-turn' : ''}`}>
         <div className="flex items-center gap-2 mb-1.5 min-h-[20px]">
           <span className="text-xs font-bold text-emerald-400">{WIND_CHARS[seatWind(hs, state.dealerSeat)]} You</span>
-          {state.flowers[hs].length > 0 && (
-            <span className="text-[10px] text-amber-400">✿ {state.flowers[hs].length}</span>
+          {flowerCount > 0 && (
+            <span key={flowerPop?.nonce ?? 'f'} className={`text-[10px] text-amber-400 inline-block ${flowerPop ? 'anim-badge' : ''}`}>
+              ✿ {flowerCount}
+            </span>
           )}
           {state.melds[hs].length > 0 && (
             <div className="flex">
@@ -170,6 +211,8 @@ export function GameBoard({
           tiles={state.hands[hs]}
           onTileClick={isHumanTurn ? handleTileClick : undefined}
           selectedTiles={isHumanTurn && selectedIdx !== null ? new Set([selectedIdx]) : undefined}
+          highlightTiles={drawnTile !== undefined ? new Set([drawnTile]) : undefined}
+          drawnTile={drawnTile}
         />
 
         {showActions && (
@@ -202,6 +245,33 @@ export function GameBoard({
           </div>
         )}
       </div>
+
+      {/* Flower pop — the hero moment */}
+      {flowerPop && (
+        <div key={flowerPop.nonce} className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center">
+          <div className="relative flex items-center justify-center">
+            <div
+              className="anim-bloom absolute w-24 h-24 rounded-full"
+              style={{ background: 'radial-gradient(circle, rgba(201,162,75,0.55), transparent 65%)' }}
+            />
+            <div className="relative flex gap-2">
+              {flowerPop.tiles.map((b, i) => (
+                <div
+                  key={i}
+                  className="anim-flower w-14 h-[72px] rounded-lg border-2 border-amber-400 shadow-tile-up flex flex-col items-center justify-center"
+                  style={{ backgroundImage: IVORY, animationDelay: `${i * 90}ms` }}
+                >
+                  <span className="text-3xl font-bold text-amber-700 leading-none">{bonusChar(b)}</span>
+                  <span className="text-[8px] text-amber-700/70 mt-0.5">bonus</span>
+                </div>
+              ))}
+            </div>
+            <div className="absolute -bottom-7 text-amber-300 text-xs font-semibold whitespace-nowrap drop-shadow">
+              +{flowerPop.tiles.length} flower · draw again
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

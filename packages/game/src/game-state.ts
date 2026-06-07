@@ -28,6 +28,10 @@ export interface GameState {
   lastDiscard: { tile: number; player: number } | null;
   pendingClaims: Claim[];
   turnCount: number;
+  // Chronological log of tiles currently in the central discard pool (most recent last).
+  discardLog: { tile: number; player: number }[];
+  // The most recent tile drawn into a hand (for the draw cue). Null until first draw.
+  lastDraw: { player: number; tile: number } | null;
 }
 
 export type GameAction =
@@ -60,6 +64,8 @@ export function createGame(humanSeat: number = 0, dealerSeat: number = 0, prevai
     lastDiscard: null,
     pendingClaims: [],
     turnCount: 0,
+    discardLog: [],
+    lastDraw: null,
   };
 }
 
@@ -79,6 +85,7 @@ export function applyAction(state: GameState, action: GameAction): GameState {
 
       s.hands[s.currentPlayer].push(result.tile);
       s.flowers[s.currentPlayer].push(...result.bonusTiles);
+      s.lastDraw = { player: s.currentPlayer, tile: result.tile };
       s.phase = 'discard';
       s.turnCount++;
 
@@ -99,6 +106,7 @@ export function applyAction(state: GameState, action: GameAction): GameState {
       hand.splice(idx, 1);
       s.discards[s.currentPlayer].push(action.tile);
       s.lastDiscard = { tile: action.tile, player: s.currentPlayer };
+      s.discardLog.push({ tile: action.tile, player: s.currentPlayer });
 
       const claims = getAvailableClaims(
         s.hands, s.melds, action.tile, s.currentPlayer, [0, 1, 2, 3],
@@ -126,6 +134,9 @@ export function applyAction(state: GameState, action: GameAction): GameState {
       }
 
       if (s.phase !== 'claim' || !s.lastDiscard) return s;
+
+      // The claimed discard leaves the central pool.
+      if (s.discardLog.length) s.discardLog.pop();
 
       const discardTile = s.lastDiscard.tile;
       const discardPlayer = s.lastDiscard.player;
@@ -160,6 +171,7 @@ export function applyAction(state: GameState, action: GameAction): GameState {
         if (replacement) {
           s.hands[claimPlayer].push(replacement.tile);
           s.flowers[claimPlayer].push(...replacement.bonusTiles);
+          s.lastDraw = { player: claimPlayer, tile: replacement.tile };
         }
         s.currentPlayer = claimPlayer;
         s.phase = 'discard';
@@ -208,6 +220,7 @@ export function applyAction(state: GameState, action: GameAction): GameState {
         if (replacement) {
           s.hands[s.currentPlayer].push(replacement.tile);
           s.flowers[s.currentPlayer].push(...replacement.bonusTiles);
+          s.lastDraw = { player: s.currentPlayer, tile: replacement.tile };
         }
         return s;
       }
@@ -226,6 +239,7 @@ export function applyAction(state: GameState, action: GameAction): GameState {
         if (replacement) {
           s.hands[s.currentPlayer].push(replacement.tile);
           s.flowers[s.currentPlayer].push(...replacement.bonusTiles);
+          s.lastDraw = { player: s.currentPlayer, tile: replacement.tile };
         }
         return s;
       }
@@ -306,5 +320,6 @@ function cloneState(state: GameState): GameState {
     discards: state.discards.map(d => [...d]),
     flowers: state.flowers.map(f => [...f]),
     pendingClaims: [...state.pendingClaims],
+    discardLog: [...state.discardLog],
   };
 }
