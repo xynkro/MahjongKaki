@@ -113,7 +113,7 @@ export function applyAction(state: GameState, action: GameAction): GameState {
 
       const claims = getAvailableClaims(
         s.hands, s.melds, action.tile, s.currentPlayer, [0, 1, 2, 3],
-        { flowers: s.flowers, dealerSeat: s.dealerSeat, prevailingWind: s.prevailingWind },
+        { flowers: s.flowers, dealerSeat: s.dealerSeat, prevailingWind: s.prevailingWind, rules: s.rules },
       );
 
       if (claims.length > 0) {

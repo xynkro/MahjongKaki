@@ -3,6 +3,7 @@ import {
   scoreWinningHand, canDeclareTsumo, isDiscardWinValid,
   type GameState,
 } from '../src/index.js';
+import { DEFAULT_RULES } from '@mahjongkaki/engine';
 
 // A concealed full-flush bamboo win: pair b1 + chow 1-2-3 + chow 4-5-6 + chow 7-8-9 + pung b9.
 // indices: b1=0..b9=8.
@@ -58,5 +59,14 @@ describe('isDiscardWinValid', () => {
   it('is false when the discard does not complete the hand', () => {
     const waiting = [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8];
     expect(isDiscardWinValid(waiting, [], [], 'east', 'east', 20)).toBe(false);
+  });
+
+  it('respects a custom minimum-tai rule', () => {
+    // completes to a 5-tai full flush on b1 (index 0)
+    const waiting = [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8];
+    // minimum above the hand's tai → not a legal win
+    expect(isDiscardWinValid(waiting, [], [], 'east', 'east', 0, { ...DEFAULT_RULES, minTai: 6 })).toBe(false);
+    // minimum at the hand's tai → legal
+    expect(isDiscardWinValid(waiting, [], [], 'east', 'east', 0, { ...DEFAULT_RULES, minTai: 5 })).toBe(true);
   });
 });

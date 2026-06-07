@@ -1,4 +1,4 @@
-import { type BonusTile, type Wind, type Meld } from '@mahjongkaki/engine';
+import { type BonusTile, type Wind, type Meld, type RulesConfig } from '@mahjongkaki/engine';
 import { canWin } from './win-detect.js';
 import { isDiscardWinValid, seatWindForSeat } from './score.js';
 
@@ -18,6 +18,7 @@ export interface ClaimWinContext {
   flowers: BonusTile[][];
   dealerSeat: number;
   prevailingWind: Wind;
+  rules?: RulesConfig;
 }
 
 export function getAvailableClaims(
@@ -39,7 +40,7 @@ export function getAvailableClaims(
     const winnable = winCtx
       ? isDiscardWinValid(
           hand, playerMelds, winCtx.flowers[seat],
-          seatWindForSeat(seat, winCtx.dealerSeat), winCtx.prevailingWind, discardTile,
+          seatWindForSeat(seat, winCtx.dealerSeat), winCtx.prevailingWind, discardTile, winCtx.rules,
         )
       : canWin([...hand, discardTile], playerMelds);
 

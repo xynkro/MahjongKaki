@@ -104,10 +104,11 @@ export function isDiscardWinValid(
   seatWind: Wind,
   prevailingWind: Wind,
   discardTile: number,
+  rules: RulesConfig = DEFAULT_RULES,
 ): boolean {
   if (!canWin([...hand, discardTile], melds)) return false;
   const res = scoreWinningHand(
-    [...hand, discardTile], melds, bonus, seatWind, prevailingWind, 'discard', discardTile,
+    [...hand, discardTile], melds, bonus, seatWind, prevailingWind, 'discard', discardTile, rules,
   );
   return res !== null && res.isValid;
 }
