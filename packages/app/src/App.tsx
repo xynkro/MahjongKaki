@@ -66,7 +66,7 @@ export function App() {
                 <span className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-0.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(63,182,131,0.6)]" />
               )}
               <span className="w-6 h-6">{t.icon}</span>
-              <span className="text-[11px] font-medium">{t.label}</span>
+              <span className="text-[13px] font-medium">{t.label}</span>
             </button>
           );
         })}

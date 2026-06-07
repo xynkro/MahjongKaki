@@ -167,7 +167,7 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
         <div className="grid grid-cols-4 gap-2">
           {playerNames.map((name, i) => (
             <div key={i} className="text-center">
-              <div className="text-[10px] text-slate-500 truncate">{name}</div>
+              <div className="text-[12px] text-slate-500 truncate">{name}</div>
               <div className={`text-sm font-bold font-mono ${
                 deltas[i] > 0 ? 'text-emerald-400' : deltas[i] < 0 ? 'text-red-400' : 'text-slate-400'
               }`}>

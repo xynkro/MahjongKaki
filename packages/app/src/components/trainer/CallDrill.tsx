@@ -70,11 +70,11 @@ export function CallDrill({ onBack }: Props) {
 
         <div className="flex items-end gap-3 mb-3">
           <div>
-            <span className="text-[10px] text-slate-500 block mb-1">Discard</span>
+            <span className="text-[12px] text-slate-500 block mb-1">Discard</span>
             <TileRow tiles={[drill.discardTile]} sortTiles={false} />
           </div>
           <div>
-            <span className="text-[10px] text-slate-500 block mb-1">Would form</span>
+            <span className="text-[12px] text-slate-500 block mb-1">Would form</span>
             <TileRow tiles={drill.meldTiles} size="sm" sortTiles={false} />
           </div>
         </div>

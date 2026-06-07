@@ -80,7 +80,7 @@ export function DirectionDrill({ onBack }: Props) {
               className="w-full text-left bg-slate-800/50 rounded-lg p-3 border border-slate-700/50 active:bg-slate-700/50 flex items-center justify-between"
             >
               <span className="text-sm text-slate-200">{o.label}</span>
-              <span className="text-[10px] text-slate-500">{o.tai} tai</span>
+              <span className="text-[12px] text-slate-500">{o.tai} tai</span>
             </button>
           ))}
         </div>

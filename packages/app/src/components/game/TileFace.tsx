@@ -95,7 +95,7 @@ function CharacterFace({ value, size }: { value: number; size: 'sm' | 'md' }) {
       <span className={size === 'sm' ? 'text-sm' : 'text-xl'} style={{ fontWeight: 700 }}>
         {CN_NUM[value]}
       </span>
-      <span className={size === 'sm' ? 'text-[10px]' : 'text-sm'} style={{ fontWeight: 700, marginTop: 1 }}>
+      <span className={size === 'sm' ? 'text-[12px]' : 'text-sm'} style={{ fontWeight: 700, marginTop: 1 }}>
         萬
       </span>
     </div>

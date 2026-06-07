@@ -70,7 +70,7 @@ export function PushFoldDrill({ onBack }: Props) {
         </p>
 
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-[10px] text-slate-500 w-16 shrink-0">Opponent</span>
+          <span className="text-[12px] text-slate-500 w-16 shrink-0">Opponent</span>
           <span className={`text-xs font-semibold ${drill.threatLevel === 'high' ? 'text-red-400' : 'text-slate-400'}`}>
             {drill.threatLevel === 'high' ? 'Looks dangerous' : 'No clear threat'}
           </span>
@@ -78,13 +78,13 @@ export function PushFoldDrill({ onBack }: Props) {
 
         {drill.opponentExposed.length > 0 && (
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-[10px] text-slate-500 w-16 shrink-0">Exposed</span>
+            <span className="text-[12px] text-slate-500 w-16 shrink-0">Exposed</span>
             <TileRow tiles={drill.opponentExposed} size="sm" sortTiles={false} />
           </div>
         )}
 
         <div className="flex items-start gap-2 mb-3">
-          <span className="text-[10px] text-slate-500 w-16 shrink-0 mt-1">Discards</span>
+          <span className="text-[12px] text-slate-500 w-16 shrink-0 mt-1">Discards</span>
           <TileRow tiles={drill.opponentDiscards} size="sm" sortTiles={false} />
         </div>
 
@@ -103,7 +103,7 @@ export function PushFoldDrill({ onBack }: Props) {
               className={`flex-1 py-3 ${c.color} text-white rounded-lg text-sm font-semibold flex flex-col items-center`}
             >
               <span>{c.label}</span>
-              <span className="text-[10px] font-normal opacity-80">{c.sub}</span>
+              <span className="text-[12px] font-normal opacity-80">{c.sub}</span>
             </button>
           ))}
         </div>

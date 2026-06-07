@@ -71,9 +71,9 @@ function Seat({
     >
       <div className="flex items-center justify-center gap-1.5">
         <span className={`text-base font-bold ${isCurrent ? 'text-emerald-400' : 'text-slate-300'}`}>{WIND_CHARS[w]}</span>
-        <span className="text-[10px] text-slate-500">{state.hands[seat].length}</span>
+        <span className="text-[12px] text-slate-500">{state.hands[seat].length}</span>
         {state.flowers[seat].length > 0 && (
-          <span className="text-[10px] text-amber-400">✿{state.flowers[seat].length}</span>
+          <span className="text-[12px] text-amber-400">✿{state.flowers[seat].length}</span>
         )}
       </div>
       {showBacks && <div className="mt-1"><TileBack count={state.hands[seat].length} /></div>}
@@ -82,7 +82,7 @@ function Seat({
           <TileRow tiles={state.melds[seat].flatMap(meldToIndices)} size="sm" sortTiles={false} animateEntrance={false} />
         </div>
       )}
-      <div className="text-[9px] text-slate-600 mt-0.5">{label}</div>
+      <div className="text-[11px] text-slate-600 mt-0.5">{label}</div>
     </div>
   );
 }
@@ -166,11 +166,11 @@ export function GameBoard({
 
           {/* Centre discard pool — born-home tiles, latest leans in from its seat */}
           <div className="flex-1 relative rounded-2xl border border-emerald-950/40 bg-emerald-950/20 p-2 overflow-y-auto">
-            <div className="absolute top-1.5 right-2 text-[10px] text-slate-500 bg-slate-900/50 rounded-full px-2 py-0.5 z-10">
+            <div className="absolute top-1.5 right-2 text-[12px] text-slate-500 bg-slate-900/50 rounded-full px-2 py-0.5 z-10">
               wall {state.wall.length}
             </div>
             {state.discardLog.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-[11px] text-slate-600">discards land here</div>
+              <div className="h-full flex items-center justify-center text-[13px] text-slate-600">discards land here</div>
             ) : (
               <div className="flex flex-wrap gap-1 justify-center content-start pt-5">
                 {state.discardLog.map((d, i) => {
@@ -200,7 +200,7 @@ export function GameBoard({
         <div className="flex items-center gap-2 mb-1.5 min-h-[20px]">
           <span className="text-xs font-bold text-emerald-400">{WIND_CHARS[seatWind(hs, state.dealerSeat)]} You</span>
           {flowerCount > 0 && (
-            <span key={flowerPop?.nonce ?? 'f'} className={`text-[10px] text-amber-400 inline-block ${flowerPop ? 'anim-badge' : ''}`}>
+            <span key={flowerPop?.nonce ?? 'f'} className={`text-[12px] text-amber-400 inline-block ${flowerPop ? 'anim-badge' : ''}`}>
               ✿ {flowerCount}
             </span>
           )}
@@ -266,7 +266,7 @@ export function GameBoard({
                   style={{ backgroundImage: IVORY, animationDelay: `${i * 90}ms` }}
                 >
                   <span className="text-3xl font-bold text-amber-700 leading-none">{bonusChar(b)}</span>
-                  <span className="text-[8px] text-amber-700/70 mt-0.5">bonus</span>
+                  <span className="text-[10px] text-amber-700/70 mt-0.5">bonus</span>
                 </div>
               ))}
             </div>

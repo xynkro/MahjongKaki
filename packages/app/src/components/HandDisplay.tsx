@@ -31,7 +31,7 @@ export function HandDisplay({ melds, flowers, seasons, animals, onRemoveMeld }: 
               className="flex items-center gap-0.5 bg-slate-800 rounded-lg px-2 py-1.5 border border-slate-700
                 active:bg-red-900/30 active:border-red-700 transition-colors group"
             >
-              <span className="text-[10px] text-slate-500 mr-1 uppercase">
+              <span className="text-[12px] text-slate-500 mr-1 uppercase">
                 {meldLabel(meld.type)}
                 {meld.type !== 'eyes' && (meld.exposed ? '' : '*')}
               </span>

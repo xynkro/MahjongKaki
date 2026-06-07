@@ -96,7 +96,7 @@ export function ScorePanel({
                 <button
                   type="button"
                   onClick={() => onWinnerChange(i)}
-                  className={`px-2 py-1 text-[10px] rounded ${
+                  className={`px-2 py-1 text-[12px] rounded ${
                     winnerIndex === i ? 'bg-emerald-700 text-white' : 'bg-slate-700 text-slate-500'
                   }`}
                 >
@@ -106,7 +106,7 @@ export function ScorePanel({
                   <button
                     type="button"
                     onClick={() => onShooterChange(i === winnerIndex ? undefined : i)}
-                    className={`px-2 py-1 text-[10px] rounded ${
+                    className={`px-2 py-1 text-[12px] rounded ${
                       shooterIndex === i ? 'bg-red-700 text-white' : 'bg-slate-700 text-slate-500'
                     }`}
                     disabled={i === winnerIndex}

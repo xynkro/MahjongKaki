@@ -30,14 +30,14 @@ export function Scoreboard({ match, deltas }: { match: MatchState; deltas?: numb
             >
               <div className="flex items-center justify-center gap-1">
                 <span className="text-base font-bold text-slate-200">{WIND_CHARS[seatWindOf(seat, match.dealerSeat)]}</span>
-                {isDealer && <span className="text-[9px] text-amber-400 font-bold">庄</span>}
+                {isDealer && <span className="text-[11px] text-amber-400 font-bold">庄</span>}
               </div>
-              <div className="text-[10px] text-slate-500">{isYou ? 'You' : 'AI'}</div>
+              <div className="text-[12px] text-slate-500">{isYou ? 'You' : 'AI'}</div>
               <div className={`text-sm font-bold ${total > 0 ? 'text-emerald-400' : total < 0 ? 'text-red-400' : 'text-slate-500'}`}>
                 {money(total)}
               </div>
               {d !== 0 && (
-                <div className={`text-[10px] ${d > 0 ? 'text-emerald-400/70' : 'text-red-400/70'}`}>{money(d)}</div>
+                <div className={`text-[12px] ${d > 0 ? 'text-emerald-400/70' : 'text-red-400/70'}`}>{money(d)}</div>
               )}
             </div>
           );

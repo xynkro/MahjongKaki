@@ -27,7 +27,7 @@ export function ChipTracker() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="section-title">Session</h3>
-            <div className="text-[10px] text-slate-500 mt-0.5">
+            <div className="text-[12px] text-slate-500 mt-0.5">
               {session.stakeLabel} &middot; {rounds.length} round{rounds.length !== 1 ? 's' : ''}
             </div>
           </div>
@@ -109,7 +109,7 @@ export function ChipTracker() {
                 </div>
                 <div className="flex gap-2 mt-0.5">
                   {round.deltas.map((d, i) => (
-                    <span key={i} className={`text-[10px] font-mono ${
+                    <span key={i} className={`text-[12px] font-mono ${
                       d > 0 ? 'text-emerald-400' : d < 0 ? 'text-red-400' : 'text-slate-500'
                     }`}>
                       {d > 0 ? '+' : ''}{formatCurrency(d)}

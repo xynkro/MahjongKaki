@@ -141,7 +141,7 @@ export function TableUtils() {
               }`}
             >
               <span className="text-lg font-bold">{WIND_ZH[w]}</span>
-              <span className="text-[9px]">{w}</span>
+              <span className="text-[11px]">{w}</span>
             </div>
           ))}
         </div>
@@ -211,7 +211,7 @@ function SeatCard({ wind, position }: { wind: string; position: string }) {
   return (
     <div className="w-12 h-12 bg-emerald-800/50 rounded-lg flex flex-col items-center justify-center border border-emerald-700/30">
       <span className="text-base font-bold text-emerald-300">{WIND_ZH[wind]}</span>
-      <span className="text-[8px] text-slate-400">{position}</span>
+      <span className="text-[10px] text-slate-400">{position}</span>
     </div>
   );
 }

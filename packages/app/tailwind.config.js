@@ -59,6 +59,20 @@ export default {
         sans: ['"Plus Jakarta Sans Variable"', '"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         display: ['"Fraunces Variable"', 'Fraunces', 'ui-serif', 'Georgia', 'serif'],
       },
+      // Bumped type scale (~+15%) — the whole app reads larger without touching
+      // every className. [size, line-height].
+      fontSize: {
+        '2xs': ['0.75rem', '1rem'],      // 12 (was the [10px]/[11px] micro-labels)
+        xs: ['0.8125rem', '1.15rem'],    // 13
+        sm: ['0.9375rem', '1.35rem'],    // 15
+        base: ['1.0625rem', '1.6rem'],   // 17
+        lg: ['1.1875rem', '1.7rem'],     // 19
+        xl: ['1.375rem', '1.9rem'],      // 22
+        '2xl': ['1.625rem', '2.05rem'],  // 26
+        '3xl': ['2rem', '2.35rem'],      // 32
+        '4xl': ['2.5rem', '2.6rem'],     // 40
+        '5xl': ['3.25rem', '1'],         // 52
+      },
       boxShadow: {
         tile: '0 2px 4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -2px 2px rgba(120,95,55,0.22)',
         'tile-up': '0 8px 14px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.7)',

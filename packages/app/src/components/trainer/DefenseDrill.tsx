@@ -71,11 +71,11 @@ export function DefenseDrill({ onBack }: Props) {
         <div className="space-y-2 mb-3">
           {drill.opponentDiscards.map((pond, i) => (
             <div key={i} className="flex items-start gap-1">
-              <span className="text-[10px] text-slate-600 w-6 shrink-0 mt-1">P{i + 1}</span>
+              <span className="text-[12px] text-slate-600 w-6 shrink-0 mt-1">P{i + 1}</span>
               {pond.length > 0 ? (
                 <TileRow tiles={pond} size="sm" sortTiles={false} />
               ) : (
-                <span className="text-[10px] text-slate-700">--</span>
+                <span className="text-[12px] text-slate-700">--</span>
               )}
             </div>
           ))}

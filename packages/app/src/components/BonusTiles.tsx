@@ -77,7 +77,7 @@ export function BonusTiles({
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[10px] text-slate-500 w-14 shrink-0">{label}</span>
+      <span className="text-[12px] text-slate-500 w-14 shrink-0">{label}</span>
       <div className="flex gap-1">{children}</div>
     </div>
   );
@@ -103,7 +103,7 @@ function ToggleChip({
       className={`flex flex-col items-center px-2.5 py-1.5 rounded-md border text-xs transition-all ${colors[color]}`}
     >
       <span className="font-bold text-base leading-none">{label}</span>
-      <span className="text-[9px] leading-tight opacity-75 mt-0.5">{sublabel}</span>
+      <span className="text-[11px] leading-tight opacity-75 mt-0.5">{sublabel}</span>
     </button>
   );
 }
