@@ -12,6 +12,7 @@ import { GameSetup, type SpeedSetting } from './GameSetup';
 import { GameBoard } from './GameBoard';
 import { ClaimOverlay } from './ClaimOverlay';
 import { RoundResult } from './RoundResult';
+import { db } from '../../lib/db';
 
 const SPEED_MS: Record<SpeedSetting, number> = {
   slow: 2000,
@@ -27,20 +28,110 @@ export function PlayTab() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [profile, setProfile] = useState<AiProfile>(ALL_PROFILES[1]);
   const [speedMs, setSpeedMs] = useState(SPEED_MS.normal);
+  const [speedSetting, setSpeedSetting] = useState<SpeedSetting>('normal');
+  const [resumeChecked, setResumeChecked] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function handleStart(config: {
+  // --- Persistence (gameSaves) ---
+  const saveIdRef = useRef<number | null>(null);
+  const latestRef = useRef<{ gs: GameState | null; difficulty: AiProfile['difficulty']; speed: SpeedSetting; view: PlayView }>({
+    gs: null, difficulty: 'medium', speed: 'normal', view: 'setup',
+  });
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  async function persistSave(gs: GameState, difficulty: AiProfile['difficulty'], speed: SpeedSetting) {
+    try {
+      const payload = { state: JSON.stringify(gs), difficulty, speed, isActive: 1 as const, updatedAt: Date.now() };
+      if (saveIdRef.current != null) {
+        await db.gameSaves.update(saveIdRef.current, payload);
+      } else {
+        await db.gameSaves.where('isActive').equals(1).modify({ isActive: 0 });
+        saveIdRef.current = await db.gameSaves.add({ ...payload, createdAt: Date.now() });
+      }
+    } catch {
+      /* persistence is best-effort */
+    }
+  }
+
+  function flushSave() {
+    const { gs, difficulty, speed, view: v } = latestRef.current;
+    if (v === 'playing' && gs && gs.phase !== 'finished') void persistSave(gs, difficulty, speed);
+  }
+
+  async function endSave() {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    const id = saveIdRef.current;
+    saveIdRef.current = null;
+    if (id != null) {
+      try { await db.gameSaves.delete(id); } catch { /* ignore */ }
+    }
+  }
+
+  // Resume an in-progress game on mount (tab switch or refresh).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const save = await db.gameSaves.where('isActive').equals(1).last();
+        if (!cancelled && save) {
+          const gs = JSON.parse(save.state) as GameState;
+          if (gs && Array.isArray(gs.hands) && gs.phase && gs.phase !== 'finished') {
+            const p = ALL_PROFILES.find(pr => pr.difficulty === save.difficulty) ?? ALL_PROFILES[1];
+            const ss = (save.speed in SPEED_MS ? save.speed : 'normal') as SpeedSetting;
+            saveIdRef.current = save.id ?? null;
+            setProfile(p);
+            setSpeedMs(SPEED_MS[ss]);
+            setSpeedSetting(ss);
+            setGameState(gs);
+            setView('playing');
+          } else if (save.id != null) {
+            await db.gameSaves.delete(save.id);
+          }
+        }
+      } catch {
+        /* corrupt/unavailable save — start fresh */
+      }
+      if (!cancelled) setResumeChecked(true);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Keep the latest state mirrored + autosave (debounced) while playing.
+  useEffect(() => {
+    latestRef.current = { gs: gameState, difficulty: profile.difficulty, speed: speedSetting, view };
+    if (view === 'playing' && gameState && gameState.phase !== 'finished') {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(flushSave, 400);
+    }
+  }, [gameState, view, profile, speedSetting]);
+
+  // Flush the latest state when the page is hidden/backgrounded, and on unmount.
+  useEffect(() => {
+    const onHide = () => { if (document.visibilityState === 'hidden') flushSave(); };
+    window.addEventListener('pagehide', flushSave);
+    document.addEventListener('visibilitychange', onHide);
+    return () => {
+      window.removeEventListener('pagehide', flushSave);
+      document.removeEventListener('visibilitychange', onHide);
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      flushSave();
+    };
+  }, []);
+
+  async function handleStart(config: {
     difficulty: AiProfile['difficulty'];
     speed: SpeedSetting;
     humanSeat: number;
   }) {
-    const p =
-      ALL_PROFILES.find(pr => pr.difficulty === config.difficulty) ??
-      ALL_PROFILES[1];
+    await endSave();
+    const p = ALL_PROFILES.find(pr => pr.difficulty === config.difficulty) ?? ALL_PROFILES[1];
+    const gs = createGame(config.humanSeat, 0, 'east');
     setProfile(p);
     setSpeedMs(SPEED_MS[config.speed]);
-    setGameState(createGame(config.humanSeat, 0, 'east'));
+    setSpeedSetting(config.speed);
+    setGameState(gs);
     setView('playing');
+    void persistSave(gs, config.difficulty, config.speed);
   }
 
   useEffect(() => {
@@ -54,6 +145,7 @@ export function PlayTab() {
     if (timerRef.current) clearTimeout(timerRef.current);
 
     if (gameState.phase === 'finished') {
+      void endSave();
       setView('result');
       return;
     }
@@ -191,6 +283,15 @@ export function PlayTab() {
     resolveAiClaims();
   }
 
+  function handleQuit() {
+    void endSave();
+    setView('setup');
+  }
+
+  if (!resumeChecked) {
+    return <div className="h-full flex items-center justify-center text-slate-500 text-sm">Loading…</div>;
+  }
+
   if (view === 'setup') {
     return <GameSetup onStart={handleStart} />;
   }
@@ -200,10 +301,12 @@ export function PlayTab() {
       <RoundResult
         state={gameState}
         onPlayAgain={() => {
-          setGameState(createGame(gameState.humanSeat, 0, 'east'));
+          const gs = createGame(gameState.humanSeat, 0, 'east');
+          setGameState(gs);
           setView('playing');
+          void persistSave(gs, profile.difficulty, speedSetting);
         }}
-        onBackToSetup={() => setView('setup')}
+        onBackToSetup={() => { void endSave(); setView('setup'); }}
       />
     );
   }
@@ -229,7 +332,7 @@ export function PlayTab() {
           onDiscard={handleDiscard}
           onDeclareKong={handleDeclareKong}
           onTsumo={handleTsumo}
-          onQuit={() => setView('setup')}
+          onQuit={handleQuit}
           animateDiscards={speedMs >= 1000}
         />
       </div>
