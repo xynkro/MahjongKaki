@@ -47,6 +47,16 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
           </>
         ) : (
           <>
+            {isHumanWin && (
+              <div className="wintile-scene mb-3">
+                <div className="wintile3d">
+                  <div className="wintile-front">
+                    <span style={{ color: '#b5392a', fontWeight: 800, fontSize: '2.5rem', lineHeight: 1 }}>中</span>
+                  </div>
+                  <div className="wintile-back" />
+                </div>
+              </div>
+            )}
             <h2 className={`text-2xl font-bold mb-1 ${isHumanWin ? 'text-emerald-400' : 'text-red-400'}`}>
               {isHumanWin ? 'You Win!' : `${WIND_CHARS[seatWind(state.winner!, playedDealer)]} Wins`}
             </h2>
