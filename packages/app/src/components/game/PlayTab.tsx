@@ -7,108 +7,110 @@ import {
   applyAction,
   getAvailableActions,
 } from '@mahjongkaki/game';
-import { type AiProfile, ALL_PROFILES, aiDecide } from '@mahjongkaki/ai';
-import { GameSetup, type SpeedSetting } from './GameSetup';
+import { ALL_PROFILES, aiDecide } from '@mahjongkaki/ai';
+import { GameSetup, type SpeedSetting, type MatchConfig } from './GameSetup';
 import { GameBoard } from './GameBoard';
 import { ClaimOverlay } from './ClaimOverlay';
 import { RoundResult } from './RoundResult';
+import { Scoreboard } from './Scoreboard';
+import { type MatchState, newMatch, advanceMatch, handDeltas } from './match';
 import { db } from '../../lib/db';
 
-const SPEED_MS: Record<SpeedSetting, number> = {
-  slow: 2000,
-  normal: 1000,
-  fast: 400,
-  instant: 50,
-};
+const SPEED_MS: Record<SpeedSetting, number> = { slow: 2000, normal: 1000, fast: 400, instant: 50 };
 
-type PlayView = 'setup' | 'playing' | 'result';
+type PlayView = 'setup' | 'playing' | 'result' | 'matchover';
+
+function startHand(match: MatchState): GameState {
+  const gs = createGame(match.humanSeat, match.dealerSeat, match.prevailingWind);
+  gs.roundNumber = match.handNo;
+  return gs;
+}
 
 export function PlayTab() {
   const [view, setView] = useState<PlayView>('setup');
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [profile, setProfile] = useState<AiProfile>(ALL_PROFILES[1]);
-  const [speedMs, setSpeedMs] = useState(SPEED_MS.normal);
-  const [speedSetting, setSpeedSetting] = useState<SpeedSetting>('normal');
+  const [match, setMatch] = useState<MatchState | null>(null);
+  const [deltas, setDeltas] = useState<number[] | null>(null);
   const [resumeChecked, setResumeChecked] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // --- Persistence (gameSaves) ---
+  const profile = match
+    ? ALL_PROFILES.find(p => p.difficulty === match.difficulty) ?? ALL_PROFILES[1]
+    : ALL_PROFILES[1];
+  const speedMs = match ? SPEED_MS[match.speed] : SPEED_MS.normal;
+
+  // --- Persistence (whole match + current hand) ---
   const saveIdRef = useRef<number | null>(null);
-  const latestRef = useRef<{ gs: GameState | null; difficulty: AiProfile['difficulty']; speed: SpeedSetting; view: PlayView }>({
-    gs: null, difficulty: 'medium', speed: 'normal', view: 'setup',
+  const latestRef = useRef<{ gs: GameState | null; match: MatchState | null; view: PlayView }>({
+    gs: null, match: null, view: 'setup',
   });
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  async function persistSave(gs: GameState, difficulty: AiProfile['difficulty'], speed: SpeedSetting) {
+  async function persistSave(gs: GameState, m: MatchState) {
     try {
-      const payload = { state: JSON.stringify(gs), difficulty, speed, isActive: 1 as const, updatedAt: Date.now() };
+      const payload = {
+        state: JSON.stringify({ game: gs, match: m }),
+        difficulty: m.difficulty, speed: m.speed, isActive: 1 as const, updatedAt: Date.now(),
+      };
       if (saveIdRef.current != null) {
         await db.gameSaves.update(saveIdRef.current, payload);
       } else {
         await db.gameSaves.where('isActive').equals(1).modify({ isActive: 0 });
         saveIdRef.current = await db.gameSaves.add({ ...payload, createdAt: Date.now() });
       }
-    } catch {
-      /* persistence is best-effort */
-    }
+    } catch { /* best-effort */ }
   }
 
   function flushSave() {
-    const { gs, difficulty, speed, view: v } = latestRef.current;
-    if (v === 'playing' && gs && gs.phase !== 'finished') void persistSave(gs, difficulty, speed);
+    const { gs, match: m, view: v } = latestRef.current;
+    if (v === 'playing' && gs && m && gs.phase !== 'finished') void persistSave(gs, m);
   }
 
   async function endSave() {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     const id = saveIdRef.current;
     saveIdRef.current = null;
-    if (id != null) {
-      try { await db.gameSaves.delete(id); } catch { /* ignore */ }
-    }
+    if (id != null) { try { await db.gameSaves.delete(id); } catch { /* ignore */ } }
   }
 
-  // Resume an in-progress game on mount (tab switch or refresh).
+  // Resume on mount.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const save = await db.gameSaves.where('isActive').equals(1).last();
         if (!cancelled && save) {
-          const gs = JSON.parse(save.state) as GameState;
-          if (gs && Array.isArray(gs.hands) && gs.phase && gs.phase !== 'finished') {
-            const p = ALL_PROFILES.find(pr => pr.difficulty === save.difficulty) ?? ALL_PROFILES[1];
-            const ss = (save.speed in SPEED_MS ? save.speed : 'normal') as SpeedSetting;
+          const parsed = JSON.parse(save.state);
+          const gs: GameState | undefined = parsed?.game;
+          const m: MatchState | undefined = parsed?.match;
+          if (gs && m && Array.isArray(gs.hands) && gs.phase && gs.phase !== 'finished') {
             saveIdRef.current = save.id ?? null;
-            setProfile(p);
-            setSpeedMs(SPEED_MS[ss]);
-            setSpeedSetting(ss);
+            setMatch(m);
             setGameState(gs);
             setView('playing');
           } else if (save.id != null) {
-            await db.gameSaves.delete(save.id);
+            await db.gameSaves.delete(save.id); // old/finished/corrupt
           }
         }
-      } catch {
-        /* corrupt/unavailable save — start fresh */
-      }
+      } catch { /* start fresh */ }
       if (!cancelled) setResumeChecked(true);
     })();
     return () => { cancelled = true; };
   }, []);
 
-  // Keep the latest state mirrored + autosave (debounced) while playing.
+  // Mirror latest + autosave (debounced) while playing.
   useEffect(() => {
-    latestRef.current = { gs: gameState, difficulty: profile.difficulty, speed: speedSetting, view };
-    if (view === 'playing' && gameState && gameState.phase !== 'finished') {
+    latestRef.current = { gs: gameState, match, view };
+    if (view === 'playing' && gameState && match && gameState.phase !== 'finished') {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(flushSave, 400);
     }
-  }, [gameState, view, profile, speedSetting]);
+  }, [gameState, match, view]);
 
-  // Flush the latest state when the page is hidden/backgrounded, and on unmount.
+  // Flush on hide / unmount.
   useEffect(() => {
-    const onHide = () => { if (document.visibilityState === 'hidden') flushSave(); };
     window.addEventListener('pagehide', flushSave);
+    const onHide = () => { if (document.visibilityState === 'hidden') flushSave(); };
     document.addEventListener('visibilitychange', onHide);
     return () => {
       window.removeEventListener('pagehide', flushSave);
@@ -118,34 +120,29 @@ export function PlayTab() {
     };
   }, []);
 
-  async function handleStart(config: {
-    difficulty: AiProfile['difficulty'];
-    speed: SpeedSetting;
-    humanSeat: number;
-  }) {
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  async function handleStart(config: MatchConfig) {
     await endSave();
-    const p = ALL_PROFILES.find(pr => pr.difficulty === config.difficulty) ?? ALL_PROFILES[1];
-    const gs = createGame(config.humanSeat, 0, 'east');
-    setProfile(p);
-    setSpeedMs(SPEED_MS[config.speed]);
-    setSpeedSetting(config.speed);
+    const m = newMatch(config);
+    const gs = startHand(m);
+    setMatch(m);
     setGameState(gs);
+    setDeltas(null);
     setView('playing');
-    void persistSave(gs, config.difficulty, config.speed);
+    void persistSave(gs, m);
   }
 
+  // Game loop + end-of-hand handling.
   useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!gameState || view !== 'playing') return;
+    if (!gameState || !match || view !== 'playing') return;
     if (timerRef.current) clearTimeout(timerRef.current);
 
     if (gameState.phase === 'finished') {
       void endSave();
+      const d = handDeltas(gameState, match.stakeIndex);
+      setDeltas(d);
+      setMatch(advanceMatch(match, d, gameState.winner));
       setView('result');
       return;
     }
@@ -153,138 +150,88 @@ export function PlayTab() {
     const isHumanTurn = gameState.currentPlayer === gameState.humanSeat;
 
     if (gameState.phase === 'draw') {
-      const delay = isHumanTurn ? 100 : speedMs;
       timerRef.current = setTimeout(() => {
-        setGameState(prev =>
-          prev ? applyAction(prev, { type: 'auto_draw' }) : prev,
-        );
-      }, delay);
-      return () => {
-        if (timerRef.current) clearTimeout(timerRef.current);
-      };
+        setGameState(prev => (prev ? applyAction(prev, { type: 'auto_draw' }) : prev));
+      }, isHumanTurn ? 100 : speedMs);
+      return () => { if (timerRef.current) clearTimeout(timerRef.current); };
     }
 
     if (gameState.phase === 'discard' && !isHumanTurn) {
       timerRef.current = setTimeout(() => {
-        setGameState(prev => {
-          if (!prev) return prev;
-          const action = aiDecide(prev, prev.currentPlayer, profile);
-          return applyAction(prev, action);
-        });
+        setGameState(prev => (prev ? applyAction(prev, aiDecide(prev, prev.currentPlayer, profile)) : prev));
       }, speedMs);
-      return () => {
-        if (timerRef.current) clearTimeout(timerRef.current);
-      };
+      return () => { if (timerRef.current) clearTimeout(timerRef.current); };
     }
 
     if (gameState.phase === 'claim') {
-      const humanClaims = gameState.pendingClaims.filter(
-        c => c.player === gameState.humanSeat,
-      );
+      const humanClaims = gameState.pendingClaims.filter(c => c.player === gameState.humanSeat);
       if (humanClaims.length === 0) {
-        timerRef.current = setTimeout(() => {
-          resolveAiClaims();
-        }, speedMs);
-        return () => {
-          if (timerRef.current) clearTimeout(timerRef.current);
-        };
+        timerRef.current = setTimeout(resolveAiClaims, speedMs);
+        return () => { if (timerRef.current) clearTimeout(timerRef.current); };
       }
     }
-  }, [gameState, view, speedMs, profile]);
+  }, [gameState, match, view]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function resolveAiClaims() {
     setGameState(prev => {
       if (!prev) return prev;
-
       const accepted: GameAction[] = [];
       for (let seat = 0; seat < 4; seat++) {
         if (seat === prev.humanSeat) continue;
         const action = aiDecide(prev, seat, profile);
         if (action.type === 'claim') accepted.push(action);
       }
-
-      if (accepted.length === 0) {
-        return applyAction(prev, { type: 'skip_claim' });
-      }
-
-      const pri: Record<string, number> = {
-        win: 0,
-        kong: 1,
-        pung: 1,
-        chow: 2,
-      };
-      accepted.sort((a, b) => {
-        if (a.type !== 'claim' || b.type !== 'claim') return 0;
-        return (pri[a.claimType] ?? 9) - (pri[b.claimType] ?? 9);
-      });
-
+      if (accepted.length === 0) return applyAction(prev, { type: 'skip_claim' });
+      const pri: Record<string, number> = { win: 0, kong: 1, pung: 1, chow: 2 };
+      accepted.sort((a, b) => (a.type !== 'claim' || b.type !== 'claim' ? 0 : (pri[a.claimType] ?? 9) - (pri[b.claimType] ?? 9)));
       return applyAction(prev, accepted[0]);
     });
   }
 
   function handleDiscard(tile: number) {
-    setGameState(prev =>
-      prev ? applyAction(prev, { type: 'discard', tile }) : prev,
-    );
+    setGameState(prev => (prev ? applyAction(prev, { type: 'discard', tile }) : prev));
   }
-
   function handleDeclareKong(tile: number) {
-    setGameState(prev =>
-      prev ? applyAction(prev, { type: 'declare_kong', tile }) : prev,
-    );
+    setGameState(prev => (prev ? applyAction(prev, { type: 'declare_kong', tile }) : prev));
   }
-
   function handleTsumo() {
-    setGameState(prev => {
-      if (!prev) return prev;
-      return applyAction(prev, {
-        type: 'claim',
-        claimType: 'win',
-        player: prev.humanSeat,
-        tilesFromHand: [],
-      });
-    });
+    setGameState(prev => (prev ? applyAction(prev, { type: 'claim', claimType: 'win', player: prev.humanSeat, tilesFromHand: [] }) : prev));
   }
-
   function handleClaim(claim: Claim) {
     setGameState(prev => {
       if (!prev) return prev;
-
-      const humanAction: GameAction = {
-        type: 'claim',
-        claimType: claim.claimType,
-        player: claim.player,
-        tilesFromHand: claim.tilesFromHand,
-      };
-
-      const allAccepted: GameAction[] = [humanAction];
+      const all: GameAction[] = [{ type: 'claim', claimType: claim.claimType, player: claim.player, tilesFromHand: claim.tilesFromHand }];
       for (let seat = 0; seat < 4; seat++) {
         if (seat === prev.humanSeat) continue;
         const action = aiDecide(prev, seat, profile);
-        if (action.type === 'claim') allAccepted.push(action);
+        if (action.type === 'claim') all.push(action);
       }
-
-      const pri: Record<string, number> = {
-        win: 0,
-        kong: 1,
-        pung: 1,
-        chow: 2,
-      };
-      allAccepted.sort((a, b) => {
-        if (a.type !== 'claim' || b.type !== 'claim') return 0;
-        return (pri[a.claimType] ?? 9) - (pri[b.claimType] ?? 9);
-      });
-
-      return applyAction(prev, allAccepted[0]);
+      const pri: Record<string, number> = { win: 0, kong: 1, pung: 1, chow: 2 };
+      all.sort((a, b) => (a.type !== 'claim' || b.type !== 'claim' ? 0 : (pri[a.claimType] ?? 9) - (pri[b.claimType] ?? 9)));
+      return applyAction(prev, all[0]);
     });
   }
+  function handleSkipClaim() { resolveAiClaims(); }
 
-  function handleSkipClaim() {
-    resolveAiClaims();
+  function nextHand() {
+    if (!match) return;
+    const gs = startHand(match);
+    setGameState(gs);
+    setDeltas(null);
+    setView('playing');
+    void persistSave(gs, match);
   }
 
-  function handleQuit() {
+  function endMatch() {
     void endSave();
+    setView('matchover');
+  }
+
+  function newMatchSetup() {
+    void endSave();
+    setMatch(null);
+    setGameState(null);
+    setDeltas(null);
     setView('setup');
   }
 
@@ -292,21 +239,43 @@ export function PlayTab() {
     return <div className="h-full flex items-center justify-center text-slate-500 text-sm">Loading…</div>;
   }
 
-  if (view === 'setup') {
+  if (view === 'setup' || !match) {
     return <GameSetup onStart={handleStart} />;
+  }
+
+  if (view === 'matchover') {
+    const leader = match.totals.indexOf(Math.max(...match.totals));
+    const youWon = leader === match.humanSeat;
+    return (
+      <div className="space-y-4 p-1">
+        <section className="card anim-rise p-6 text-center">
+          <h2 className={`text-2xl font-bold mb-1 ${youWon ? 'text-emerald-400' : 'text-slate-200'}`}>
+            {youWon ? 'You came out ahead!' : 'Match over'}
+          </h2>
+          <p className="text-slate-400 text-xs">{match.handNo - 1} hands played</p>
+        </section>
+        <div className="anim-rise" style={{ animationDelay: '80ms' }}>
+          <Scoreboard match={match} />
+        </div>
+        <button
+          onClick={newMatchSetup}
+          className="anim-rise w-full min-h-[48px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
+          style={{ animationDelay: '160ms' }}
+        >
+          New Match
+        </button>
+      </div>
+    );
   }
 
   if (view === 'result' && gameState) {
     return (
       <RoundResult
         state={gameState}
-        onPlayAgain={() => {
-          const gs = createGame(gameState.humanSeat, 0, 'east');
-          setGameState(gs);
-          setView('playing');
-          void persistSave(gs, profile.difficulty, speedSetting);
-        }}
-        onBackToSetup={() => { void endSave(); setView('setup'); }}
+        match={match}
+        deltas={deltas ?? [0, 0, 0, 0]}
+        onNextHand={nextHand}
+        onEndMatch={endMatch}
       />
     );
   }
@@ -314,14 +283,10 @@ export function PlayTab() {
   if (!gameState) return null;
 
   const humanActions = getAvailableActions(gameState, gameState.humanSeat);
-  const humanClaims =
-    gameState.phase === 'claim'
-      ? gameState.pendingClaims.filter(c => c.player === gameState.humanSeat)
-      : [];
-  const showClaimOverlay =
-    gameState.phase === 'claim' &&
-    humanClaims.length > 0 &&
-    gameState.lastDiscard !== null;
+  const humanClaims = gameState.phase === 'claim'
+    ? gameState.pendingClaims.filter(c => c.player === gameState.humanSeat)
+    : [];
+  const showClaimOverlay = gameState.phase === 'claim' && humanClaims.length > 0 && gameState.lastDiscard !== null;
 
   return (
     <div className="flex flex-col h-full">
@@ -332,7 +297,7 @@ export function PlayTab() {
           onDiscard={handleDiscard}
           onDeclareKong={handleDeclareKong}
           onTsumo={handleTsumo}
-          onQuit={handleQuit}
+          onQuit={endMatch}
           animateDiscards={speedMs >= 1000}
         />
       </div>
