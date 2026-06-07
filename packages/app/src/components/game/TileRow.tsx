@@ -47,7 +47,7 @@ export function TileRow({
               ${drawnTile !== undefined && tile === drawnTile ? 'anim-draw' : ''}
               ${isSelected ? '-translate-y-1.5 ring-2 ring-amber-400 shadow-tile-up' : ''}
               ${isHighlight ? 'ring-2 ring-amber-400/70' : ''}
-              ${onTileClick ? 'active:scale-90 cursor-pointer' : 'cursor-default'}
+              ${onTileClick ? 'cursor-pointer active:[transform:perspective(560px)_rotateX(24deg)_scale(0.94)]' : 'cursor-default'}
             `}
           >
             <TileFace index={tile} size={size} />
