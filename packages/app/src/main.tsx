@@ -11,3 +11,12 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 );
+
+// Fade out the launch splash once the app has mounted.
+const splash = document.getElementById('splash');
+if (splash) {
+  requestAnimationFrame(() => {
+    splash.style.opacity = '0';
+    setTimeout(() => splash.remove(), 450);
+  });
+}

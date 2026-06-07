@@ -21,6 +21,13 @@ export function GameSetup({ onStart }: GameSetupProps) {
   const [speed, setSpeed] = useState<SpeedSetting>('normal');
   const [humanSeat, setHumanSeat] = useState(0);
   const [stakeIndex, setStakeIndex] = useState(1);
+  const [showHint, setShowHint] = useState(() => {
+    try { return localStorage.getItem('mk_play_hint') !== '0'; } catch { return true; }
+  });
+  const dismissHint = () => {
+    setShowHint(false);
+    try { localStorage.setItem('mk_play_hint', '0'); } catch { /* ignore */ }
+  };
 
   const seatLabels = ['East', 'South', 'West', 'North'];
   const pill = (active: boolean) =>
@@ -31,6 +38,23 @@ export function GameSetup({ onStart }: GameSetupProps) {
   return (
     <div className="space-y-4 pb-4">
       <h2 className="text-lg font-bold text-slate-200">New Match</h2>
+
+      {showHint && (
+        <section className="card p-4 border-amber-400/25">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="section-title">How to play</h3>
+            <button onClick={dismissHint} aria-label="Dismiss" className="-mt-1 -mr-1 w-7 h-7 grid place-items-center text-slate-500 active:scale-90 text-base">✕</button>
+          </div>
+          <ul className="mt-2 space-y-1.5 text-sm text-slate-300 list-disc list-inside marker:text-amber-400/60">
+            <li>Tap a tile to select it, tap again to <strong className="text-slate-100">discard</strong>.</li>
+            <li>When someone discards, <strong className="text-slate-100">Pung / Chow / Kong</strong> or <strong className="text-emerald-400">Hu!</strong> if offered — or Skip.</li>
+            <li>Win with <strong className="text-slate-100">4 sets + a pair</strong> at the minimum tai. Chips settle after each hand; dealer rotates.</li>
+          </ul>
+          <button onClick={dismissHint} className="mt-3 w-full min-h-[40px] rounded-lg bg-slate-700 text-slate-200 text-sm font-medium active:bg-slate-600">
+            Got it
+          </button>
+        </section>
+      )}
 
       <section className="card p-4">
         <h3 className="section-title mb-3">AI Difficulty</h3>

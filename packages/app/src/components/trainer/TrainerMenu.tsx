@@ -61,16 +61,54 @@ export function TrainerMenu({ onSelect }: TrainerMenuProps) {
     );
   };
 
+  const all = Object.values(stats).reduce(
+    (a, s) => ({ total: a.total + s.total, correct: a.correct + s.correct }),
+    { total: 0, correct: 0 },
+  );
+
   return (
     <div className="space-y-3">
       <h2 className="text-lg font-bold text-slate-200">Training Drills</h2>
       <p className="text-xs text-slate-400">Practice specific mahjong skills</p>
+
+      {all.total > 0 ? (
+        <div className="card p-4">
+          <AccuracyRing pct={Math.round((all.correct / all.total) * 100)} total={all.total} />
+        </div>
+      ) : (
+        <div className="card p-4 text-sm text-slate-400">Answer a few drills to track your accuracy here.</div>
+      )}
 
       <h3 className="section-title pt-2">Fundamentals</h3>
       {FUNDAMENTALS.map(renderDrill)}
 
       <h3 className="section-title pt-2">Strategy</h3>
       {STRATEGY.map(renderDrill)}
+    </div>
+  );
+}
+
+function AccuracyRing({ pct, total }: { pct: number; total: number }) {
+  const r = 26;
+  const circ = 2 * Math.PI * r;
+  const off = circ * (1 - pct / 100);
+  return (
+    <div className="flex items-center gap-4">
+      <svg width="68" height="68" viewBox="0 0 68 68" className="shrink-0 -rotate-90">
+        <circle cx="34" cy="34" r={r} fill="none" stroke="#3c372e" strokeWidth="7" />
+        <circle
+          cx="34" cy="34" r={r} fill="none" stroke="#3FB683" strokeWidth="7" strokeLinecap="round"
+          strokeDasharray={circ} strokeDashoffset={off}
+        />
+        <text
+          x="34" y="34" transform="rotate(90 34 34)" textAnchor="middle" dominantBaseline="central"
+          className="fill-slate-100" fontSize="15" fontWeight="700"
+        >{pct}%</text>
+      </svg>
+      <div>
+        <div className="text-sm font-semibold text-slate-200">Overall accuracy</div>
+        <div className="text-xs text-slate-500">{total} drill{total === 1 ? '' : 's'} answered</div>
+      </div>
     </div>
   );
 }
