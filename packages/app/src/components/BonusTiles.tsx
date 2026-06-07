@@ -32,7 +32,7 @@ export function BonusTiles({
                 label={FLOWER_LABELS[f]}
                 sublabel={f === 'bamboo_flower' ? 'bamboo' : f}
                 active={active}
-                color="pink"
+                color="amber"
                 onClick={() => onToggleFlower(flower(f))}
               />
             );
@@ -47,7 +47,7 @@ export function BonusTiles({
                 label={SEASON_LABELS[s]}
                 sublabel={s}
                 active={active}
-                color="cyan"
+                color="emerald"
                 onClick={() => onToggleSeason(season(s))}
               />
             );
@@ -85,22 +85,24 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 function ToggleChip({
   label, sublabel, active, color, onClick,
 }: {
-  label: string; sublabel: string; active: boolean; color: 'pink' | 'cyan' | 'yellow'; onClick: () => void;
+  label: string; sublabel: string; active: boolean; color: 'amber' | 'emerald' | 'yellow'; onClick: () => void;
 }) {
+  // Inactive chips read as tappable (not disabled); active uses the on-brand palette.
+  const inactive = 'bg-slate-700/60 text-slate-200 border-slate-600 active:bg-slate-700';
   const colors = {
-    pink: active ? 'bg-pink-800 text-pink-200 border-pink-600' : 'bg-slate-800 text-slate-500 border-slate-700',
-    cyan: active ? 'bg-cyan-800 text-cyan-200 border-cyan-600' : 'bg-slate-800 text-slate-500 border-slate-700',
-    yellow: active ? 'bg-yellow-800 text-yellow-200 border-yellow-600' : 'bg-slate-800 text-slate-500 border-slate-700',
+    amber: active ? 'bg-amber-800 text-amber-100 border-amber-400 shadow-[0_0_10px_rgba(201,162,75,0.35)]' : inactive,
+    emerald: active ? 'bg-emerald-800 text-emerald-100 border-emerald-400 shadow-[0_0_10px_rgba(63,182,131,0.3)]' : inactive,
+    yellow: active ? 'bg-yellow-800 text-yellow-100 border-yellow-400 shadow-[0_0_10px_rgba(205,170,82,0.35)]' : inactive,
   };
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex flex-col items-center px-2.5 py-1 rounded-md border text-xs transition-colors ${colors[color]}`}
+      className={`flex flex-col items-center px-2.5 py-1.5 rounded-md border text-xs transition-all ${colors[color]}`}
     >
-      <span className="font-bold text-sm leading-none">{label}</span>
-      <span className="text-[9px] leading-tight opacity-70">{sublabel}</span>
+      <span className="font-bold text-base leading-none">{label}</span>
+      <span className="text-[9px] leading-tight opacity-75 mt-0.5">{sublabel}</span>
     </button>
   );
 }
