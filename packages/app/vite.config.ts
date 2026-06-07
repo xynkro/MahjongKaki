@@ -10,7 +10,7 @@ export default defineConfig(({ command }) => ({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'MahjongKaki',
         short_name: 'MahjongKaki',
@@ -23,7 +23,6 @@ export default defineConfig(({ command }) => ({
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml' },
         ],
       },
       workbox: {
