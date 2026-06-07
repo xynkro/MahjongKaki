@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
-import { calculatePayout, formatCurrency, STAKE_PRESETS, DEFAULT_RULES } from '@mahjongkaki/engine';
+import { calculatePayout, formatCurrency, STAKE_PRESETS } from '@mahjongkaki/engine';
 import { haptics } from '../lib/haptics';
+import { useRules } from '../lib/settings';
 import type { Round } from '../lib/db';
 
 interface AddRoundProps {
@@ -15,11 +16,12 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
   const [tai, setTai] = useState(1);
   const [winType, setWinType] = useState<'zimo' | 'discard'>('discard');
   const [shooterIndex, setShooterIndex] = useState(1);
+  const rules = useRules();
 
   const stake = STAKE_PRESETS.find(s => s.label === stakeLabel) ?? STAKE_PRESETS[0];
 
   const deltas = useMemo(() => {
-    const cap = DEFAULT_RULES.taiCap ?? 13;
+    const cap = rules.taiCap ?? 13;
     const scoring = { elements: [], totalTai: tai, cappedTai: Math.min(tai, cap), isValid: true };
     const payout = calculatePayout({
       scoring,
@@ -27,7 +29,7 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
       winnerIndex,
       shooterIndex: winType === 'zimo' ? undefined : shooterIndex,
       playerNames,
-      rules: DEFAULT_RULES,
+      rules,
     });
 
     const d: [number, number, number, number] = [0, 0, 0, 0];
@@ -35,7 +37,7 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
       d[i] = payout.netPerPlayer[playerNames[i]] ?? 0;
     }
     return d;
-  }, [winnerIndex, tai, winType, shooterIndex, playerNames, stake]);
+  }, [winnerIndex, tai, winType, shooterIndex, playerNames, stake, rules]);
 
   function handleSubmit() {
     onAdd({
@@ -98,7 +100,7 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
           <span className="text-lg font-bold text-slate-200 w-8 text-center font-mono">{tai}</span>
           <button
             type="button"
-            onClick={() => { haptics.tap(); setTai(t => Math.min(DEFAULT_RULES.taiCap ?? 13, t + 1)); }}
+            onClick={() => { haptics.tap(); setTai(t => Math.min(rules.taiCap ?? 13, t + 1)); }}
             className="w-8 h-8 text-lg bg-slate-700 rounded-lg text-slate-300 active:bg-slate-600"
           >
             +

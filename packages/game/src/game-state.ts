@@ -1,7 +1,7 @@
 import {
   type PlayTile, type BonusTile, type Meld, type Wind,
   tileToIndex, indexToTile, suit, pung, kong, chow, eyes,
-  WINDS,
+  WINDS, DEFAULT_RULES, type RulesConfig,
 } from '@mahjongkaki/engine';
 import { createWallTiles, shuffleWall, dealInitial, drawFromWall, drawFromDeadWall, type WallTile } from './wall.js';
 import { canWin } from './win-detect.js';
@@ -32,6 +32,8 @@ export interface GameState {
   discardLog: { tile: number; player: number }[];
   // The most recent tile drawn into a hand (for the draw cue). Null until first draw.
   lastDraw: { player: number; tile: number } | null;
+  // House rules in force for this game (scoring + payout), snapshotted at createGame.
+  rules: RulesConfig;
 }
 
 export type GameAction =
@@ -42,7 +44,7 @@ export type GameAction =
   | { type: 'declare_kong'; tile: number }
   | { type: 'auto_draw' };
 
-export function createGame(humanSeat: number = 0, dealerSeat: number = 0, prevailingWind: Wind = 'east'): GameState {
+export function createGame(humanSeat: number = 0, dealerSeat: number = 0, prevailingWind: Wind = 'east', rules: RulesConfig = DEFAULT_RULES): GameState {
   const wall = shuffleWall(createWallTiles());
   const deal = dealInitial(wall, dealerSeat);
 
@@ -66,6 +68,7 @@ export function createGame(humanSeat: number = 0, dealerSeat: number = 0, prevai
     turnCount: 0,
     discardLog: [],
     lastDraw: null,
+    rules,
   };
 }
 

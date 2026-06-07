@@ -1,5 +1,5 @@
 import { type GameState, scoreWinForSeat } from '@mahjongkaki/game';
-import { type Wind, WINDS, calculatePayout, STAKE_PRESETS } from '@mahjongkaki/engine';
+import { type Wind, WINDS, calculatePayout, STAKE_PRESETS, type RulesConfig } from '@mahjongkaki/engine';
 import type { AiProfile } from '@mahjongkaki/ai';
 import type { SpeedSetting } from './GameSetup';
 
@@ -8,6 +8,7 @@ export interface MatchState {
   humanSeat: number;
   difficulty: AiProfile['difficulty'];
   speed: SpeedSetting;
+  rules: RulesConfig;    // house rules snapshotted at match start
   dealerSeat: number;
   prevailingWind: Wind;
   handNo: number;        // 1-based
@@ -17,12 +18,13 @@ export interface MatchState {
 
 export function newMatch(c: {
   difficulty: AiProfile['difficulty']; speed: SpeedSetting; humanSeat: number; stakeIndex: number;
-}): MatchState {
+}, rules: RulesConfig): MatchState {
   return {
     stakeIndex: c.stakeIndex,
     humanSeat: c.humanSeat,
     difficulty: c.difficulty,
     speed: c.speed,
+    rules,
     dealerSeat: 0,
     prevailingWind: 'east',
     handNo: 1,
@@ -46,6 +48,7 @@ export function handDeltas(state: GameState, stakeIndex: number): [number, numbe
     state.winType === 'discard' && state.lastDiscard ? state.lastDiscard.player : undefined;
   const payout = calculatePayout({
     scoring, stake: STAKE_PRESETS[stakeIndex], winnerIndex: state.winner, shooterIndex, playerNames: names,
+    rules: state.rules,
   });
   for (let i = 0; i < 4; i++) deltas[i] = payout.netPerPlayer[String(i)] ?? 0;
   return deltas;

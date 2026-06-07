@@ -7,7 +7,7 @@ import {
   scoreHand,
   type Hand, type Meld, type WinContext, type Wind, type ScoringResult,
   type BonusTile, type FlowerTile, type SeasonTile, type AnimalTile, type Suit,
-  indexToTile, pung, chow, eyes, WINDS,
+  indexToTile, pung, chow, eyes, WINDS, DEFAULT_RULES, type RulesConfig,
 } from '@mahjongkaki/engine';
 import { canWin, decomposeWinningHand } from './win-detect.js';
 import type { GameState } from './game-state.js';
@@ -45,6 +45,7 @@ export function scoreWinningHand(
   prevailingWind: Wind,
   winType: 'zimo' | 'discard',
   winTileIdx: number,
+  rules: RulesConfig = DEFAULT_RULES,
 ): ScoringResult | null {
   const decomps = decomposeWinningHand(concealed);
   if (decomps.length === 0) return null;
@@ -67,7 +68,7 @@ export function scoreWinningHand(
       melds: [...exposed, ...concealedMelds, eyes(indexToTile(d.pair))],
       flowers, seasons, animals,
     };
-    const res = scoreHand(hand, ctx);
+    const res = scoreHand(hand, ctx, rules);
     if (!best || res.cappedTai > best.cappedTai) best = res;
   }
   return best;
@@ -83,7 +84,7 @@ export function scoreWinForSeat(state: GameState, seat: number): ScoringResult |
   return scoreWinningHand(
     concealed, state.melds[seat], state.flowers[seat],
     seatWindForSeat(seat, state.dealerSeat), state.prevailingWind,
-    state.winType ?? 'zimo', winTileIdx,
+    state.winType ?? 'zimo', winTileIdx, state.rules,
   );
 }
 

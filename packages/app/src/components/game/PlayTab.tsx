@@ -15,13 +15,14 @@ import { RoundResult } from './RoundResult';
 import { Scoreboard } from './Scoreboard';
 import { type MatchState, newMatch, advanceMatch, handDeltas } from './match';
 import { db } from '../../lib/db';
+import { getRules } from '../../lib/settings';
 
 const SPEED_MS: Record<SpeedSetting, number> = { slow: 2000, normal: 1000, fast: 400, instant: 50 };
 
 type PlayView = 'setup' | 'playing' | 'result' | 'matchover';
 
 function startHand(match: MatchState): GameState {
-  const gs = createGame(match.humanSeat, match.dealerSeat, match.prevailingWind);
+  const gs = createGame(match.humanSeat, match.dealerSeat, match.prevailingWind, match.rules);
   gs.roundNumber = match.handNo;
   return gs;
 }
@@ -124,7 +125,7 @@ export function PlayTab() {
 
   async function handleStart(config: MatchConfig) {
     await endSave();
-    const m = newMatch(config);
+    const m = newMatch(config, getRules());
     const gs = startHand(m);
     setMatch(m);
     setGameState(gs);

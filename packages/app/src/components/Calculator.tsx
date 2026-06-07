@@ -4,7 +4,7 @@ import type {
   FlowerTile, SeasonTile, AnimalTile,
 } from '@mahjongkaki/engine';
 import {
-  scoreHand, calculatePayout, DEFAULT_RULES, STAKE_PRESETS,
+  scoreHand, calculatePayout, STAKE_PRESETS,
 } from '@mahjongkaki/engine';
 import { HandDisplay } from './HandDisplay';
 import { MeldBuilder } from './MeldBuilder';
@@ -12,6 +12,7 @@ import { BonusTiles } from './BonusTiles';
 import { WinContextPanel } from './WinContext';
 import { ScorePanel } from './ScorePanel';
 import { haptics } from '../lib/haptics';
+import { useRules } from '../lib/settings';
 
 export function Calculator() {
   const [adding, setAdding] = useState(false);
@@ -33,7 +34,7 @@ export function Calculator() {
   const [winnerIndex, setWinnerIndex] = useState(0);
   const [shooterIndex, setShooterIndex] = useState<number | undefined>(1);
 
-  const rules = DEFAULT_RULES;
+  const rules = useRules();
 
   const addMeld = useCallback((meld: Meld) => {
     setMelds(prev => {

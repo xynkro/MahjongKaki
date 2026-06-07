@@ -5,6 +5,7 @@ import { TableUtils } from './components/TableUtils';
 import { PlayTab } from './components/game/PlayTab';
 import { TrainTab } from './components/trainer/TrainTab';
 import { LegalSheet, FirstRunDisclaimer, useFirstRunDisclaimer } from './components/LegalSheet';
+import { SettingsSheet } from './components/SettingsSheet';
 
 type Tab = 'calculator' | 'chips' | 'table' | 'play' | 'train';
 
@@ -19,6 +20,7 @@ const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
 export function App() {
   const [tab, setTab] = useState<Tab>('calculator');
   const [legalOpen, setLegalOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const disclaimer = useFirstRunDisclaimer();
 
   return (
@@ -31,13 +33,22 @@ export function App() {
           <h1 className="font-display text-2xl font-semibold tracking-wide text-slate-100">
             Mahjong<span className="text-amber-400">Kaki</span>
           </h1>
-          <button
-            onClick={() => setLegalOpen(true)}
-            aria-label="About and legal"
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 grid place-items-center rounded-full border border-slate-700/60 text-slate-400 active:scale-90"
-          >
-            <span className="font-serif text-base font-semibold leading-none italic">i</span>
-          </button>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+            <button
+              onClick={() => setSettingsOpen(true)}
+              aria-label="House rules and settings"
+              className="w-9 h-9 grid place-items-center rounded-full border border-slate-700/60 text-slate-400 active:scale-90"
+            >
+              <IconGear />
+            </button>
+            <button
+              onClick={() => setLegalOpen(true)}
+              aria-label="About and legal"
+              className="w-9 h-9 grid place-items-center rounded-full border border-slate-700/60 text-slate-400 active:scale-90"
+            >
+              <span className="font-serif text-base font-semibold leading-none italic">i</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -72,6 +83,7 @@ export function App() {
         })}
       </nav>
 
+      <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <LegalSheet open={legalOpen} onClose={() => setLegalOpen(false)} />
       {disclaimer.show && <FirstRunDisclaimer onAccept={disclaimer.accept} />}
     </div>
@@ -97,4 +109,12 @@ function IconPlay() {
 }
 function IconTrain() {
   return <SVG><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="4" /><circle cx="12" cy="12" r="1" fill="currentColor" /></SVG>;
+}
+function IconGear() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2.5v2.5M12 19v2.5M21.5 12H19M5 12H2.5M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8M18.4 18.4l-1.8-1.8M7.4 7.4 5.6 5.6" />
+    </svg>
+  );
 }

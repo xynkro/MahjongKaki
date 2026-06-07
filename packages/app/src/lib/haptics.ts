@@ -3,7 +3,17 @@
 // existing haptics.* call site now also produces audio.
 import { sound } from './sound';
 
+let hapticsOn = true;
+try { hapticsOn = localStorage.getItem('mk_haptics') !== '0'; } catch { /* private mode */ }
+
+export function setHapticsEnabled(v: boolean): void {
+  hapticsOn = v;
+  try { localStorage.setItem('mk_haptics', v ? '1' : '0'); } catch { /* ignore */ }
+}
+export function hapticsEnabled(): boolean { return hapticsOn; }
+
 function buzz(pattern: number | number[]): void {
+  if (!hapticsOn) return;
   if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
     try {
       navigator.vibrate(pattern);
