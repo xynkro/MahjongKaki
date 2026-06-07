@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MahjongKaki">
+  <rect width="64" height="64" rx="14" fill="#161310"/>
+  <rect x="14" y="9" width="36" height="46" rx="7" fill="#F1E7D2" stroke="#C6AE84" stroke-width="2"/>
+  <rect x="14" y="9" width="36" height="46" rx="7" fill="url(#g)"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="0.55" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#b89a5a" stop-opacity="0.25"/>
+    </linearGradient>
+  </defs>
+  <text x="32" y="43" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" text-anchor="middle" fill="#236F4D">索</text>
+</svg>

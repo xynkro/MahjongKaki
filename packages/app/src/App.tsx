@@ -12,8 +12,10 @@ export function App() {
 
   return (
     <div className="flex flex-col h-dvh">
-      <header className="flex items-center justify-center py-3 bg-slate-800 border-b border-slate-700">
-        <h1 className="text-lg font-bold tracking-wide">MahjongKaki</h1>
+      <header className="flex items-center justify-center py-3 bg-slate-900/80 backdrop-blur border-b border-amber-400/15">
+        <h1 className="font-display text-xl font-semibold tracking-wide text-slate-100">
+          Mahjong<span className="text-amber-400">Kaki</span>
+        </h1>
       </header>
 
       <main className={`flex-1 overflow-y-auto ${tab === 'play' ? '' : 'p-4'}`}>
@@ -24,7 +26,7 @@ export function App() {
         {tab === 'train' && <TrainTab />}
       </main>
 
-      <nav className="flex border-t border-slate-700 bg-slate-800 pb-safe">
+      <nav className="flex border-t border-amber-400/10 bg-slate-900/90 backdrop-blur pb-safe">
         <TabButton label="Score" active={tab === 'calculator'} onClick={() => setTab('calculator')} />
         <TabButton label="Chips" active={tab === 'chips'} onClick={() => setTab('chips')} />
         <TabButton label="Table" active={tab === 'table'} onClick={() => setTab('table')} />

@@ -64,7 +64,7 @@ export function GameBoard({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full felt">
       {/* Status bar */}
       <div className="flex items-center justify-between px-3 py-2 bg-slate-800/80 border-b border-slate-700/50 text-xs text-slate-400">
         <button
