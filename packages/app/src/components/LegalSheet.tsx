@@ -62,14 +62,17 @@ export function LegalSheet({ open, onClose }: { open: boolean; onClose: () => vo
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      <div className="h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="max-w-lg mx-auto p-4 pb-12 space-y-4">
-          <div className="flex items-center justify-between sticky top-0 -mx-4 px-4 py-3 bg-slate-950/80 backdrop-blur z-10">
+      <div className="h-full overflow-y-auto overscroll-contain" onClick={e => e.stopPropagation()}>
+        <div className="max-w-lg mx-auto px-4 pb-12 space-y-4">
+          <div
+            className="flex items-center justify-between sticky top-0 -mx-4 px-4 pb-3 bg-slate-950/85 backdrop-blur z-10"
+            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.85rem)' }}
+          >
             <h2 className="font-display text-xl text-slate-100">About &amp; Legal</h2>
             <button
               onClick={onClose}
               aria-label="Close"
-              className="w-9 h-9 grid place-items-center text-slate-400 active:scale-90 text-lg"
+              className="w-11 h-11 -mr-1 grid place-items-center rounded-full border border-slate-700/70 text-slate-300 active:scale-90 text-xl"
             >
               ✕
             </button>
@@ -118,6 +121,13 @@ export function LegalSheet({ open, onClose }: { open: boolean; onClose: () => vo
           </Section>
 
           <p className="text-center text-xs text-slate-600 pt-2">MahjongKaki · v{APP_VERSION}</p>
+
+          <button
+            onClick={onClose}
+            className="w-full min-h-[48px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
+          >
+            Done
+          </button>
         </div>
       </div>
     </div>

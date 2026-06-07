@@ -15,6 +15,7 @@ createRoot(document.getElementById('root')!).render(
 // Fade out the launch splash once the app has mounted.
 const splash = document.getElementById('splash');
 if (splash) {
+  splash.style.pointerEvents = 'none';
   requestAnimationFrame(() => {
     splash.style.opacity = '0';
     setTimeout(() => splash.remove(), 450);

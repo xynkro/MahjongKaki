@@ -71,11 +71,14 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      <div className="h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="max-w-lg mx-auto p-4 pb-12 space-y-4">
-          <div className="flex items-center justify-between sticky top-0 -mx-4 px-4 py-3 bg-slate-950/80 backdrop-blur z-10">
+      <div className="h-full overflow-y-auto overscroll-contain" onClick={e => e.stopPropagation()}>
+        <div className="max-w-lg mx-auto px-4 pb-12 space-y-4">
+          <div
+            className="flex items-center justify-between sticky top-0 -mx-4 px-4 pb-3 bg-slate-950/85 backdrop-blur z-10"
+            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.85rem)' }}
+          >
             <h2 className="font-display text-xl text-slate-100">House Rules</h2>
-            <button onClick={onClose} aria-label="Close" className="w-9 h-9 grid place-items-center text-slate-400 active:scale-90 text-lg">✕</button>
+            <button onClick={onClose} aria-label="Close settings" className="w-11 h-11 -mr-1 grid place-items-center rounded-full border border-slate-700/70 text-slate-300 active:scale-90 text-xl">✕</button>
           </div>
           <p className="text-sm text-slate-400 -mt-1">
             These apply to the calculator, chip tracker, and AI match. Set them to match how your table plays.
@@ -156,6 +159,13 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
             className="w-full min-h-[44px] text-sm font-medium bg-slate-800 text-slate-300 rounded-xl border border-slate-700 active:scale-95"
           >
             Reset to Singapore defaults
+          </button>
+
+          <button
+            onClick={() => { haptics.tap(); onClose(); }}
+            className="w-full min-h-[48px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
+          >
+            Done
           </button>
         </div>
       </div>

@@ -73,6 +73,32 @@ describe('createWallTiles', () => {
     const bonus = wall.filter(w => w.isBonus);
     expect(bonus).toHaveLength(12);
   });
+
+  it('includes 4 animal bonus tiles by default', () => {
+    const wall = createWallTiles();
+    const animals = wall.filter(w => w.isBonus && (w.tile as any).kind === 'animal');
+    expect(animals).toHaveLength(4);
+  });
+
+  it('excludes animals when animals: false (144 tiles, 8 bonus, 0 animals)', () => {
+    const wall = createWallTiles({ animals: false });
+    expect(wall).toHaveLength(144);
+
+    const play = wall.filter(w => !w.isBonus);
+    const bonus = wall.filter(w => w.isBonus);
+    expect(play).toHaveLength(136);
+    expect(bonus).toHaveLength(8);
+
+    const animals = bonus.filter(w => (w.tile as any).kind === 'animal');
+    expect(animals).toHaveLength(0);
+  });
+
+  it('keeps 136 play tiles regardless of the animals rule', () => {
+    const withAnimals = createWallTiles({ animals: true }).filter(w => !w.isBonus);
+    const withoutAnimals = createWallTiles({ animals: false }).filter(w => !w.isBonus);
+    expect(withAnimals).toHaveLength(136);
+    expect(withoutAnimals).toHaveLength(136);
+  });
 });
 
 describe('shuffleWall', () => {
@@ -115,6 +141,29 @@ describe('dealInitial', () => {
     expect(
       totalPlay + totalBonus + wallPlayRemaining + wallBonusRemaining + deadPlayRemaining + deadBonusRemaining
     ).toBe(148);
+  });
+
+  it('deals correctly with animals disabled (144-tile wall, bonus replacement intact)', () => {
+    const wall = shuffleWall(createWallTiles({ animals: false }));
+    const result = dealInitial(wall, 0);
+
+    expect(result.hands[0].hand.length).toBe(14);
+    for (let i = 1; i < 4; i++) {
+      expect(result.hands[i].hand.length).toBe(13);
+    }
+
+    // No animal can ever surface as a bonus tile.
+    for (const h of result.hands) {
+      for (const bt of h.bonusTiles) {
+        expect((bt as any).kind).not.toBe('animal');
+      }
+    }
+
+    const totalPlay = result.hands.reduce((sum, h) => sum + h.hand.length, 0);
+    const totalBonus = result.hands.reduce((sum, h) => sum + h.bonusTiles.length, 0);
+    const wallRemaining = result.remainingWall.length;
+    const deadRemaining = result.deadWall.length;
+    expect(totalPlay + totalBonus + wallRemaining + deadRemaining).toBe(144);
   });
 
   it('works with non-zero dealer seat', () => {

@@ -15,7 +15,6 @@
     "@mahjongkaki/engine": "*",
     "@mahjongkaki/game": "*",
     "dexie": "^4.0.0",
-    "framer-motion": "^12.40.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "zustand": "^5.0.0"

@@ -74,8 +74,10 @@ export default {
         '5xl': ['3.25rem', '1'],         // 52
       },
       boxShadow: {
-        tile: '0 2px 4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -2px 2px rgba(120,95,55,0.22)',
-        'tile-up': '0 8px 14px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.7)',
+        // Rounded, lit ivory body: tight contact + soft drop for depth, a bright
+        // specular top edge, light/warm side bevels, and a warm bottom "thickness".
+        tile: '0 1px 2px rgba(0,0,0,0.35), 0 4px 8px -2px rgba(0,0,0,0.45), inset 0 1.5px 0 rgba(255,255,255,0.85), inset 1px 0 0 rgba(255,255,255,0.25), inset -1px 0 0 rgba(120,95,55,0.22), inset 0 -3px 4px rgba(120,95,55,0.3)',
+        'tile-up': '0 2px 4px rgba(0,0,0,0.35), 0 12px 22px -6px rgba(0,0,0,0.55), inset 0 1.5px 0 rgba(255,255,255,0.9), inset 0 -3px 4px rgba(120,95,55,0.32)',
       },
     },
   },

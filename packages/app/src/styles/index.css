@@ -111,6 +111,38 @@
 .wintile-front { background-image: linear-gradient(to bottom, #FBF4E4, #F1E7D2 55%, #E4D2AC); border: 1px solid #C6AE84; }
 .wintile-back  { transform: rotateY(180deg); background-image: linear-gradient(to bottom, #234231, #16291e); border: 1px solid #0c2a1e; }
 
+/* Polished tile surface: a static specular sheen (top-left light) + a faint warm
+   grounding at the foot. Pure CSS, no animation — so it is unaffected by
+   prefers-reduced-motion (which only kills animation) and adds no rAF/battery cost.
+   The sheen sits below the painted face so glyphs stay crisp. */
+.tile-sheen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.15) 12%, rgba(255, 255, 255, 0) 30%),
+    linear-gradient(0deg, rgba(120, 95, 55, 0.12), transparent 22%);
+}
+.tile-sheen > svg,
+.tile-sheen > div,
+.tile-sheen > span { position: relative; z-index: 1; }
+
+/* Same polish on the hero win tile. */
+.wintile-front { overflow: hidden; }
+.wintile-front::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.18) 14%, rgba(255, 255, 255, 0) 34%);
+}
+.wintile-front > span { position: relative; z-index: 1; }
+
 @layer utilities {
   .anim-tile { animation: tileIn 0.34s cubic-bezier(0.16, 1, 0.3, 1) both; }
   .anim-pop  { animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }

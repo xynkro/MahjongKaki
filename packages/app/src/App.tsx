@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { Calculator } from './components/Calculator';
 import { ChipTracker } from './components/ChipTracker';
 import { TableUtils } from './components/TableUtils';
@@ -22,6 +22,12 @@ export function App() {
   const [legalOpen, setLegalOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const disclaimer = useFirstRunDisclaimer();
+
+  // Lock the page behind any open sheet so iOS doesn't scroll-chain ("phantom" scroll).
+  useEffect(() => {
+    document.body.style.overflow = (settingsOpen || legalOpen || disclaimer.show) ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [settingsOpen, legalOpen, disclaimer.show]);
 
   return (
     <div className="flex flex-col h-dvh">

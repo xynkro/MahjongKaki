@@ -10,13 +10,17 @@ export interface WallTile {
   isBonus: boolean;
 }
 
-const ALL_BONUS: BonusTile[] = [
+const FLOWER_SEASON_BONUS: BonusTile[] = [
   flower('plum'), flower('orchid'), flower('chrysanthemum'), flower('bamboo_flower'),
   season('spring'), season('summer'), season('autumn'), season('winter'),
+];
+
+const ANIMAL_BONUS: BonusTile[] = [
   animal('cat'), animal('rat'), animal('rooster'), animal('centipede'),
 ];
 
-export function createWallTiles(): WallTile[] {
+export function createWallTiles(opts: { animals?: boolean } = {}): WallTile[] {
+  const { animals = true } = opts;
   const tiles: WallTile[] = [];
   let idx = 0;
 
@@ -26,7 +30,8 @@ export function createWallTiles(): WallTile[] {
     }
   }
 
-  for (const bt of ALL_BONUS) {
+  const bonus = animals ? [...FLOWER_SEASON_BONUS, ...ANIMAL_BONUS] : FLOWER_SEASON_BONUS;
+  for (const bt of bonus) {
     tiles.push({ index: idx++, tile: bt, isBonus: true });
   }
 

@@ -262,7 +262,7 @@ export function GameBoard({
               {flowerPop.tiles.map((b, i) => (
                 <div
                   key={i}
-                  className="anim-flower w-14 h-[72px] rounded-lg border-2 border-amber-400 shadow-tile-up flex flex-col items-center justify-center"
+                  className="anim-flower relative overflow-hidden tile-sheen w-14 h-[72px] rounded-lg border-2 border-amber-400 shadow-tile-up flex flex-col items-center justify-center"
                   style={{ backgroundImage: IVORY, animationDelay: `${i * 90}ms` }}
                 >
                   <span className="text-3xl font-bold text-amber-700 leading-none">{bonusChar(b)}</span>

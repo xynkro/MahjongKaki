@@ -41,7 +41,7 @@ export function TileRow({
               backgroundImage: 'linear-gradient(to bottom, #FBF4E4 0%, #F1E7D2 55%, #E4D2AC 100%)',
               animationDelay: animateEntrance ? `${Math.min(i, 14) * 32}ms` : undefined,
             }}
-            className={`${sizeClass} relative rounded-[7px] flex items-center justify-center overflow-hidden
+            className={`${sizeClass} relative rounded-[7px] flex items-center justify-center overflow-hidden tile-sheen
               border border-[#C6AE84] shadow-tile transition-transform duration-150 ease-out will-change-transform
               ${animateEntrance ? 'anim-tile' : ''}
               ${drawnTile !== undefined && tile === drawnTile ? 'anim-draw' : ''}

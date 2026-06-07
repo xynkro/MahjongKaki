@@ -45,7 +45,7 @@ export type GameAction =
   | { type: 'auto_draw' };
 
 export function createGame(humanSeat: number = 0, dealerSeat: number = 0, prevailingWind: Wind = 'east', rules: RulesConfig = DEFAULT_RULES): GameState {
-  const wall = shuffleWall(createWallTiles());
+  const wall = shuffleWall(createWallTiles({ animals: rules.animalsEnabled }));
   const deal = dealInitial(wall, dealerSeat);
 
   return {
