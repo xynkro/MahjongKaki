@@ -5,6 +5,7 @@ import { TileRow } from './TileRow';
 import { Scoreboard } from './Scoreboard';
 import { type MatchState } from './match';
 import { haptics } from '../../lib/haptics';
+import { TermTip } from '../TermTip';
 
 const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西', north: '北' };
 
@@ -61,12 +62,12 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
               {isHumanWin ? 'You Win!' : `${WIND_CHARS[seatWind(state.winner!, playedDealer)]} Wins`}
             </h2>
             <p className="text-slate-400 text-xs mb-3">
-              {state.winType === 'zimo' ? 'Self-drawn (Zimo)' : 'Discard win'}
+              {state.winType === 'zimo' ? <>Self-drawn (<TermTip term="zimo">Zimo</TermTip>)</> : 'Discard win'}
             </p>
             {scoring && (
               <div className="anim-win relative text-5xl font-extrabold text-amber-400 drop-shadow-[0_2px_12px_rgba(201,162,75,0.45)]">
                 {scoring.cappedTai}
-                <span className="text-lg font-semibold text-amber-500/80"> tai</span>
+                <span className="text-lg font-semibold text-amber-500/80"> <TermTip term="tai">tai</TermTip></span>
               </div>
             )}
           </>

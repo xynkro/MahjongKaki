@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { calculatePayout, formatCurrency, STAKE_PRESETS } from '@mahjongkaki/engine';
 import { haptics } from '../lib/haptics';
 import { useRules } from '../lib/settings';
+import { TermTip } from './TermTip';
 import type { Round } from '../lib/db';
 
 interface AddRoundProps {
@@ -88,7 +89,7 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
       </div>
 
       <div>
-        <h3 className="section-title mb-1">Tai</h3>
+        <h3 className="section-title mb-1"><TermTip term="tai">Tai</TermTip></h3>
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -144,7 +145,7 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
 
       {winType === 'discard' && (
         <div>
-          <h3 className="section-title mb-1">Shooter</h3>
+          <h3 className="section-title mb-1"><TermTip term="shooter">Shooter</TermTip></h3>
           <div className="grid grid-cols-3 gap-1">
             {shooterOptions.map(i => (
               <button

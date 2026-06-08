@@ -1,5 +1,6 @@
 import type { ScoringResult, PayoutResult, StakeConfig } from '@mahjongkaki/engine';
 import { formatCurrency, formatSettlement, STAKE_PRESETS } from '@mahjongkaki/engine';
+import { TermTip } from './TermTip';
 
 interface ScorePanelProps {
   scoring: ScoringResult | null;
@@ -25,7 +26,7 @@ export function ScorePanel({
       {scoring && (
         <div className="card p-4">
           <div className="flex items-baseline justify-between mb-3">
-            <h3 className="section-title">Tai Breakdown</h3>
+            <h3 className="section-title"><TermTip term="tai">Tai</TermTip> Breakdown</h3>
             <div className="flex items-baseline gap-1" aria-live="polite">
               <span className={`text-2xl font-bold ${scoring.isValid ? 'text-emerald-400' : 'text-red-400'}`}>
                 {scoring.cappedTai}

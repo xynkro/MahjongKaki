@@ -99,13 +99,16 @@ function BambooFace({ value }: { value: number }) {
       </svg>
     );
   }
+  // Shorter sticks at dense counts (7-9) so rows don't merge into a blob.
+  const h = value >= 7 ? 14 : 18;
+  const top = -h / 2;
   return (
     <svg viewBox="0 0 60 84" className="w-full h-full p-0.5">
       {LAYOUTS[value].map(([x, y], i) => (
         <g key={i}>
-          <rect x={x - 3} y={y - 9} width={6} height={18} rx={3} fill={ink} />
-          <line x1={x - 3} y1={y - 2} x2={x + 3} y2={y - 2} stroke="#fbf7ec" strokeWidth={1.4} />
-          <line x1={x - 3} y1={y + 4} x2={x + 3} y2={y + 4} stroke="#fbf7ec" strokeWidth={1.4} />
+          <rect x={x - 3.2} y={y + top} width={6.4} height={h} rx={3} fill={ink} />
+          <line x1={x - 3.2} y1={y + top + h * 0.36} x2={x + 3.2} y2={y + top + h * 0.36} stroke="#fbf7ec" strokeWidth={1.3} />
+          <line x1={x - 3.2} y1={y + top + h * 0.64} x2={x + 3.2} y2={y + top + h * 0.64} stroke="#fbf7ec" strokeWidth={1.3} />
         </g>
       ))}
     </svg>

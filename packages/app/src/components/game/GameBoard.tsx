@@ -91,10 +91,10 @@ function Seat({
 function BigTile({ tile, cls }: { tile: number; cls: string }) {
   return (
     <div
-      className={`relative overflow-hidden tile-sheen w-20 h-28 rounded-xl border-2 border-amber-400/80 shadow-tile-up flex items-center justify-center ${cls}`}
+      className={`relative overflow-hidden tile-sheen w-20 h-28 rounded-xl border-2 border-amber-400/80 shadow-tile-up ${cls}`}
       style={{ backgroundImage: IVORY }}
     >
-      <div className="scale-[1.9]"><TileFace index={tile} size="md" /></div>
+      <div className="absolute inset-0 p-2 flex items-center justify-center"><TileFace index={tile} size="md" /></div>
     </div>
   );
 }

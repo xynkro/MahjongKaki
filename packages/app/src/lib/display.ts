@@ -5,9 +5,11 @@ import { useSyncExternalStore } from 'react';
 export type TileMode = 'classic' | 'beginner';
 export interface DisplayConfig {
   tileMode: TileMode;
+  /** Tap underlined terms (Tai, Shooter…) to see a plain-English definition. */
+  tooltips: boolean;
 }
 
-const DEFAULT: DisplayConfig = { tileMode: 'classic' };
+const DEFAULT: DisplayConfig = { tileMode: 'classic', tooltips: true };
 const KEY = 'mk_display';
 
 let cfg: DisplayConfig = load();
