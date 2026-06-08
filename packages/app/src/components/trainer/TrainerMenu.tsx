@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../lib/db';
 import { haptics } from '../../lib/haptics';
+import { LearnSheet } from './LearnSheet';
 
 export type DrillType =
   | 'efficiency' | 'waits' | 'defense'
@@ -27,6 +28,7 @@ const STRATEGY: DrillDef[] = [
 
 export function TrainerMenu({ onSelect }: TrainerMenuProps) {
   const [stats, setStats] = useState<Record<string, { total: number; correct: number }>>({});
+  const [learnOpen, setLearnOpen] = useState(false);
 
   useEffect(() => {
     db.trainerStats.toArray().then(rows => {
@@ -71,6 +73,17 @@ export function TrainerMenu({ onSelect }: TrainerMenuProps) {
       <h2 className="text-lg font-bold text-slate-200">Training Drills</h2>
       <p className="text-xs text-slate-400">Practice specific mahjong skills</p>
 
+      <button
+        onClick={() => { haptics.tap(); setLearnOpen(true); }}
+        className="w-full text-left card p-4 border-amber-400/25 active:bg-slate-700/40 flex items-center gap-3"
+      >
+        <span className="text-2xl" aria-hidden>📘</span>
+        <div>
+          <div className="text-sm font-semibold text-slate-100">Learn the Basics</div>
+          <div className="text-xs text-slate-400">New to mahjong? How to play + glossary (Tai, Shooter, Pung…).</div>
+        </div>
+      </button>
+
       {all.total > 0 ? (
         <div className="card p-4">
           <AccuracyRing pct={Math.round((all.correct / all.total) * 100)} total={all.total} />
@@ -84,6 +97,8 @@ export function TrainerMenu({ onSelect }: TrainerMenuProps) {
 
       <h3 className="section-title pt-2">Strategy</h3>
       {STRATEGY.map(renderDrill)}
+
+      <LearnSheet open={learnOpen} onClose={() => setLearnOpen(false)} />
     </div>
   );
 }
