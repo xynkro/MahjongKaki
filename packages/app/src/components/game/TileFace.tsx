@@ -1,4 +1,6 @@
+import { type ReactNode } from 'react';
 import { indexToTile } from '@mahjongkaki/engine';
+import { useDisplay } from '../../lib/display';
 
 // Original mahjong tile faces (no copied tile sets):
 //  索 bamboo  → jade green sticks
@@ -33,20 +35,41 @@ interface FaceProps {
 }
 
 export function TileFace({ index, size = 'md' }: FaceProps) {
+  const { tileMode } = useDisplay();
   const t = indexToTile(index);
 
-  if (t.kind === 'suit' && t.suit === 'dot') return <DotFace value={t.value} />;
-  if (t.kind === 'suit' && t.suit === 'bamboo') return <BambooFace value={t.value} />;
-  if (t.kind === 'suit') return <CharacterFace value={t.value} size={size} />;
+  let face: ReactNode;
+  if (t.kind === 'suit' && t.suit === 'dot') face = <DotFace value={t.value} />;
+  else if (t.kind === 'suit' && t.suit === 'bamboo') face = <BambooFace value={t.value} />;
+  else if (t.kind === 'suit') face = <CharacterFace value={t.value} size={size} />;
+  else if (t.kind === 'wind') face = <HonorFace char={{ east: '東', south: '南', west: '西', north: '北' }[t.wind]} color="#2c2820" size={size} />;
+  else if (t.dragon === 'red') face = <HonorFace char="中" color="#b5392a" size={size} />;
+  else if (t.dragon === 'green') face = <HonorFace char="發" color="#1d6b46" size={size} />;
+  else face = <WhiteDragonFace />;
 
-  if (t.kind === 'wind') {
-    const ch = { east: '東', south: '南', west: '西', north: '北' }[t.wind];
-    return <HonorFace char={ch} color="#2c2820" size={size} />;
-  }
-  // dragons
-  if (t.dragon === 'red') return <HonorFace char="中" color="#b5392a" size={size} />;
-  if (t.dragon === 'green') return <HonorFace char="發" color="#1d6b46" size={size} />;
-  return <WhiteDragonFace />;
+  if (tileMode !== 'beginner') return <>{face}</>;
+
+  // Beginner mode: a small readable corner tag so non-Chinese readers know each tile.
+  const tag = beginnerTag(t);
+  return (
+    <div className="relative w-full h-full">
+      {face}
+      <span
+        className={`absolute top-0 left-0 rounded-br-[3px] bg-[#FBF4E4]/85 px-[2px] font-extrabold leading-none ${size === 'sm' ? 'text-[8px]' : 'text-[10px]'}`}
+        style={{ color: tag.color }}
+      >
+        {tag.label}
+      </span>
+    </div>
+  );
+}
+
+function beginnerTag(t: ReturnType<typeof indexToTile>): { label: string; color: string } {
+  if (t.kind === 'suit') return { label: String(t.value), color: '#26201a' };
+  if (t.kind === 'wind') return { label: { east: 'E', south: 'S', west: 'W', north: 'N' }[t.wind], color: '#26201a' };
+  if (t.dragon === 'red') return { label: 'Rd', color: '#b5392a' };
+  if (t.dragon === 'green') return { label: 'Gn', color: '#1d6b46' };
+  return { label: 'Wt', color: '#36468a' };
 }
 
 function DotFace({ value }: { value: number }) {

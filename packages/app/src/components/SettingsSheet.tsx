@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { type RulesConfig } from '@mahjongkaki/engine';
 import { useRules, setRule, resetRules } from '../lib/settings';
+import { useDisplay, setDisplay } from '../lib/display';
 import { haptics, sound, setHapticsEnabled, hapticsEnabled } from '../lib/haptics';
 
 function Row({ label, desc, children }: { label: string; desc?: string; children: ReactNode }) {
@@ -63,6 +64,7 @@ function Stepper({ value, min, max, onChange }: { value: number; min: number; ma
 
 export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const rules = useRules();
+  const display = useDisplay();
   const [snd, setSnd] = useState(sound.enabled);
   const [hap, setHap] = useState(hapticsEnabled());
   if (!open) return null;
@@ -141,6 +143,13 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
             </Row>
             <Row label="Instant flower payment">
               <Toggle value={rules.instantFlowerPayments} onChange={v => set('instantFlowerPayments', v)} />
+            </Row>
+          </section>
+
+          <section className="card p-4">
+            <h3 className="section-title mb-1">Display</h3>
+            <Row label="Beginner tile labels" desc="Adds readable tags to every tile — 1–9, E/S/W/N, Rd/Gn/Wt — for non-Chinese readers.">
+              <Toggle value={display.tileMode === 'beginner'} onChange={v => setDisplay('tileMode', v ? 'beginner' : 'classic')} />
             </Row>
           </section>
 
