@@ -70,17 +70,17 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
   const set = <K extends keyof RulesConfig>(k: K, v: RulesConfig[K]) => setRule(k, v);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      <div className="h-full overflow-y-auto overscroll-contain" onClick={e => e.stopPropagation()}>
-        <div className="max-w-lg mx-auto px-4 pb-12 space-y-4">
-          <div
-            className="flex items-center justify-between sticky top-0 -mx-4 px-4 pb-3 bg-slate-950/85 backdrop-blur z-10"
-            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.85rem)' }}
-          >
-            <h2 className="font-display text-xl text-slate-100">House Rules</h2>
-            <button onClick={onClose} aria-label="Close settings" className="w-11 h-11 -mr-1 grid place-items-center rounded-full border border-slate-700/70 text-slate-300 active:scale-90 text-xl">✕</button>
-          </div>
-          <p className="text-sm text-slate-400 -mt-1">
+    <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">
+      <header
+        className="shrink-0 px-4 pb-3 bg-slate-900/95 border-b border-amber-400/15"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.85rem)' }}
+      >
+        <h2 className="font-display text-xl text-slate-100 max-w-lg mx-auto">House Rules</h2>
+      </header>
+
+      <div className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
+          <p className="text-sm text-slate-400">
             These apply to the calculator, chip tracker, and AI match. Set them to match how your table plays.
           </p>
 
@@ -160,14 +160,19 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
           >
             Reset to Singapore defaults
           </button>
-
-          <button
-            onClick={() => { haptics.tap(); onClose(); }}
-            className="w-full min-h-[48px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
-          >
-            Done
-          </button>
         </div>
+      </div>
+
+      <div
+        className="shrink-0 border-t border-slate-800 bg-slate-900/95 px-4 pt-3"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
+      >
+        <button
+          onClick={() => { haptics.success(); onClose(); }}
+          className="max-w-lg mx-auto block w-full min-h-[50px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
+        >
+          Save &amp; Close
+        </button>
       </div>
     </div>
   );

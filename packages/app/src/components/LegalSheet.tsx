@@ -61,23 +61,16 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export function LegalSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      <div className="h-full overflow-y-auto overscroll-contain" onClick={e => e.stopPropagation()}>
-        <div className="max-w-lg mx-auto px-4 pb-12 space-y-4">
-          <div
-            className="flex items-center justify-between sticky top-0 -mx-4 px-4 pb-3 bg-slate-950/85 backdrop-blur z-10"
-            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.85rem)' }}
-          >
-            <h2 className="font-display text-xl text-slate-100">About &amp; Legal</h2>
-            <button
-              onClick={onClose}
-              aria-label="Close"
-              className="w-11 h-11 -mr-1 grid place-items-center rounded-full border border-slate-700/70 text-slate-300 active:scale-90 text-xl"
-            >
-              ✕
-            </button>
-          </div>
+    <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">
+      <header
+        className="shrink-0 px-4 pb-3 bg-slate-900/95 border-b border-amber-400/15"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.85rem)' }}
+      >
+        <h2 className="font-display text-xl text-slate-100 max-w-lg mx-auto">About &amp; Legal</h2>
+      </header>
 
+      <div className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
           <Section title="What this app is">
             <p>
               MahjongKaki is a companion for Singapore-style mahjong: a tai (fan) calculator, a chip-settlement
@@ -121,14 +114,19 @@ export function LegalSheet({ open, onClose }: { open: boolean; onClose: () => vo
           </Section>
 
           <p className="text-center text-xs text-slate-600 pt-2">MahjongKaki · v{APP_VERSION}</p>
-
-          <button
-            onClick={onClose}
-            className="w-full min-h-[48px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
-          >
-            Done
-          </button>
         </div>
+      </div>
+
+      <div
+        className="shrink-0 border-t border-slate-800 bg-slate-900/95 px-4 pt-3"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
+      >
+        <button
+          onClick={onClose}
+          className="max-w-lg mx-auto block w-full min-h-[50px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
+        >
+          Close
+        </button>
       </div>
     </div>
   );
