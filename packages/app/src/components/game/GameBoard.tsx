@@ -202,8 +202,11 @@ export function GameBoard({
         </span>
       </div>
 
-      {/* The table — ornate framed felt with a faint centre medallion */}
-      <div className="flex-1 min-h-0 m-2 table-frame">
+      {/* The table — ornate framed felt, tilted back in 3D perspective (hand stays flat) */}
+      <div
+        className="flex-1 min-h-0 mx-2 mt-1 mb-3 table-frame"
+        style={{ transform: 'perspective(1300px) rotateX(16deg)', transformOrigin: '50% 90%' }}
+      >
        <div className="relative isolate h-full felt rounded-[0.85rem] overflow-hidden flex flex-col p-2 gap-2">
         <div className="felt-medallion -z-10" />
         <div className="flex justify-center">
