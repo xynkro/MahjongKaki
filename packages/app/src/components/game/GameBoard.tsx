@@ -191,6 +191,15 @@ export function GameBoard({
     }
   }
 
+  // Drag a hand tile up and release to throw (discard) it.
+  function handleThrow(tile: number) {
+    if (!isHumanTurn) return;
+    haptics.select();
+    onDiscard(tile);
+    setSelectedIdx(null);
+    setSelectedTileValue(null);
+  }
+
   return (
     <div className="relative flex flex-col h-full" style={{ background: 'radial-gradient(130% 100% at 50% 22%, #34160c, #190a06)' }}>
       {/* Status bar */}
@@ -267,6 +276,7 @@ export function GameBoard({
         <TileRow
           tiles={state.hands[hs]}
           onTileClick={isHumanTurn ? handleTileClick : undefined}
+          onThrow={isHumanTurn ? handleThrow : undefined}
           selectedTiles={isHumanTurn && selectedIdx !== null ? new Set([selectedIdx]) : undefined}
           highlightTiles={drawnTile !== undefined ? new Set([drawnTile]) : undefined}
           drawnTile={drawnTile}

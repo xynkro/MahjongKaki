@@ -46,7 +46,7 @@ export function GameSetup({ onStart }: GameSetupProps) {
             <button onClick={dismissHint} aria-label="Dismiss" className="-mt-1 -mr-1 w-7 h-7 grid place-items-center text-slate-500 active:scale-90 text-base">✕</button>
           </div>
           <ul className="mt-2 space-y-1.5 text-sm text-slate-300 list-disc list-inside marker:text-amber-400/60">
-            <li>Tap a tile to select it, tap again to <strong className="text-slate-100">discard</strong>.</li>
+            <li><strong className="text-slate-100">Drag a tile up &amp; release</strong> to throw it — or tap to select, tap again to discard.</li>
             <li>When someone discards, <strong className="text-slate-100">Pung / Chow / Kong</strong> or <strong className="text-emerald-400">Hu!</strong> if offered — or Skip.</li>
             <li>Win with <strong className="text-slate-100">4 sets + a pair</strong> at the minimum tai. Chips settle after each hand; dealer rotates.</li>
           </ul>
