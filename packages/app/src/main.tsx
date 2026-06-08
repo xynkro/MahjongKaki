@@ -16,8 +16,10 @@ createRoot(document.getElementById('root')!).render(
 const splash = document.getElementById('splash');
 if (splash) {
   splash.style.pointerEvents = 'none';
-  requestAnimationFrame(() => {
+  // setTimeout (not rAF) so the splash always clears even if the tab is
+  // backgrounded/throttled during load (rAF is paused in background tabs).
+  setTimeout(() => {
     splash.style.opacity = '0';
     setTimeout(() => splash.remove(), 450);
-  });
+  }, 80);
 }

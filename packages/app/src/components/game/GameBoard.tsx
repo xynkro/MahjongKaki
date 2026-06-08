@@ -145,18 +145,20 @@ export function GameBoard({
   }
 
   return (
-    <div className="relative flex flex-col h-full felt">
+    <div className="relative flex flex-col h-full" style={{ background: 'radial-gradient(130% 100% at 50% 22%, #34160c, #190a06)' }}>
       {/* Status bar */}
-      <div className="flex items-center justify-between px-3 py-2 bg-slate-900/60 border-b border-amber-400/10 text-xs text-slate-400 backdrop-blur">
-        <button onClick={onQuit} className="text-slate-500 active:text-slate-300 text-base leading-none active:scale-90">✕</button>
-        <span className="font-medium">Round {WIND_CHARS[state.prevailingWind]} · {state.roundNumber}</span>
-        <span className={isHumanTurn ? 'text-emerald-400 font-bold' : 'text-slate-400'}>
+      <div className="flex items-center justify-between px-3 py-2 bg-black/30 border-b border-amber-400/10 text-xs text-amber-100/70 backdrop-blur">
+        <button onClick={onQuit} className="text-amber-100/60 active:text-amber-100 text-base leading-none active:scale-90">✕</button>
+        <span className="round-badge">{WIND_CHARS[state.prevailingWind]} {state.roundNumber}</span>
+        <span className={isHumanTurn ? 'text-emerald-300 font-bold' : 'text-amber-100/70'}>
           {isHumanTurn ? 'Your turn' : `${WIND_CHARS[seatWind(state.currentPlayer, state.dealerSeat)]} playing…`}
         </span>
       </div>
 
-      {/* The table */}
-      <div className="flex-1 flex flex-col min-h-0 px-2 py-2 gap-2">
+      {/* The table — ornate framed felt with a faint centre medallion */}
+      <div className="flex-1 min-h-0 m-2 table-frame">
+       <div className="relative isolate h-full felt rounded-[0.85rem] overflow-hidden flex flex-col p-2 gap-2">
+        <div className="felt-medallion -z-10" />
         <div className="flex justify-center">
           <div className="w-44"><Seat state={state} seat={acrossSeat} label="across" showBacks /></div>
         </div>
@@ -165,7 +167,7 @@ export function GameBoard({
           <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={leftSeat} label="left" /></div></div>
 
           {/* Centre discard pool — born-home tiles, latest leans in from its seat */}
-          <div className="flex-1 relative rounded-2xl border border-emerald-950/40 bg-emerald-950/20 p-2 overflow-y-auto">
+          <div className="flex-1 relative rounded-xl border border-emerald-950/25 bg-emerald-950/10 p-2 overflow-y-auto">
             <div className="absolute top-1.5 right-2 text-[12px] text-slate-500 bg-slate-900/50 rounded-full px-2 py-0.5 z-10">
               wall {state.wall.length}
             </div>
@@ -193,6 +195,7 @@ export function GameBoard({
 
           <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={rightSeat} label="right" /></div></div>
         </div>
+       </div>
       </div>
 
       {/* Player area */}
