@@ -70,4 +70,12 @@ export const sound = {
     blip(1760, 0.24, { type: 'sine', vol: 0.17, delay: 0.07 });
   },
   error() { if (enabled) blip(150, 0.18, { type: 'square', vol: 0.16, slideTo: 95 }); },
+  draw() {                                              // soft "pick up" rising blip
+    if (enabled) blip(440, 0.13, { type: 'sine', vol: 0.13, slideTo: 680 });
+  },
+  throw() {                                             // discard: a downward whoosh + clack
+    if (!enabled) return;
+    blip(560, 0.12, { type: 'triangle', vol: 0.14, slideTo: 240 });
+    clack(0.3);
+  },
 };

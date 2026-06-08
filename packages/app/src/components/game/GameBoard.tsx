@@ -3,7 +3,7 @@ import { type GameState, type GameAction } from '@mahjongkaki/game';
 import { tileToIndex, type Meld, type Wind, type BonusTile, WINDS } from '@mahjongkaki/engine';
 import { TileRow } from './TileRow';
 import { TileFace } from './TileFace';
-import { haptics } from '../../lib/haptics';
+import { haptics, sound } from '../../lib/haptics';
 
 const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西', north: '北' };
 const IVORY = 'linear-gradient(to bottom, #FBF4E4 0%, #F1E7D2 55%, #E4D2AC 100%)';
@@ -87,6 +87,18 @@ function Seat({
   );
 }
 
+// Large centre-stage tile used by the draw/discard flash overlays.
+function BigTile({ tile, cls }: { tile: number; cls: string }) {
+  return (
+    <div
+      className={`relative overflow-hidden tile-sheen w-20 h-28 rounded-xl border-2 border-amber-400/80 shadow-tile-up flex items-center justify-center ${cls}`}
+      style={{ backgroundImage: IVORY }}
+    >
+      <div className="scale-[1.9]"><TileFace index={tile} size="md" /></div>
+    </div>
+  );
+}
+
 export function GameBoard({
   state, availableActions, onDiscard, onDeclareKong, onTsumo, onQuit, animateDiscards = true,
 }: GameBoardProps) {
@@ -118,6 +130,41 @@ export function GameBoard({
     }
     prevFlowers.current = flowerCount;
   }, [flowerCount]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Draw flash: big centre reveal of the human's freshly drawn tile before it joins the hand.
+  const drawNonce = useRef(0);
+  const prevDraw = useRef(state.lastDraw);
+  const [drawFlash, setDrawFlash] = useState<{ tile: number; nonce: number } | null>(null);
+  useEffect(() => {
+    const ld = state.lastDraw;
+    if (ld && ld !== prevDraw.current && ld.player === hs) {
+      drawNonce.current += 1;
+      setDrawFlash({ tile: ld.tile, nonce: drawNonce.current });
+      sound.draw();
+      prevDraw.current = ld;
+      const id = setTimeout(() => setDrawFlash(null), 820);
+      return () => clearTimeout(id);
+    }
+    prevDraw.current = ld;
+  }, [state.lastDraw, hs]);
+
+  // Discard flash: big centre reveal of any thrown tile before it shrinks to the pool.
+  const discNonce = useRef(0);
+  const prevDiscLen = useRef(state.discardLog.length);
+  const [discardFlash, setDiscardFlash] = useState<{ tile: number; nonce: number } | null>(null);
+  useEffect(() => {
+    const len = state.discardLog.length;
+    if (len > prevDiscLen.current) {
+      const last = state.discardLog[len - 1];
+      discNonce.current += 1;
+      setDiscardFlash({ tile: last.tile, nonce: discNonce.current });
+      if (last.player !== hs) sound.throw(); // human's own throw is sounded by the discard tap
+      prevDiscLen.current = len;
+      const id = setTimeout(() => setDiscardFlash(null), 680);
+      return () => clearTimeout(id);
+    }
+    prevDiscLen.current = len;
+  }, [state.discardLog, hs]);
 
   const rightSeat = (hs + 1) % 4;
   const acrossSeat = (hs + 2) % 4;
@@ -277,6 +324,18 @@ export function GameBoard({
               +{flowerPop.tiles.length} flower · draw again
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Big centre-stage flashes — draw (settles toward hand) + discard (shrinks to pool) */}
+      {drawFlash && (
+        <div key={`draw${drawFlash.nonce}`} className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center">
+          <BigTile tile={drawFlash.tile} cls="anim-drawbig" />
+        </div>
+      )}
+      {discardFlash && (
+        <div key={`disc${discardFlash.nonce}`} className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center">
+          <BigTile tile={discardFlash.tile} cls="anim-discardbig" />
         </div>
       )}
     </div>
