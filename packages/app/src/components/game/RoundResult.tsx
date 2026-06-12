@@ -41,6 +41,7 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
           <div className="pointer-events-none absolute inset-0"
             style={{ background: 'radial-gradient(60% 60% at 50% 35%, rgba(201,162,75,0.20), transparent 70%)' }} />
         )}
+        {isHumanWin && <div className="shimmer-gold" />}
         {isDraw ? (
           <>
             <h2 className="text-2xl font-bold text-slate-300 mb-2">Draw</h2>

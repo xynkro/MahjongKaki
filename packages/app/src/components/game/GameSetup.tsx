@@ -34,7 +34,10 @@ export function GameSetup({ onStart }: GameSetupProps) {
 
   return (
     <div className="space-y-4 pb-4">
-      <h2 className="text-lg font-bold text-slate-200">New Match</h2>
+      <div>
+        <h2 className="page-title">New Match</h2>
+        <div className="page-title-rule" />
+      </div>
 
       {showHint && (
         <section className="card p-4 border-amber-400/25">

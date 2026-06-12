@@ -70,7 +70,10 @@ export function TrainerMenu({ onSelect }: TrainerMenuProps) {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-lg font-bold text-slate-200">Training Drills</h2>
+      <div>
+        <h2 className="page-title">Training Drills</h2>
+        <div className="page-title-rule" />
+      </div>
       <p className="text-xs text-slate-400">Practice specific mahjong skills</p>
 
       <button

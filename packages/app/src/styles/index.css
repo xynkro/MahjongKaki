@@ -122,6 +122,34 @@
     color: #2a1f0c;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 4px 12px -5px rgba(201, 162, 75, 0.6);
   }
+  /* Elegant page heading with a fading gold underline. */
+  .page-title {
+    @apply font-display text-2xl font-bold text-slate-50 tracking-[0.01em];
+  }
+  .page-title-rule {
+    margin-top: 0.4rem;
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(201, 162, 75, 0.55), rgba(201, 162, 75, 0.08) 55%, transparent);
+  }
+  /* One-shot gold gleam that sweeps across a surface (win celebration). */
+  .shimmer-gold {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .shimmer-gold::after {
+    content: '';
+    position: absolute;
+    top: -20%;
+    bottom: -20%;
+    width: 38%;
+    background: linear-gradient(100deg, transparent, rgba(246, 230, 176, 0.55), transparent);
+    transform: translateX(-140%) skewX(-16deg);
+    animation: shimmerSweep 1.7s cubic-bezier(0.25, 0.6, 0.3, 1) 0.25s 1 both;
+  }
   .empty-state {
     @apply flex flex-col items-center justify-center text-center text-slate-500 text-sm gap-2 py-10;
   }
@@ -184,6 +212,7 @@
 @keyframes tsumoPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 @keyframes countWin { 0% { transform: scale(0.4); } 55% { transform: scale(1.18); } 100% { transform: scale(1); } }
 @keyframes winFlash { 0% { transform: scale(0.96); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+@keyframes shimmerSweep { to { transform: translateX(340%) skewX(-16deg); } }
 
 /* Discard "born-home" settle: the real pool tile mounts visible at its final
    slot and leans in from the discarder's seat direction (transform-only). */
