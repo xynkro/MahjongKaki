@@ -24,8 +24,12 @@ export function Scoreboard({ match, deltas }: { match: MatchState; deltas?: numb
           return (
             <div
               key={seat}
-              className={`rounded-lg p-2 text-center border ${
-                isYou ? 'border-emerald-500/50 bg-emerald-900/15' : 'border-slate-700/40'
+              className={`rounded-lg p-2 text-center border bg-gradient-to-b ${
+                isYou
+                  ? 'from-emerald-900/45 to-emerald-950/25 border-emerald-500/45 shadow-[inset_0_1px_0_rgba(120,214,168,0.14)]'
+                  : isDealer
+                  ? 'from-[#2c2517] to-[#211c14] border-amber-500/35 shadow-[inset_0_1px_0_rgba(214,178,96,0.12)]'
+                  : 'from-[#272219] to-[#1e1a14] border-slate-700/40'
               }`}
             >
               <div className="flex items-center justify-center gap-1">

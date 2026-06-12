@@ -88,12 +88,12 @@ function ToggleChip({
 }: {
   label: string; sublabel: string; active: boolean; color: 'amber' | 'emerald' | 'yellow'; onClick: () => void;
 }) {
-  // Inactive chips read as tappable (not disabled); active uses the on-brand palette.
-  const inactive = 'bg-slate-700/60 text-slate-200 border-slate-600 active:bg-slate-700';
+  // Inactive chips read as tappable (premium dark gradient); active lights up on-brand.
+  const inactive = 'bg-gradient-to-b from-[#2c2820] to-[#241f18] text-slate-200 border-[#3a3328] active:brightness-110';
   const colors = {
-    amber: active ? 'bg-amber-800 text-amber-100 border-amber-400 shadow-[0_0_10px_rgba(201,162,75,0.35)]' : inactive,
-    emerald: active ? 'bg-emerald-800 text-emerald-100 border-emerald-400 shadow-[0_0_10px_rgba(63,182,131,0.3)]' : inactive,
-    yellow: active ? 'bg-yellow-800 text-yellow-100 border-yellow-400 shadow-[0_0_10px_rgba(205,170,82,0.35)]' : inactive,
+    amber: active ? 'bg-gradient-to-b from-amber-600 to-amber-800 text-amber-50 border-amber-300/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_0_12px_rgba(201,162,75,0.45)]' : inactive,
+    emerald: active ? 'bg-gradient-to-b from-emerald-600 to-emerald-800 text-emerald-50 border-emerald-300/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_0_12px_rgba(63,182,131,0.4)]' : inactive,
+    yellow: active ? 'bg-gradient-to-b from-yellow-600 to-yellow-800 text-yellow-50 border-yellow-300/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_0_12px_rgba(205,170,82,0.45)]' : inactive,
   };
 
   return (
