@@ -168,7 +168,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
 
           <button
             onClick={() => { haptics.error(); resetRules(); }}
-            className="w-full min-h-[44px] text-sm font-medium bg-slate-800 text-slate-300 rounded-xl border border-slate-700 active:scale-95"
+            className="w-full min-h-[44px] text-sm font-medium btn-ghost rounded-xl active:scale-95"
           >
             Reset to Singapore defaults
           </button>

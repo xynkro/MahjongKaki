@@ -159,7 +159,7 @@ export function TableUtils() {
           <button
             type="button"
             onClick={prevDealer}
-            className="px-3 py-1.5 min-h-[44px] text-xs bg-slate-700 text-slate-300 rounded-lg active:bg-slate-600"
+            className="px-3 py-1.5 min-h-[44px] text-xs btn-ghost rounded-lg active:bg-slate-600"
           >
             Prev Dealer
           </button>

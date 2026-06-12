@@ -109,7 +109,7 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
         </button>
         <button
           onClick={onEndMatch}
-          className="min-h-[48px] px-5 text-sm font-medium bg-slate-700 text-slate-300 rounded-xl active:scale-95 active:bg-slate-600"
+          className="min-h-[48px] px-5 text-sm font-medium btn-ghost rounded-xl active:scale-95 active:bg-slate-600"
         >
           End match
         </button>

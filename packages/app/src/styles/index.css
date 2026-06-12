@@ -93,6 +93,15 @@
     transition: transform 0.12s ease, filter 0.12s ease;
   }
   .btn-gold:active { transform: scale(0.97); filter: brightness(1.06); }
+  /* Premium secondary / ghost button (Cancel, End match, Reset). */
+  .btn-ghost {
+    background-image: linear-gradient(180deg, #2c2820 0%, #231e17 100%);
+    border: 1px solid #3a3328;
+    color: #cbb994;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition: transform 0.12s ease, filter 0.12s ease;
+  }
+  .btn-ghost:active { transform: scale(0.97); filter: brightness(1.12); }
   /* Premium segmented / toggle pill. Pair `.seg` with `.seg-on` or `.seg-off`. */
   .seg {
     @apply rounded-lg font-medium;

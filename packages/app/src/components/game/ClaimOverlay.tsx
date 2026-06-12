@@ -35,7 +35,7 @@ export function ClaimOverlay({ claims, lastDiscardTile, onClaim, onSkip }: Claim
         ))}
         <button
           onClick={() => { haptics.tap(); onSkip(); }}
-          className="px-5 py-2.5 bg-slate-700 text-slate-300 rounded-lg text-sm active:scale-95"
+          className="px-5 py-2.5 btn-ghost rounded-lg text-sm active:scale-95"
         >
           Skip
         </button>
