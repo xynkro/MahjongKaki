@@ -68,7 +68,7 @@ export function TableUtils() {
           <button
             type="button"
             onClick={handleRollDice}
-            className="px-4 py-2 min-h-[44px] text-sm font-medium bg-emerald-700 text-white rounded-lg active:bg-emerald-600"
+            className="px-4 py-2 min-h-[44px] text-sm font-medium btn-primary rounded-lg active:bg-emerald-600"
           >
             Roll 3 Dice
           </button>
@@ -90,7 +90,7 @@ export function TableUtils() {
         <button
           type="button"
           onClick={handleShuffleSeats}
-          className="px-4 py-2 min-h-[44px] text-sm font-medium bg-emerald-700 text-white rounded-lg active:bg-emerald-600 mb-3 mt-3"
+          className="px-4 py-2 min-h-[44px] text-sm font-medium btn-primary rounded-lg active:bg-emerald-600 mb-3 mt-3"
         >
           Shuffle Seats
         </button>
@@ -134,7 +134,7 @@ export function TableUtils() {
               key={w}
               className={`w-12 h-12 rounded-lg flex flex-col items-center justify-center transition-colors ${
                 windRound === i
-                  ? 'bg-emerald-700 text-white'
+                  ? 'seg-on'
                   : windRound > i
                     ? 'bg-slate-600 text-slate-400'
                     : 'bg-slate-700/50 text-slate-500'
@@ -166,7 +166,7 @@ export function TableUtils() {
           <button
             type="button"
             onClick={nextDealer}
-            className="px-3 py-1.5 min-h-[44px] text-xs bg-emerald-700 text-white rounded-lg active:bg-emerald-600"
+            className="px-3 py-1.5 min-h-[44px] text-xs btn-primary rounded-lg active:bg-emerald-600"
           >
             Next Dealer
           </button>

@@ -45,7 +45,7 @@ export function CallDrill({ onBack }: Props) {
     return (
       <div className="text-center py-8">
         <p className="text-slate-400 text-sm">Failed to generate drill. Try again.</p>
-        <button onClick={newDrill} className="mt-4 px-4 py-2 bg-emerald-700 text-white rounded-lg text-sm">
+        <button onClick={newDrill} className="mt-4 px-4 py-2 btn-primary rounded-lg text-sm">
           Retry
         </button>
       </div>
@@ -92,7 +92,7 @@ export function CallDrill({ onBack }: Props) {
         <div className="flex gap-2">
           <button
             onClick={() => answer('call')}
-            className="flex-1 py-3 bg-emerald-700 text-white rounded-lg text-sm font-semibold active:bg-emerald-600"
+            className="flex-1 py-3 btn-primary rounded-lg text-sm font-semibold active:bg-emerald-600"
           >
             {callLabel} it
           </button>
@@ -118,7 +118,7 @@ export function CallDrill({ onBack }: Props) {
           </ul>
           <button
             onClick={newDrill}
-            className="w-full mt-3 py-2 bg-emerald-700 text-white rounded-lg text-sm font-medium active:bg-emerald-600"
+            className="w-full mt-3 py-2 btn-primary rounded-lg text-sm font-medium active:bg-emerald-600"
           >
             Next
           </button>

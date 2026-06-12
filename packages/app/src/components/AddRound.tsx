@@ -78,8 +78,8 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
               }}
               className={`px-2 py-1.5 text-xs rounded-lg truncate transition-colors ${
                 winnerIndex === i
-                  ? 'bg-emerald-700 text-white'
-                  : 'bg-slate-700 text-slate-400'
+                  ? 'seg-on'
+                  : 'seg-off'
               }`}
             >
               {name}
@@ -113,7 +113,7 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
                 type="button"
                 onClick={() => { haptics.select(); setTai(v); }}
                 className={`px-2 py-1 text-xs rounded-md ${
-                  tai === v ? 'bg-emerald-700 text-white' : 'bg-slate-700 text-slate-400'
+                  tai === v ? 'seg-on' : 'seg-off'
                 }`}
               >
                 {v}
@@ -133,8 +133,8 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
               onClick={() => { haptics.select(); setWinType(wt); }}
               className={`flex-1 py-1.5 text-xs rounded-lg transition-colors ${
                 winType === wt
-                  ? 'bg-emerald-700 text-white'
-                  : 'bg-slate-700 text-slate-400'
+                  ? 'seg-on'
+                  : 'seg-off'
               }`}
             >
               {wt === 'zimo' ? 'Self-draw' : 'Discard'}
@@ -155,7 +155,7 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
                 className={`px-2 py-1.5 text-xs rounded-lg truncate transition-colors ${
                   shooterIndex === i
                     ? 'bg-red-700/80 text-white'
-                    : 'bg-slate-700 text-slate-400'
+                    : 'seg-off'
                 }`}
               >
                 {playerNames[i]}
@@ -184,7 +184,7 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
       <button
         type="button"
         onClick={handleSubmit}
-        className="w-full min-h-[44px] py-2.5 text-sm font-medium bg-emerald-700 text-white rounded-xl active:bg-emerald-600"
+        className="w-full min-h-[44px] py-2.5 text-sm font-medium btn-primary rounded-xl active:bg-emerald-600"
       >
         Add Round
       </button>

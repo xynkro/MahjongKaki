@@ -102,7 +102,7 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
       <div className="anim-rise flex gap-2" style={delay(240)}>
         <button
           onClick={onNextHand}
-          className="flex-1 min-h-[48px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
+          className="flex-1 min-h-[48px] btn-primary text-base font-semibold rounded-xl"
         >
           Next hand →
         </button>

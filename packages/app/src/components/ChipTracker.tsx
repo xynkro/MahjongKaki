@@ -78,7 +78,7 @@ export function ChipTracker() {
         <button
           type="button"
           onClick={() => { haptics.tap(); setShowAddRound(true); }}
-          className="w-full min-h-[44px] py-3 text-sm font-medium bg-emerald-700 text-white rounded-xl active:bg-emerald-600"
+          className="w-full min-h-[44px] py-3 text-sm font-medium btn-primary rounded-xl active:bg-emerald-600"
         >
           + Record Round
         </button>

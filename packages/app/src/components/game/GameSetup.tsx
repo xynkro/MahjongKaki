@@ -30,10 +30,7 @@ export function GameSetup({ onStart }: GameSetupProps) {
   };
 
   const seatLabels = ['East', 'South', 'West', 'North'];
-  const pill = (active: boolean) =>
-    `min-h-[44px] rounded-lg text-sm font-medium transition-colors ${
-      active ? 'bg-emerald-700 text-white' : 'bg-slate-700 text-slate-300 active:bg-slate-600'
-    }`;
+  const pill = (active: boolean) => `seg min-h-[44px] text-sm ${active ? 'seg-on' : 'seg-off'}`;
 
   return (
     <div className="space-y-4 pb-4">
@@ -110,7 +107,7 @@ export function GameSetup({ onStart }: GameSetupProps) {
 
       <button type="button"
         onClick={() => { haptics.success(); onStart({ difficulty, speed, humanSeat, stakeIndex }); }}
-        className="w-full min-h-[48px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600">
+        className="btn-primary w-full min-h-[52px] text-base font-semibold rounded-xl">
         Start Match
       </button>
     </div>

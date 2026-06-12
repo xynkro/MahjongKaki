@@ -133,7 +133,7 @@ export function Calculator() {
               <button
                 type="button"
                 onClick={() => { haptics.tap(); setAdding(true); }}
-                className="px-3 py-1 text-xs font-medium bg-emerald-700 text-white rounded-md active:bg-emerald-600"
+                className="px-3 py-1 text-xs font-medium btn-primary rounded-md active:bg-emerald-600"
               >
                 + Add
               </button>

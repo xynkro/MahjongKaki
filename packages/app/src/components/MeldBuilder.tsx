@@ -61,7 +61,7 @@ export function MeldBuilder({ onAdd, onCancel, hasEyes, setCount }: MeldBuilderP
                   ? 'bg-emerald-600 text-white'
                   : disabled
                     ? 'bg-slate-800 text-slate-600'
-                    : 'bg-slate-700 text-slate-300 active:bg-slate-600'
+                    : 'seg-off'
                 }`}
             >
               {label}
@@ -83,7 +83,7 @@ export function MeldBuilder({ onAdd, onCancel, hasEyes, setCount }: MeldBuilderP
             type="button"
             onClick={() => { haptics.select(); setExposed(!exposed); }}
             className={`px-3 py-1 text-xs rounded-md ${
-              exposed ? 'bg-amber-700 text-amber-100' : 'bg-slate-700 text-slate-300'
+              exposed ? 'bg-amber-700 text-amber-100' : 'seg-off'
             }`}
           >
             {exposed ? 'Exposed' : 'Concealed'}

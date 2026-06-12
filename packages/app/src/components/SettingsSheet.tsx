@@ -41,7 +41,7 @@ function Segmented<T extends string | number | null>({
           key={String(o.value)}
           onClick={() => { haptics.select(); onChange(o.value); }}
           className={`min-h-[36px] px-3 rounded-lg text-sm font-medium transition-colors ${
-            value === o.value ? 'bg-emerald-700 text-white' : 'bg-slate-700 text-slate-300 active:bg-slate-600'
+            value === o.value ? 'seg-on' : 'seg-off'
           }`}
         >
           {o.label}
@@ -181,7 +181,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
       >
         <button
           onClick={() => { haptics.success(); onClose(); }}
-          className="max-w-lg mx-auto block w-full min-h-[50px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
+          className="max-w-lg mx-auto block w-full min-h-[50px] btn-primary text-base font-semibold rounded-xl"
         >
           Save &amp; Close
         </button>

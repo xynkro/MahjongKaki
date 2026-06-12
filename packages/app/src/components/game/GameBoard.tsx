@@ -287,7 +287,7 @@ export function GameBoard({
             {selectedTileValue !== null && (
               <button
                 onClick={() => { haptics.select(); onDiscard(selectedTileValue); setSelectedIdx(null); setSelectedTileValue(null); }}
-                className="px-5 py-2 bg-emerald-700 text-white rounded-lg text-sm font-medium active:scale-95 active:bg-emerald-600"
+                className="px-5 py-2 btn-primary rounded-lg text-sm font-medium active:scale-95 active:bg-emerald-600"
               >
                 Discard
               </button>

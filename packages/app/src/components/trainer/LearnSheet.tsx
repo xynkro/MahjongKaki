@@ -103,7 +103,7 @@ export function LearnSheet({ open, onClose }: { open: boolean; onClose: () => vo
       >
         <button
           onClick={onClose}
-          className="max-w-lg mx-auto block w-full min-h-[50px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
+          className="max-w-lg mx-auto block w-full min-h-[50px] btn-primary text-base font-semibold rounded-xl"
         >
           Got it
         </button>

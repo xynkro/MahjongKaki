@@ -260,7 +260,7 @@ export function PlayTab() {
         </div>
         <button
           onClick={newMatchSetup}
-          className="anim-rise w-full min-h-[48px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
+          className="anim-rise w-full min-h-[48px] btn-primary text-base font-semibold rounded-xl"
           style={{ animationDelay: '160ms' }}
         >
           New Match

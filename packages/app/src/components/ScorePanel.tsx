@@ -74,8 +74,8 @@ export function ScorePanel({
                   onClick={() => onStakeChange(i)}
                   className={`px-2 py-1 text-xs rounded-md transition-colors ${
                     stakeIndex === i
-                      ? 'bg-emerald-700 text-white'
-                      : 'bg-slate-700 text-slate-400'
+                      ? 'seg-on'
+                      : 'seg-off'
                   }`}
                 >
                   {preset.label}
@@ -98,7 +98,7 @@ export function ScorePanel({
                   type="button"
                   onClick={() => onWinnerChange(i)}
                   className={`px-2 py-1 text-[12px] rounded ${
-                    winnerIndex === i ? 'bg-emerald-700 text-white' : 'bg-slate-700 text-slate-500'
+                    winnerIndex === i ? 'seg-on' : 'seg-off'
                   }`}
                 >
                   Win
@@ -108,7 +108,7 @@ export function ScorePanel({
                     type="button"
                     onClick={() => onShooterChange(i === winnerIndex ? undefined : i)}
                     className={`px-2 py-1 text-[12px] rounded ${
-                      shooterIndex === i ? 'bg-red-700 text-white' : 'bg-slate-700 text-slate-500'
+                      shooterIndex === i ? 'bg-red-700 text-white' : 'seg-off'
                     }`}
                     disabled={i === winnerIndex}
                   >

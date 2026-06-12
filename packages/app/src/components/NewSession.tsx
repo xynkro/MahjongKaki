@@ -55,8 +55,8 @@ export function NewSession({ onStart }: NewSessionProps) {
               onClick={() => { haptics.select(); setStakeIdx(i); }}
               className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
                 stakeIdx === i
-                  ? 'bg-emerald-700 text-white'
-                  : 'bg-slate-700 text-slate-400'
+                  ? 'seg-on'
+                  : 'seg-off'
               }`}
             >
               {preset.label}
@@ -68,7 +68,7 @@ export function NewSession({ onStart }: NewSessionProps) {
       <button
         type="button"
         onClick={handleStart}
-        className="w-full min-h-[44px] py-3 text-sm font-medium bg-emerald-700 text-white rounded-xl active:bg-emerald-600"
+        className="w-full min-h-[44px] py-3 text-sm font-medium btn-primary rounded-xl active:bg-emerald-600"
       >
         Start Session
       </button>

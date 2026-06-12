@@ -40,7 +40,7 @@ export function FirstRunDisclaimer({ onAccept }: { onAccept: () => void }) {
         </p>
         <button
           onClick={onAccept}
-          className="w-full min-h-[44px] mt-2 bg-emerald-700 text-white rounded-xl font-medium active:scale-95 active:bg-emerald-600"
+          className="w-full min-h-[44px] mt-2 btn-primary rounded-xl font-medium active:scale-95 active:bg-emerald-600"
         >
           I understand
         </button>
@@ -123,7 +123,7 @@ export function LegalSheet({ open, onClose }: { open: boolean; onClose: () => vo
       >
         <button
           onClick={onClose}
-          className="max-w-lg mx-auto block w-full min-h-[50px] text-base font-semibold bg-emerald-700 text-white rounded-xl active:scale-95 active:bg-emerald-600"
+          className="max-w-lg mx-auto block w-full min-h-[50px] btn-primary text-base font-semibold rounded-xl"
         >
           Close
         </button>
