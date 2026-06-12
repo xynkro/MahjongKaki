@@ -163,16 +163,17 @@
     @apply flex flex-col items-center justify-center text-center text-slate-500 text-sm gap-2 py-10;
   }
 
-  /* Felt table surface — real woven cloth: warp + weft thread crosshatch over a
-     lit jade centre with a deep vignette. */
+  /* Felt table surface — a real woven-wool baize photo, lit with a jade centre
+     glow + deep vignette over the top. */
   .felt {
     background-color: #1a3b29;
     background-image:
-      radial-gradient(115% 80% at 50% 14%, rgba(98, 216, 160, 0.20), transparent 60%),
-      radial-gradient(70% 50% at 50% 50%, rgba(201, 162, 75, 0.07), transparent 72%),
-      radial-gradient(155% 135% at 50% 106%, rgba(0, 0, 0, 0.44), transparent 50%),
-      repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px),
-      repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.055) 0 1px, transparent 1px 3px);
+      radial-gradient(115% 80% at 50% 14%, rgba(98, 216, 160, 0.16), transparent 60%),
+      radial-gradient(70% 50% at 50% 50%, rgba(201, 162, 75, 0.06), transparent 72%),
+      radial-gradient(155% 135% at 50% 106%, rgba(0, 0, 0, 0.5), transparent 52%),
+      url('../assets/felt.jpg');
+    background-size: cover;
+    background-position: center;
   }
   /* Ornate red-lacquer + gold rim around the play table — turned, gilded edge. */
   .table-frame {
@@ -186,22 +187,17 @@
       inset 0 0 16px rgba(0, 0, 0, 0.45),
       0 16px 40px -10px rgba(0, 0, 0, 0.62);
   }
-  /* Faint centre medallion behind the discard pool */
+  /* Gold dragon-filigree medallion inlaid into the felt centre (behind the pool). */
   .felt-medallion {
     position: absolute;
     inset: 0;
-    display: grid;
-    place-items: center;
     pointer-events: none;
-    color: rgba(201, 162, 75, 0.12);
-  }
-  .felt-medallion::before {
-    content: '';
-    width: 56%;
-    aspect-ratio: 1;
-    border-radius: 9999px;
-    border: 2px solid rgba(201, 162, 75, 0.12);
-    box-shadow: 0 0 0 10px rgba(201, 162, 75, 0.05), inset 0 0 0 8px rgba(201, 162, 75, 0.06);
+    background-image: url('../assets/medallion.png');
+    background-repeat: no-repeat;
+    background-position: center 44%;
+    background-size: 74%;
+    opacity: 0.5;
+    mix-blend-mode: screen;
   }
   /* Gold round badge */
   .round-badge {
