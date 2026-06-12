@@ -65,9 +65,9 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
               {state.winType === 'zimo' ? <>Self-drawn (<TermTip term="zimo">Zimo</TermTip>)</> : 'Discard win'}
             </p>
             {scoring && (
-              <div className="anim-win relative text-5xl font-extrabold text-amber-400 drop-shadow-[0_2px_12px_rgba(201,162,75,0.45)]">
+              <div className="anim-win relative text-6xl font-extrabold gold-foil drop-shadow-[0_2px_14px_rgba(201,162,75,0.5)]">
                 {scoring.cappedTai}
-                <span className="text-lg font-semibold text-amber-500/80"> <TermTip term="tai">tai</TermTip></span>
+                <span className="text-xl font-semibold gold-foil"> <TermTip term="tai">tai</TermTip></span>
               </div>
             )}
           </>

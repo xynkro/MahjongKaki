@@ -12,12 +12,14 @@
     font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
-    /* Jade Parlour: warm charcoal with a soft jade lamp-glow vignette */
-    background-color: #161310;
+    /* Jade Parlour: a lit table seen from above — warm gold lamp glow overhead,
+       jade ambient, darkened edges (vignette) to draw the eye in, fine grain. */
+    background-color: #14110d;
     background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"),
-      radial-gradient(120% 80% at 50% -10%, rgba(63, 182, 131, 0.10), transparent 60%),
-      radial-gradient(100% 60% at 50% 110%, rgba(201, 162, 75, 0.06), transparent 55%);
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+      radial-gradient(80% 45% at 50% -6%, rgba(214, 180, 90, 0.12), transparent 62%),
+      radial-gradient(120% 75% at 50% 8%, rgba(63, 182, 131, 0.08), transparent 58%),
+      radial-gradient(150% 120% at 50% 50%, transparent 38%, rgba(0, 0, 0, 0.55) 100%);
     background-attachment: fixed;
   }
 
@@ -38,19 +40,87 @@
 }
 
 @layer components {
-  /* Shared surface — lifted off the near-black body so cards read clearly. */
+  /* Shared surface — a lifted lacquer panel: faint top-down sheen, hairline
+     gold-warmed edge, crisp top highlight, deep soft drop. */
   .card {
-    background-color: #221e18;
-    border: 1px solid #3c372e;
-    border-radius: 0.85rem;
+    background-image: linear-gradient(177deg, #272219 0%, #211c16 60%, #1e1914 100%);
+    border: 1px solid #3a3328;
+    border-radius: 0.9rem;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 2px 6px rgba(0, 0, 0, 0.35),
-      0 12px 28px -10px rgba(0, 0, 0, 0.45);
+      inset 0 1px 0 rgba(255, 240, 214, 0.06),
+      inset 0 0 0 1px rgba(201, 162, 75, 0.045),
+      0 1px 2px rgba(0, 0, 0, 0.4),
+      0 14px 34px -14px rgba(0, 0, 0, 0.6);
   }
   /* Consistent sub-section label across all tabs. */
   .section-title {
-    @apply text-xs font-semibold uppercase tracking-[0.08em] text-amber-400/80;
+    @apply text-xs font-semibold uppercase tracking-[0.11em] text-amber-400/80;
+  }
+  /* Gold-leaf text for hero numerals and the wordmark accent. */
+  .gold-foil {
+    background: linear-gradient(180deg, #f6e6b0 0%, #dcb964 42%, #b8923f 72%, #ecd58c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Hairline gold divider that fades at both ends. */
+  .hairline-gold {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201, 162, 75, 0.5), transparent);
+  }
+  /* Premium jade CTA — lit gradient, inner highlight, soft jade glow. */
+  .btn-primary {
+    background-image: linear-gradient(180deg, #36a571 0%, #257152 100%);
+    border: 1px solid rgba(120, 214, 168, 0.28);
+    color: #fff;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -2px 6px rgba(0, 0, 0, 0.18),
+      0 6px 16px -6px rgba(36, 120, 84, 0.75),
+      0 1px 2px rgba(0, 0, 0, 0.35);
+    transition: transform 0.12s ease, filter 0.12s ease;
+  }
+  .btn-primary:active { transform: scale(0.97); filter: brightness(1.08); }
+  /* Premium gold CTA — for the marquee action (e.g. a win/confirm). */
+  .btn-gold {
+    background-image: linear-gradient(180deg, #f0d896 0%, #cda64a 55%, #b8923f 100%);
+    border: 1px solid rgba(246, 230, 176, 0.6);
+    color: #2a1f0c;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.55),
+      0 6px 16px -6px rgba(201, 162, 75, 0.7),
+      0 1px 2px rgba(0, 0, 0, 0.35);
+    transition: transform 0.12s ease, filter 0.12s ease;
+  }
+  .btn-gold:active { transform: scale(0.97); filter: brightness(1.06); }
+  /* Premium segmented / toggle pill. Pair `.seg` with `.seg-on` or `.seg-off`. */
+  .seg {
+    @apply rounded-lg font-medium;
+    border: 1px solid transparent;
+    transition: transform 0.12s ease, filter 0.12s ease;
+  }
+  .seg:active { transform: scale(0.96); }
+  .seg-off {
+    background-image: linear-gradient(180deg, #2c2820 0%, #241f18 100%);
+    border-color: #38322a;
+    color: #b6a585;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+  .seg-off:active { filter: brightness(1.12); }
+  .seg-on {
+    background-image: linear-gradient(180deg, #36a571 0%, #246f4f 100%);
+    border-color: rgba(120, 214, 168, 0.32);
+    color: #fff;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 4px 12px -4px rgba(36, 120, 84, 0.6);
+  }
+  /* Gold variant of the on-state (for selected winds / value highlights). */
+  .seg-gold {
+    background-image: linear-gradient(180deg, #e8cf86 0%, #c49a3f 100%);
+    border-color: rgba(246, 230, 176, 0.55);
+    color: #2a1f0c;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 4px 12px -5px rgba(201, 162, 75, 0.6);
   }
   .empty-state {
     @apply flex flex-col items-center justify-center text-center text-slate-500 text-sm gap-2 py-10;
@@ -65,15 +135,17 @@
       radial-gradient(140% 120% at 50% 100%, rgba(0, 0, 0, 0.35), transparent 55%),
       repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.04) 0 2px, transparent 2px 5px);
   }
-  /* Ornate red-lacquer + gold rim around the play table (MahjongLeh-style) */
+  /* Ornate red-lacquer + gold rim around the play table — turned, gilded edge. */
   .table-frame {
-    border-radius: 1.15rem;
-    padding: 7px;
-    background: linear-gradient(150deg, #8a2a1a 0%, #571a0f 42%, #2c0e08 100%);
+    border-radius: 1.25rem;
+    padding: 8px;
+    background:
+      linear-gradient(155deg, #9c3320 0%, #6e2113 44%, #2c0e08 100%);
     box-shadow:
-      inset 0 1px 0 rgba(255, 205, 150, 0.3),
-      inset 0 0 0 2px rgba(201, 162, 75, 0.4),
-      0 10px 28px rgba(0, 0, 0, 0.5);
+      inset 0 1.5px 0 rgba(255, 214, 168, 0.38),
+      inset 0 0 0 1.5px rgba(214, 178, 96, 0.6),
+      inset 0 0 16px rgba(0, 0, 0, 0.45),
+      0 16px 40px -10px rgba(0, 0, 0, 0.62);
   }
   /* Faint centre medallion behind the discard pool */
   .felt-medallion {

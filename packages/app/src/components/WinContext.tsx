@@ -51,11 +51,7 @@ function WindSelect({ label, value, onChange }: { label: string; value: Wind; on
             key={w}
             type="button"
             onClick={() => { haptics.select(); onChange(w); }}
-            className={`flex-1 py-1.5 text-sm font-bold rounded-md transition-colors ${
-              value === w
-                ? 'bg-slate-600 text-white'
-                : 'bg-slate-800 text-slate-500'
-            }`}
+            className={`seg flex-1 py-1.5 text-sm font-bold ${value === w ? 'seg-gold' : 'seg-off'}`}
           >
             {WIND_LABEL[w]}
           </button>
@@ -70,11 +66,7 @@ function TogglePill({ label, active, onClick }: { label: string; active: boolean
     <button
       type="button"
       onClick={onClick}
-      className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
-        active
-          ? 'bg-emerald-700 text-emerald-100 border border-emerald-500'
-          : 'bg-slate-800 text-slate-400 border border-slate-700'
-      }`}
+      className={`seg flex-1 py-2 text-sm ${active ? 'seg-on' : 'seg-off'}`}
     >
       {label}
     </button>
@@ -86,11 +78,7 @@ function FlagChip({ label, active, onClick }: { label: string; active: boolean; 
     <button
       type="button"
       onClick={onClick}
-      className={`px-3 py-1 text-xs rounded-full border transition-colors ${
-        active
-          ? 'bg-violet-800 text-violet-200 border-violet-500'
-          : 'bg-slate-800 text-slate-500 border-slate-700'
-      }`}
+      className={`seg !rounded-full px-3 py-1 text-xs ${active ? 'seg-gold' : 'seg-off'}`}
     >
       {label}
     </button>
