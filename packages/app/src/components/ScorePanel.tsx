@@ -28,7 +28,7 @@ export function ScorePanel({
           <div className="flex items-baseline justify-between mb-3">
             <h3 className="section-title"><TermTip term="tai">Tai</TermTip> Breakdown</h3>
             <div className="flex items-baseline gap-1" aria-live="polite">
-              <span className={`text-2xl font-bold ${scoring.isValid ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span className={`text-3xl font-extrabold ${scoring.isValid ? 'gold-foil drop-shadow-[0_1px_8px_rgba(201,162,75,0.35)]' : 'text-red-400'}`}>
                 {scoring.cappedTai}
               </span>
               <span className="text-xs text-slate-500">
