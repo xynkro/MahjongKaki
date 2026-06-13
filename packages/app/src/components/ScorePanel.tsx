@@ -14,12 +14,15 @@ interface ScorePanelProps {
   onWinnerChange: (i: number) => void;
   onShooterChange: (i: number | undefined) => void;
   onPlayerNameChange: (i: number, name: string) => void;
+  /** Send the computed tai + win-type over to the chip tracker (pre-fills a round). */
+  onSendToChips?: () => void;
 }
 
 export function ScorePanel({
   scoring, payout, stakeIndex, onStakeChange,
   playerNames, winnerIndex, shooterIndex, winType,
   onWinnerChange, onShooterChange, onPlayerNameChange,
+  onSendToChips,
 }: ScorePanelProps) {
   return (
     <div className="space-y-4">
@@ -143,6 +146,16 @@ export function ScorePanel({
                 ))}
               </div>
             </div>
+          )}
+
+          {onSendToChips && (
+            <button
+              type="button"
+              onClick={onSendToChips}
+              className="w-full min-h-[44px] mt-1 btn-gold rounded-xl text-sm font-semibold"
+            >
+              Send to chip tracker →
+            </button>
           )}
         </div>
       )}

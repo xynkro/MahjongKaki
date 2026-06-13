@@ -10,12 +10,20 @@ interface AddRoundProps {
   stakeLabel: string;
   onAdd: (round: Omit<Round, 'id' | 'sessionId' | 'timestamp'>) => void;
   onCancel: () => void;
+  /** Pre-filled tai/win-type when sent over from the calculator. */
+  initialTai?: number;
+  initialWinType?: 'zimo' | 'discard';
+  /** Show a "from the calculator" hint and nudge to pick the winner. */
+  fromCalculator?: boolean;
 }
 
-export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundProps) {
+export function AddRound({
+  playerNames, stakeLabel, onAdd, onCancel,
+  initialTai = 1, initialWinType = 'discard', fromCalculator = false,
+}: AddRoundProps) {
   const [winnerIndex, setWinnerIndex] = useState(0);
-  const [tai, setTai] = useState(1);
-  const [winType, setWinType] = useState<'zimo' | 'discard'>('discard');
+  const [tai, setTai] = useState(initialTai);
+  const [winType, setWinType] = useState<'zimo' | 'discard'>(initialWinType);
   const [shooterIndex, setShooterIndex] = useState(1);
   const rules = useRules();
 
@@ -60,6 +68,12 @@ export function AddRound({ playerNames, stakeLabel, onAdd, onCancel }: AddRoundP
           Cancel
         </button>
       </div>
+
+      {fromCalculator && (
+        <div className="text-xs text-emerald-200 bg-emerald-900/25 border border-emerald-500/25 rounded-lg px-3 py-2">
+          <span className="font-semibold">{initialTai} tai</span> from the calculator — just pick the winner{winType === 'discard' ? ' and shooter' : ''}.
+        </div>
+      )}
 
       <div>
         <h3 className="section-title mb-1">Winner</h3>

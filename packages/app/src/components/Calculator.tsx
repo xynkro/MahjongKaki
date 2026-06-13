@@ -14,7 +14,12 @@ import { ScorePanel } from './ScorePanel';
 import { haptics } from '../lib/haptics';
 import { useRules } from '../lib/settings';
 
-export function Calculator() {
+interface CalculatorProps {
+  /** Bridge to the chip tracker: pre-fill a round with this hand's tai + win-type. */
+  onSendToChips?: (round: { tai: number; winType: 'zimo' | 'discard' }) => void;
+}
+
+export function Calculator({ onSendToChips }: CalculatorProps = {}) {
   const [adding, setAdding] = useState(false);
 
   const [melds, setMelds] = useState<Meld[]>([]);
@@ -206,6 +211,11 @@ export function Calculator() {
         onWinnerChange={setWinnerIndex}
         onShooterChange={setShooterIndex}
         onPlayerNameChange={setPlayerName}
+        onSendToChips={
+          onSendToChips && scoring?.isValid
+            ? () => { haptics.success(); onSendToChips({ tai: scoring.cappedTai, winType }); }
+            : undefined
+        }
       />
     </div>
   );

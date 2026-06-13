@@ -1,17 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useActiveSession } from '../lib/use-sessions';
 import { formatCurrency, STAKE_PRESETS } from '@mahjongkaki/engine';
 import { haptics } from '../lib/haptics';
 import { NewSession } from './NewSession';
 import { AddRound } from './AddRound';
 
-export function ChipTracker() {
+interface ChipTrackerProps {
+  /** A round handed over from the calculator (tai + win-type), awaiting a winner. */
+  pendingRound?: { tai: number; winType: 'zimo' | 'discard' } | null;
+  onConsumePending?: () => void;
+}
+
+export function ChipTracker({ pendingRound, onConsumePending }: ChipTrackerProps = {}) {
   const {
     session, rounds, balances, loading,
     startSession, addRound, deleteRound, endSession,
   } = useActiveSession();
   const [showAddRound, setShowAddRound] = useState(false);
+  const [prefill, setPrefill] = useState<{ tai: number; winType: 'zimo' | 'discard' } | null>(null);
   const [confirmEnd, setConfirmEnd] = useState(false);
+
+  // A hand sent from the calculator: once a session exists, open the round form
+  // pre-filled with its tai + win-type (the user still picks the winner).
+  useEffect(() => {
+    if (session && pendingRound) {
+      setPrefill(pendingRound);
+      setShowAddRound(true);
+      onConsumePending?.();
+    }
+  }, [session, pendingRound, onConsumePending]);
 
   if (loading) {
     return <div className="text-center py-8 text-slate-500">Loading...</div>;
@@ -77,7 +94,7 @@ export function ChipTracker() {
       {!showAddRound && (
         <button
           type="button"
-          onClick={() => { haptics.tap(); setShowAddRound(true); }}
+          onClick={() => { haptics.tap(); setPrefill(null); setShowAddRound(true); }}
           className="w-full min-h-[44px] py-3 text-sm font-medium btn-primary rounded-xl active:bg-emerald-600"
         >
           + Record Round
@@ -86,10 +103,14 @@ export function ChipTracker() {
 
       {showAddRound && (
         <AddRound
+          key={prefill ? `calc-${prefill.tai}-${prefill.winType}` : 'manual'}
           playerNames={session.playerNames}
           stakeLabel={session.stakeLabel}
-          onAdd={(round) => { haptics.success(); addRound(round); setShowAddRound(false); }}
-          onCancel={() => setShowAddRound(false)}
+          initialTai={prefill?.tai ?? 1}
+          initialWinType={prefill?.winType ?? 'discard'}
+          fromCalculator={!!prefill}
+          onAdd={(round) => { haptics.success(); addRound(round); setShowAddRound(false); setPrefill(null); }}
+          onCancel={() => { setShowAddRound(false); setPrefill(null); }}
         />
       )}
 

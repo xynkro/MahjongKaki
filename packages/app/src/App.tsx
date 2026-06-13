@@ -22,6 +22,7 @@ export function App() {
   const [tab, setTab] = useState<Tab>('calculator');
   const [legalOpen, setLegalOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [pendingChipRound, setPendingChipRound] = useState<{ tai: number; winType: 'zimo' | 'discard' } | null>(null);
   const disclaimer = useFirstRunDisclaimer();
   const onboarding = useFirstRunOnboarding();
 
@@ -62,8 +63,15 @@ export function App() {
 
       <main className="flex-1 overflow-y-auto overflow-x-hidden">
         <div key={tab} className={`anim-tab ${tab === 'play' ? 'h-full' : 'p-4'}`}>
-          {tab === 'calculator' && <Calculator />}
-          {tab === 'chips' && <ChipTracker />}
+          {tab === 'calculator' && (
+            <Calculator onSendToChips={(r) => { setPendingChipRound(r); setTab('chips'); }} />
+          )}
+          {tab === 'chips' && (
+            <ChipTracker
+              pendingRound={pendingChipRound}
+              onConsumePending={() => setPendingChipRound(null)}
+            />
+          )}
           {tab === 'table' && <TableUtils />}
           {tab === 'play' && <PlayTab />}
           {tab === 'train' && <TrainTab />}
