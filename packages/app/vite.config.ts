@@ -26,7 +26,9 @@ export default defineConfig(({ command }) => ({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // jpg + mp4 so the generated felt photo, hero poster and cinematic
+        // loop are precached for full offline use (all small: <600KB total).
+        globPatterns: ['**/*.{js,css,html,svg,png,jpg,woff2,mp4}'],
       },
     }),
   ],

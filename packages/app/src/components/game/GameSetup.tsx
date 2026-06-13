@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { type AiProfile, ALL_PROFILES } from '@mahjongkaki/ai';
 import { STAKE_PRESETS } from '@mahjongkaki/engine';
 import { haptics } from '../../lib/haptics';
+import { CinematicHero } from '../CinematicHero';
 
 export type SpeedSetting = 'slow' | 'normal' | 'fast' | 'instant';
 
@@ -34,6 +35,8 @@ export function GameSetup({ onStart }: GameSetupProps) {
 
   return (
     <div className="space-y-4 pb-4">
+      <CinematicHero aspect="aspect-[21/9]" />
+
       <div>
         <h2 className="page-title">New Match</h2>
         <div className="page-title-rule" />

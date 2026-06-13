@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { HowToReel } from './HowToReel';
+import { CinematicHero } from '../CinematicHero';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -34,6 +35,8 @@ export function LearnSheet({ open, onClose }: { open: boolean; onClose: () => vo
 
       <div className="flex-1 overflow-y-auto overscroll-contain">
         <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
+          <CinematicHero caption="How to play Singapore Mahjong" />
+
           <p className="text-sm text-slate-400">
             New to mahjong? Here's everything you need in plain English. Tip: turn on
             <strong className="text-slate-200"> Beginner tile labels</strong> in Settings (⚙) to put
