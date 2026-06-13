@@ -13,6 +13,7 @@ import { WinContextPanel } from './WinContext';
 import { ScorePanel } from './ScorePanel';
 import { haptics } from '../lib/haptics';
 import { useRules } from '../lib/settings';
+import { roundWind } from '../lib/table-state';
 
 interface CalculatorProps {
   /** Bridge to the chip tracker: pre-fill a round with this hand's tai + win-type. */
@@ -28,7 +29,9 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
   const [animals, setAnimals] = useState<AnimalTile[]>([]);
 
   const [seatWind, setSeatWind] = useState<Wind>('east');
-  const [prevailingWind, setPrevailingWind] = useState<Wind>('east');
+  // Default the round wind from the shared Table tracker (Score remounts on tab
+  // switch, so this reflects the current round each time you open it).
+  const [prevailingWind, setPrevailingWind] = useState<Wind>(() => roundWind());
   const [winType, setWinType] = useState<'zimo' | 'discard'>('discard');
   const [isKongReplacement, setKongReplacement] = useState(false);
   const [isLastTile, setLastTile] = useState(false);

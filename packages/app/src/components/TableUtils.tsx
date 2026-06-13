@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { haptics } from '../lib/haptics';
+import { useTableState, setTableState, getTableState } from '../lib/table-state';
 
 const WINDS = ['East', 'South', 'West', 'North'] as const;
 const WIND_ZH: Record<string, string> = { East: '東', South: '南', West: '西', North: '北' };
@@ -24,8 +25,7 @@ function shuffleSeats(): [string, string, string, string] {
 export function TableUtils() {
   const [dice, setDice] = useState<[number, number, number] | null>(null);
   const [seats, setSeats] = useState<[string, string, string, string] | null>(null);
-  const [windRound, setWindRound] = useState(0);
-  const [dealerIndex, setDealerIndex] = useState(0);
+  const { roundWindIdx: windRound, dealerIdx: dealerIndex } = useTableState();
 
   const handleRollDice = useCallback(() => {
     haptics.tap();
@@ -39,25 +39,21 @@ export function TableUtils() {
 
   const nextDealer = useCallback(() => {
     haptics.select();
-    setDealerIndex(prev => {
-      const next = (prev + 1) % 4;
-      if (next === 0) setWindRound(wr => Math.min(wr + 1, 3));
-      return next;
-    });
+    const { dealerIdx, roundWindIdx } = getTableState();
+    const next = (dealerIdx + 1) % 4;
+    setTableState({ dealerIdx: next, roundWindIdx: next === 0 ? Math.min(roundWindIdx + 1, 3) : roundWindIdx });
   }, []);
 
   const prevDealer = useCallback(() => {
     haptics.select();
-    setDealerIndex(prev => {
-      const next = (prev - 1 + 4) % 4;
-      if (prev === 0) setWindRound(wr => Math.max(wr - 1, 0));
-      return next;
-    });
+    const { dealerIdx, roundWindIdx } = getTableState();
+    const next = (dealerIdx - 1 + 4) % 4;
+    setTableState({ dealerIdx: next, roundWindIdx: dealerIdx === 0 ? Math.max(roundWindIdx - 1, 0) : roundWindIdx });
   }, []);
 
   const resetWind = useCallback(() => {
-    setWindRound(0);
-    setDealerIndex(0);
+    haptics.tap();
+    setTableState({ roundWindIdx: 0, dealerIdx: 0 });
   }, []);
 
   return (
