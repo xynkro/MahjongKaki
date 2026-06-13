@@ -5,6 +5,7 @@ import { TableUtils } from './components/TableUtils';
 import { PlayTab } from './components/game/PlayTab';
 import { TrainTab } from './components/trainer/TrainTab';
 import { LegalSheet, FirstRunDisclaimer, useFirstRunDisclaimer } from './components/LegalSheet';
+import { Onboarding, useFirstRunOnboarding } from './components/Onboarding';
 import { SettingsSheet } from './components/SettingsSheet';
 
 type Tab = 'calculator' | 'chips' | 'table' | 'play' | 'train';
@@ -22,12 +23,13 @@ export function App() {
   const [legalOpen, setLegalOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const disclaimer = useFirstRunDisclaimer();
+  const onboarding = useFirstRunOnboarding();
 
   // Lock the page behind any open sheet so iOS doesn't scroll-chain ("phantom" scroll).
   useEffect(() => {
-    document.body.style.overflow = (settingsOpen || legalOpen || disclaimer.show) ? 'hidden' : '';
+    document.body.style.overflow = (settingsOpen || legalOpen || disclaimer.show || onboarding.show) ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [settingsOpen, legalOpen, disclaimer.show]);
+  }, [settingsOpen, legalOpen, disclaimer.show, onboarding.show]);
 
   return (
     <div className="flex flex-col h-dvh">
@@ -91,7 +93,11 @@ export function App() {
 
       <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <LegalSheet open={legalOpen} onClose={() => setLegalOpen(false)} />
-      {disclaimer.show && <FirstRunDisclaimer onAccept={disclaimer.accept} />}
+      {disclaimer.show ? (
+        <FirstRunDisclaimer onAccept={disclaimer.accept} />
+      ) : onboarding.show ? (
+        <Onboarding onDone={onboarding.done} onLearn={() => { onboarding.done(); setTab('train'); }} />
+      ) : null}
     </div>
   );
 }
