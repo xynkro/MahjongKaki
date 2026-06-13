@@ -52,7 +52,7 @@ function TileBack({ count }: { count: number }) {
         <div
           key={i}
           className="w-4 h-6 rounded-[3px] border border-emerald-950/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-          style={{ backgroundImage: 'linear-gradient(to bottom, #234231 0%, #16291e 100%)' }}
+          style={{ backgroundImage: 'radial-gradient(circle 3px at 50% 45%, rgba(212,178,98,0.6), rgba(212,178,98,0.12) 65%, transparent 72%), linear-gradient(to bottom, #284a37 0%, #16291e 100%)' }}
         />
       ))}
     </div>
