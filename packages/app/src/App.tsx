@@ -37,7 +37,7 @@ export function App() {
       >
         <div className="relative flex items-center justify-center">
           <h1 className="font-display text-2xl font-semibold tracking-[0.01em] text-slate-50">
-            Mahjong<span className="gold-foil">Kaki</span>
+            Mahjong<span className="gold-foil-live">Kaki</span>
           </h1>
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
             <button
