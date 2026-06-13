@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { HowToReel } from './HowToReel';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -38,6 +39,8 @@ export function LearnSheet({ open, onClose }: { open: boolean; onClose: () => vo
             <strong className="text-slate-200"> Beginner tile labels</strong> in Settings (⚙) to put
             numbers and letters on every tile.
           </p>
+
+          <HowToReel />
 
           <Section title="The goal">
             <p>
