@@ -27,8 +27,9 @@ export function HandDisplay({ melds, flowers, seasons, animals, onRemoveMeld }: 
             <button
               key={i}
               type="button"
+              aria-label={`Remove ${meldLabel(meld.type)}`}
               onClick={() => onRemoveMeld(i)}
-              className="flex items-center gap-0.5 bg-slate-800 rounded-lg px-2 py-1.5 border border-slate-700
+              className="flex items-center gap-0.5 bg-slate-800 rounded-lg pl-2 pr-1.5 py-1.5 border border-slate-700
                 active:bg-red-900/30 active:border-red-700 transition-colors group"
             >
               <span className="text-[12px] text-slate-500 mr-1 uppercase">
@@ -40,9 +41,16 @@ export function HandDisplay({ melds, flowers, seasons, animals, onRemoveMeld }: 
                   {tileLabel(tile)}
                 </span>
               ))}
+              <span className="ml-1.5 grid place-items-center w-4 h-4 rounded-full bg-slate-700 text-slate-400 text-[11px] leading-none group-active:bg-red-700 group-active:text-white">
+                ×
+              </span>
             </button>
           ))}
         </div>
+      )}
+
+      {melds.length > 0 && (
+        <p className="text-[11px] text-slate-500">Tap a meld to remove it.</p>
       )}
 
       {(flowers.length > 0 || seasons.length > 0 || animals.length > 0) && (

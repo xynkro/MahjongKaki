@@ -14,6 +14,10 @@ interface ScorePanelProps {
   onWinnerChange: (i: number) => void;
   onShooterChange: (i: number | undefined) => void;
   onPlayerNameChange: (i: number, name: string) => void;
+  /** Whether the hand is structurally complete (4 sets + a pair). */
+  handFull?: boolean;
+  /** Plain-language "what's still missing" while building. */
+  incompleteMsg?: string | null;
   /** Send the computed tai + win-type over to the chip tracker (pre-fills a round). */
   onSendToChips?: () => void;
 }
@@ -22,48 +26,63 @@ export function ScorePanel({
   scoring, payout, stakeIndex, onStakeChange,
   playerNames, winnerIndex, shooterIndex, winType,
   onWinnerChange, onShooterChange, onPlayerNameChange,
+  handFull = true, incompleteMsg,
   onSendToChips,
 }: ScorePanelProps) {
+  const isCompleteWin = handFull && !!scoring?.isValid;
   return (
     <div className="space-y-4">
       {scoring && (
         <div className="card p-4">
           <div className="flex items-baseline justify-between mb-3">
             <h3 className="section-title"><TermTip term="tai">Tai</TermTip> Breakdown</h3>
-            <div className="flex items-baseline gap-1" aria-live="polite">
-              <span className={`text-3xl font-extrabold ${scoring.isValid ? 'gold-foil drop-shadow-[0_1px_8px_rgba(201,162,75,0.35)]' : 'text-red-400'}`}>
-                {scoring.cappedTai}
-              </span>
-              <span className="text-xs text-slate-500">
-                tai{scoring.totalTai !== scoring.cappedTai ? ` (${scoring.totalTai} uncapped)` : ''}
-              </span>
-            </div>
+            {handFull ? (
+              <div className="flex items-baseline gap-1" aria-live="polite">
+                <span className={`text-3xl font-extrabold ${
+                  isCompleteWin ? 'gold-foil drop-shadow-[0_1px_8px_rgba(201,162,75,0.35)]' : 'text-red-400'
+                }`}>
+                  {scoring.cappedTai}
+                </span>
+                <span className="text-xs text-slate-500">
+                  tai{scoring.totalTai !== scoring.cappedTai ? ` (${scoring.totalTai} uncapped)` : ''}
+                </span>
+              </div>
+            ) : (
+              <span className="text-xs font-medium text-amber-300/80">in progress…</span>
+            )}
           </div>
 
-          {!scoring.isValid && (
+          {!handFull && incompleteMsg && (
+            <div className="text-xs text-amber-200 mb-2 bg-amber-900/20 border border-amber-500/20 px-2 py-1.5 rounded">
+              {incompleteMsg}
+            </div>
+          )}
+          {handFull && !scoring.isValid && (
             <div className="text-xs text-red-400 mb-2 bg-red-900/20 px-2 py-1 rounded">
               {scoring.invalidReason}
             </div>
           )}
 
-          <div className="space-y-1">
-            {scoring.elements.map((el, i) => (
-              <div key={i} className="flex justify-between text-xs">
-                <span className="text-slate-300">
-                  {el.name}
-                  <span className="text-slate-500 ml-1">{el.nameZh}</span>
-                </span>
-                <span className="text-emerald-400 font-mono">+{el.tai}</span>
-              </div>
-            ))}
-            {scoring.elements.length === 0 && (
-              <div className="empty-state">No tai elements (chicken hand)</div>
-            )}
-          </div>
+          {handFull && (
+            <div className="space-y-1">
+              {scoring.elements.map((el, i) => (
+                <div key={i} className="flex justify-between text-xs">
+                  <span className="text-slate-300">
+                    {el.name}
+                    <span className="text-slate-500 ml-1">{el.nameZh}</span>
+                  </span>
+                  <span className="text-emerald-400 font-mono">+{el.tai}</span>
+                </div>
+              ))}
+              {scoring.elements.length === 0 && (
+                <div className="empty-state">No tai elements (chicken hand)</div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
-      {scoring?.isValid && (
+      {isCompleteWin && (
         <div className="card p-4 space-y-3">
           <h3 className="section-title">Settlement</h3>
 

@@ -126,6 +126,16 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
   const setCount = melds.filter(m => m.type !== 'eyes').length;
   const handFull = setCount >= 4 && hasEyes;
 
+  // Plain-language "what's still missing" so an incomplete hand never silently
+  // shows a settlement (a complete win is 4 sets + a pair).
+  const incompleteMsg = (() => {
+    if (melds.length === 0 || handFull) return null;
+    const missing: string[] = [];
+    if (setCount < 4) missing.push(`${4 - setCount} more set${4 - setCount > 1 ? 's' : ''}`);
+    if (!hasEyes) missing.push('a pair');
+    return `Add ${missing.join(' and ')} to complete the hand.`;
+  })();
+
   return (
     <div className="space-y-4 pb-4">
       <section className="card p-3">
@@ -214,8 +224,10 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
         onWinnerChange={setWinnerIndex}
         onShooterChange={setShooterIndex}
         onPlayerNameChange={setPlayerName}
+        handFull={handFull}
+        incompleteMsg={incompleteMsg}
         onSendToChips={
-          onSendToChips && scoring?.isValid
+          onSendToChips && handFull && scoring?.isValid
             ? () => { haptics.success(); onSendToChips({ tai: scoring.cappedTai, winType }); }
             : undefined
         }

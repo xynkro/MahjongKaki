@@ -445,6 +445,8 @@ export function scoreHand(
     totalTai,
     cappedTai,
     isValid,
-    invalidReason: isValid ? undefined : `Hand has ${totalTai} tai, minimum is ${rules.minTai}`,
+    invalidReason: isValid
+      ? undefined
+      : `Only ${totalTai} tai — your table needs at least ${rules.minTai} to win.`,
   };
 }
