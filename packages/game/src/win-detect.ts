@@ -96,15 +96,20 @@ export function decomposeWinningHand(handIndices: number[]): WinDecomposition[] 
   for (const t of handIndices) counts[t]++;
 
   const results: WinDecomposition[] = [];
+  const seen = new Set<string>();
 
   for (let pair = 0; pair < 34; pair++) {
     if (counts[pair] < 2) continue;
     counts[pair] -= 2;
 
-    const melds: { type: 'chow' | 'pung'; tiles: number[] }[] = [];
-    if (extractMelds(counts, 0, melds)) {
+    collectMelds(counts, 0, [], (melds) => {
+      // Different search orders can reach the same melds (b1111 23: pung-then-chow
+      // and chow-then-pung), so key on the sorted set.
+      const key = `${pair}|${melds.map(m => `${m.type}${m.tiles[0]}`).sort().join(',')}`;
+      if (seen.has(key)) return;
+      seen.add(key);
       results.push({ melds: [...melds], pair });
-    }
+    });
 
     counts[pair] += 2;
   }
@@ -112,18 +117,22 @@ export function decomposeWinningHand(handIndices: number[]): WinDecomposition[] 
   return results;
 }
 
-function extractMelds(
+function collectMelds(
   counts: number[],
   pos: number,
   melds: { type: 'chow' | 'pung'; tiles: number[] }[],
-): boolean {
+  onComplete: (melds: { type: 'chow' | 'pung'; tiles: number[] }[]) => void,
+): void {
   while (pos < 34 && counts[pos] === 0) pos++;
-  if (pos >= 34) return true;
+  if (pos >= 34) {
+    onComplete(melds);
+    return;
+  }
 
   if (counts[pos] >= 3) {
     counts[pos] -= 3;
     melds.push({ type: 'pung', tiles: [pos, pos, pos] });
-    if (extractMelds(counts, pos, melds)) return true;
+    collectMelds(counts, pos, melds, onComplete);
     melds.pop();
     counts[pos] += 3;
   }
@@ -133,12 +142,10 @@ function extractMelds(
     counts[pos + 1]--;
     counts[pos + 2]--;
     melds.push({ type: 'chow', tiles: [pos, pos + 1, pos + 2] });
-    if (extractMelds(counts, pos, melds)) return true;
+    collectMelds(counts, pos, melds, onComplete);
     melds.pop();
     counts[pos]++;
     counts[pos + 1]++;
     counts[pos + 2]++;
   }
-
-  return false;
 }

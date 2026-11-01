@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import type {
   PlayTile, Meld, Hand, WinContext, Wind, ScoringResult, PayoutResult,
   FlowerTile, SeasonTile, AnimalTile,
@@ -6,8 +6,10 @@ import type {
 import {
   scoreHand, calculatePayout, STAKE_PRESETS,
 } from '@mahjongkaki/engine';
+import { detectHandFromTiles } from '@mahjongkaki/game';
 import { HandDisplay } from './HandDisplay';
 import { MeldBuilder } from './MeldBuilder';
+import { QuickHand } from './QuickHand';
 import { BonusTiles } from './BonusTiles';
 import { WinContextPanel } from './WinContext';
 import { ScorePanel } from './ScorePanel';
@@ -22,6 +24,11 @@ interface CalculatorProps {
 
 export function Calculator({ onSendToChips }: CalculatorProps = {}) {
   const [adding, setAdding] = useState(false);
+  const [quickEntry, setQuickEntry] = useState(false);
+  // The tiles behind a quick-entry hand. Kept so the best reading is re-picked if a
+  // flower, wind or win type changes which split scores highest.
+  const [quickSource, setQuickSource] = useState<{ tiles: number[]; concealed: boolean } | null>(null);
+  const [quickReadings, setQuickReadings] = useState(0);
 
   const [melds, setMelds] = useState<Meld[]>([]);
   const [flowers, setFlowers] = useState<FlowerTile[]>([]);
@@ -44,7 +51,33 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
 
   const rules = useRules();
 
+  const readQuickHand = useCallback((tiles: number[], concealed: boolean) => detectHandFromTiles(tiles, {
+    concealed,
+    bonus: { flowers, seasons, animals },
+    ctx: { seatWind, prevailingWind, winType, isKongReplacement, isLastTile, isRobbingKong },
+    rules,
+  }), [flowers, seasons, animals, seatWind, prevailingWind, winType,
+      isKongReplacement, isLastTile, isRobbingKong, rules]);
+
+  useEffect(() => {
+    if (!quickSource) return;
+    const detected = readQuickHand(quickSource.tiles, quickSource.concealed);
+    if (detected) {
+      setMelds(detected.melds);
+      setQuickReadings(detected.readings);
+    }
+  }, [quickSource, readQuickHand]);
+
+  const detectQuickHand = useCallback((tiles: number[], concealed: boolean) => {
+    if (!readQuickHand(tiles, concealed)) return false;
+    haptics.success();
+    setQuickSource({ tiles, concealed });
+    setQuickEntry(false);
+    return true;
+  }, [readQuickHand]);
+
   const addMeld = useCallback((meld: Meld) => {
+    setQuickSource(null);
     setMelds(prev => {
       const eyesCount = prev.filter(m => m.type === 'eyes').length;
       const setCount = prev.filter(m => m.type !== 'eyes').length;
@@ -56,6 +89,7 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
   }, []);
 
   const removeMeld = useCallback((index: number) => {
+    setQuickSource(null);
     setMelds(prev => prev.filter((_, i) => i !== index));
   }, []);
 
@@ -94,6 +128,8 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
     setSeasons([]);
     setAnimals([]);
     setAdding(false);
+    setQuickEntry(false);
+    setQuickSource(null);
   }, []);
 
   const scoring = useMemo(() => {
@@ -147,7 +183,16 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
             </span>
           </h3>
           <div className="flex gap-2">
-            {!adding && !handFull && (
+            {!adding && !quickEntry && melds.length === 0 && (
+              <button
+                type="button"
+                onClick={() => { haptics.tap(); setQuickEntry(true); }}
+                className="px-3 py-1 text-xs font-medium seg-off rounded-md"
+              >
+                Quick entry
+              </button>
+            )}
+            {!adding && !quickEntry && !handFull && (
               <button
                 type="button"
                 onClick={() => { haptics.tap(); setAdding(true); }}
@@ -168,13 +213,28 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
           </div>
         </div>
 
-        <HandDisplay
-          melds={melds}
-          flowers={flowers}
-          seasons={seasons}
-          animals={animals}
-          onRemoveMeld={removeMeld}
-        />
+        {!quickEntry && (
+          <HandDisplay
+            melds={melds}
+            flowers={flowers}
+            seasons={seasons}
+            animals={animals}
+            onRemoveMeld={removeMeld}
+          />
+        )}
+
+        {quickSource && (
+          <p className="mt-2 text-[11px] text-amber-200/80">
+            Read from your 14 tiles{quickReadings > 1 ? `, best of ${quickReadings} ways to split them` : ''}.{' '}
+            {quickSource.concealed ? 'Counted as fully concealed.' : 'Counted as exposed, so no concealed bonus.'}
+          </p>
+        )}
+
+        {quickEntry && (
+          <div className="mt-3 pt-3 border-t border-slate-700">
+            <QuickHand onDetect={detectQuickHand} onCancel={() => setQuickEntry(false)} />
+          </div>
+        )}
 
         {adding && (
           <div className="mt-3 pt-3 border-t border-slate-700">

@@ -9,7 +9,7 @@ import {
   type BonusTile, type FlowerTile, type SeasonTile, type AnimalTile, type Suit,
   indexToTile, pung, chow, eyes, WINDS, DEFAULT_RULES, type RulesConfig,
 } from '@mahjongkaki/engine';
-import { canWin, decomposeWinningHand } from './win-detect.js';
+import { canWin, decomposeWinningHand, type WinDecomposition } from './win-detect.js';
 import type { GameState } from './game-state.js';
 
 export function seatWindForSeat(seat: number, dealerSeat: number): Wind {
@@ -59,17 +59,60 @@ export function scoreWinningHand(
 
   let best: ScoringResult | null = null;
   for (const d of decomps) {
-    const concealedMelds: Meld[] = d.melds.map(m => {
-      const t0 = m.tiles[0];
-      if (m.type === 'pung') return pung(indexToTile(t0), false);
-      return chow(suitOf(t0), ((t0 % 9) + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7, false);
-    });
     const hand: Hand = {
-      melds: [...exposed, ...concealedMelds, eyes(indexToTile(d.pair))],
+      melds: [...exposed, ...decompToMelds(d, false)],
       flowers, seasons, animals,
     };
     const res = scoreHand(hand, ctx, rules);
     if (!best || res.cappedTai > best.cappedTai) best = res;
+  }
+  return best;
+}
+
+function decompToMelds(d: WinDecomposition, exposed: boolean): Meld[] {
+  const sets: Meld[] = d.melds.map(m => {
+    const t0 = m.tiles[0];
+    if (m.type === 'pung') return pung(indexToTile(t0), exposed);
+    return chow(suitOf(t0), ((t0 % 9) + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7, exposed);
+  });
+  return [...sets, eyes(indexToTile(d.pair))];
+}
+
+export interface DetectedHand {
+  melds: Meld[];
+  scoring: ScoringResult;
+  /** How many legal ways the tiles could be split into 4 sets + a pair. */
+  readings: number;
+}
+
+// Calculator quick entry: read a flat list of 14 tiles as the best-scoring 4 sets
+// + a pair. Tiles alone don't say what was exposed, and a concealed hand scores
+// more, so `concealed` must come from the player. Kongs can't be inferred (a
+// kong hand holds more than 14 tiles).
+export function detectHandFromTiles(
+  tiles: number[],
+  opts: {
+    concealed: boolean;
+    bonus: Pick<Hand, 'flowers' | 'seasons' | 'animals'>;
+    ctx: Omit<WinContext, 'winTile'>;
+    rules?: RulesConfig;
+  },
+): DetectedHand | null {
+  if (tiles.length !== 14) return null;
+  const decomps = decomposeWinningHand(tiles);
+
+  let best: DetectedHand | null = null;
+  for (const d of decomps) {
+    const melds = decompToMelds(d, !opts.concealed);
+    const scoring = scoreHand(
+      { melds, ...opts.bonus },
+      { ...opts.ctx, winTile: indexToTile(d.pair) },
+      opts.rules ?? DEFAULT_RULES,
+    );
+    const beats = !best
+      || scoring.cappedTai > best.scoring.cappedTai
+      || (scoring.cappedTai === best.scoring.cappedTai && scoring.totalTai > best.scoring.totalTai);
+    if (beats) best = { melds, scoring, readings: decomps.length };
   }
   return best;
 }

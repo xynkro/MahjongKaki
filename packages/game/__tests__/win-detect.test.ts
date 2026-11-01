@@ -149,4 +149,44 @@ describe('decomposeWinningHand', () => {
     const decomps = decomposeWinningHand(h);
     expect(decomps.length).toBeGreaterThanOrEqual(1);
   });
+
+  it('returns every reading of a shape that splits two ways', () => {
+    // b111 222 333 is three pungs OR three chows of 1-2-3.
+    const h = hand(
+      suit('bamboo', 1), suit('bamboo', 1), suit('bamboo', 1),
+      suit('bamboo', 2), suit('bamboo', 2), suit('bamboo', 2),
+      suit('bamboo', 3), suit('bamboo', 3), suit('bamboo', 3),
+      suit('dot', 7), suit('dot', 8), suit('dot', 9),
+      suit('character', 5), suit('character', 5),
+    );
+    const decomps = decomposeWinningHand(h);
+    expect(decomps).toHaveLength(2);
+    expect(decomps.every(d => d.pair === t(suit('character', 5)))).toBe(true);
+    const pungCounts = decomps.map(d => d.melds.filter(m => m.type === 'pung').length).sort();
+    expect(pungCounts).toEqual([0, 3]);
+  });
+
+  it('finds readings that use a different pair', () => {
+    // b2 2 3 3 4 4 5 5 = pair 22 + 345 345, or pair 55 + 234 234.
+    const h = hand(
+      suit('bamboo', 2), suit('bamboo', 2), suit('bamboo', 3), suit('bamboo', 3),
+      suit('bamboo', 4), suit('bamboo', 4), suit('bamboo', 5), suit('bamboo', 5),
+      suit('dot', 7), suit('dot', 8), suit('dot', 9),
+      wind('east'), wind('east'), wind('east'),
+    );
+    const pairs = decomposeWinningHand(h).map(d => d.pair).sort((a, b) => a - b);
+    expect(pairs).toEqual([t(suit('bamboo', 2)), t(suit('bamboo', 5))]);
+  });
+
+  it('does not list the same reading twice', () => {
+    // b1111 23: pung-then-chow and chow-then-pung are the same set of melds.
+    const h = hand(
+      suit('bamboo', 1), suit('bamboo', 1), suit('bamboo', 1), suit('bamboo', 1),
+      suit('bamboo', 2), suit('bamboo', 3),
+      suit('dot', 7), suit('dot', 8), suit('dot', 9),
+      suit('character', 1), suit('character', 1), suit('character', 1),
+      wind('east'), wind('east'),
+    );
+    expect(decomposeWinningHand(h)).toHaveLength(1);
+  });
 });
