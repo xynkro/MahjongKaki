@@ -16,6 +16,9 @@ ios/
 .idea/
 *.swp
 .claude/
+.claude-flow/
+.swarm/
+ruvector.db
 
 # OS
 .DS_Store
