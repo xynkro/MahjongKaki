@@ -160,7 +160,8 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
 
   const hasEyes = melds.some(m => m.type === 'eyes');
   const setCount = melds.filter(m => m.type !== 'eyes').length;
-  const handFull = setCount >= 4 && hasEyes;
+  const isWonders = melds.some(m => m.type === 'wonders');
+  const handFull = isWonders || (setCount >= 4 && hasEyes);
 
   // Plain-language "what's still missing" so an incomplete hand never silently
   // shows a settlement (a complete win is 4 sets + a pair).
@@ -179,7 +180,7 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
           <h3 className="section-title">
             Hand
             <span className="text-slate-500 ml-1 font-normal normal-case">
-              ({setCount}/4 sets{hasEyes ? ' + eyes' : ''})
+              {isWonders ? '(Thirteen Wonders)' : `(${setCount}/4 sets${hasEyes ? ' + eyes' : ''})`}
             </span>
           </h3>
           <div className="flex gap-2">
@@ -226,7 +227,9 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
         {quickSource && (
           <p className="mt-2 text-[11px] text-amber-200/80">
             Read from your 14 tiles{quickReadings > 1 ? `, best of ${quickReadings} ways to split them` : ''}.{' '}
-            {quickSource.concealed ? 'Counted as fully concealed.' : 'Counted as exposed, so no concealed bonus.'}
+            {isWonders
+              ? 'Thirteen Wonders is always concealed.'
+              : quickSource.concealed ? 'Counted as fully concealed.' : 'Counted as exposed, so no concealed bonus.'}
           </p>
         )}
 

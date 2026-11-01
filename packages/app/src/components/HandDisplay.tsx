@@ -29,7 +29,7 @@ export function HandDisplay({ melds, flowers, seasons, animals, onRemoveMeld }: 
               type="button"
               aria-label={`Remove ${meldLabel(meld.type)}`}
               onClick={() => onRemoveMeld(i)}
-              className="flex items-center gap-0.5 bg-slate-800 rounded-lg pl-2 pr-1.5 py-1.5 border border-slate-700
+              className="flex flex-wrap items-center gap-0.5 bg-slate-800 rounded-lg pl-2 pr-1.5 py-1.5 border border-slate-700
                 active:bg-red-900/30 active:border-red-700 transition-colors group"
             >
               <span className="text-[12px] text-slate-500 mr-1 uppercase">

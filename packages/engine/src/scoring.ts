@@ -3,7 +3,7 @@ import type { RulesConfig } from './rules.js';
 import { DEFAULT_RULES } from './rules.js';
 import {
   FLOWER_WIND_MAP, SEASON_WIND_MAP, DRAGONS, WINDS,
-  isHonour, isTerminal, isTerminalOrHonour, getMeldSuit,
+  isHonour, isTerminal, isTerminalOrHonour, getMeldSuit, tileKey,
 } from './tiles.js';
 
 function isConcealedHand(hand: Hand): boolean {
@@ -73,13 +73,60 @@ function hasWindPair(hand: Hand): boolean {
   );
 }
 
-function isThirteenOrphans(hand: Hand): boolean {
-  if (hand.melds.length !== 13) return false;
-  // Special hand: one of each terminal + honour + one pair
-  // Represented as 13 single tiles + 1 pair in some implementations
-  // For simplicity, we check via a flag or special meld structure
-  // The caller should set this up as a special case
-  return false;
+// Special hand: one of each terminal + honour + one pair, held as a single meld
+// (see thirteenWonders in tiles.ts).
+function isThirteenWonders(hand: Hand): boolean {
+  if (hand.melds.length !== 1 || hand.melds[0].type !== 'wonders') return false;
+  const { tiles } = hand.melds[0];
+  return tiles.length === 14
+    && tiles.every(isTerminalOrHonour)
+    && new Set(tiles.map(tileKey)).size === 13;
+}
+
+function pushWinCircumstances(
+  elements: TaiElement[],
+  ctx: WinContext,
+  rules: RulesConfig,
+): void {
+  if (rules.zimoAsTai && ctx.winType === 'zimo') {
+    elements.push({
+      id: 'zimo',
+      name: 'Self-Draw',
+      nameZh: '自摸',
+      tai: 1,
+      description: 'Won by drawing the winning tile',
+    });
+  }
+
+  if (ctx.isKongReplacement) {
+    elements.push({
+      id: 'kong_replacement',
+      name: 'Kong Replacement Win',
+      nameZh: '杠上开花',
+      tai: 1,
+      description: 'Won on replacement tile after declaring a kong',
+    });
+  }
+
+  if (ctx.isLastTile) {
+    elements.push({
+      id: 'last_tile',
+      name: 'Last Tile Win',
+      nameZh: '海底捞月',
+      tai: 1,
+      description: 'Won on the last tile from the wall',
+    });
+  }
+
+  if (ctx.isRobbingKong) {
+    elements.push({
+      id: 'robbing_kong',
+      name: 'Robbing the Kong',
+      nameZh: '抢杠',
+      tai: 1,
+      description: 'Won by taking a tile from an opponent\'s kong declaration',
+    });
+  }
 }
 
 export function scoreTaiElements(
@@ -175,6 +222,20 @@ export function scoreTaiElements(
         description: 'All four animals collected',
       });
     }
+  }
+
+  // Thirteen Wonders is a limit hand with no sets, so none of the set, shape or
+  // no-flower bonuses below apply. Its mixed meld must not reach the suit logic.
+  if (isThirteenWonders(hand)) {
+    elements.push({
+      id: 'thirteen_wonders',
+      name: 'Thirteen Wonders',
+      nameZh: '十三幺',
+      tai: rules.taiCap ?? 13,
+      description: 'One of each terminal and honour, plus a pair of any of them',
+    });
+    pushWinCircumstances(elements, ctx, rules);
+    return elements;
   }
 
   const totalBonusTiles = hand.flowers.length + hand.seasons.length + hand.animals.length;
@@ -383,45 +444,7 @@ export function scoreTaiElements(
   }
 
   // --- Win circumstance ---
-  if (rules.zimoAsTai && ctx.winType === 'zimo') {
-    elements.push({
-      id: 'zimo',
-      name: 'Self-Draw',
-      nameZh: '自摸',
-      tai: 1,
-      description: 'Won by drawing the winning tile',
-    });
-  }
-
-  if (ctx.isKongReplacement) {
-    elements.push({
-      id: 'kong_replacement',
-      name: 'Kong Replacement Win',
-      nameZh: '杠上开花',
-      tai: 1,
-      description: 'Won on replacement tile after declaring a kong',
-    });
-  }
-
-  if (ctx.isLastTile) {
-    elements.push({
-      id: 'last_tile',
-      name: 'Last Tile Win',
-      nameZh: '海底捞月',
-      tai: 1,
-      description: 'Won on the last tile from the wall',
-    });
-  }
-
-  if (ctx.isRobbingKong) {
-    elements.push({
-      id: 'robbing_kong',
-      name: 'Robbing the Kong',
-      nameZh: '抢杠',
-      tai: 1,
-      description: 'Won by taking a tile from an opponent\'s kong declaration',
-    });
-  }
+  pushWinCircumstances(elements, ctx, rules);
 
   return elements;
 }

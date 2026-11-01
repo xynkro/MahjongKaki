@@ -72,6 +72,7 @@ export function meldLabel(type: string): string {
     case 'pung': return 'Pung';
     case 'kong': return 'Kong';
     case 'eyes': return 'Eyes';
+    case 'wonders': return 'Thirteen Wonders';
     default: return type;
   }
 }

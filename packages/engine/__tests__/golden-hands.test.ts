@@ -15,7 +15,7 @@ import { describe, it, expect } from 'vitest';
 import {
   scoreHand, calculatePayout, formatCurrency, formatSettlement,
   suit, wind, dragon, flower, season, animal,
-  pung, kong, chow, eyes,
+  pung, kong, chow, eyes, thirteenWonders,
   DEFAULT_RULES, mergeRules,
   type Hand, type WinContext, type RulesConfig, type StakeConfig,
 } from '../src/index.js';
@@ -962,5 +962,75 @@ describe('Settlement Formatting', () => {
     const totalPaid = Object.values(net).filter(v => v < 0).reduce((s, v) => s + v, 0);
     const totalReceived = Object.values(net).filter(v => v > 0).reduce((s, v) => s + v, 0);
     expect(Math.abs(totalPaid + totalReceived)).toBeLessThan(0.01);
+  });
+});
+
+// ============================================================
+// SECTION: Thirteen Wonders (limit hand)
+// ============================================================
+
+describe('Thirteen Wonders', () => {
+  const wonders = (bonus: Partial<Hand> = {}): Hand => ({
+    melds: [thirteenWonders(dragon('red'))],
+    flowers: [],
+    seasons: [],
+    animals: [],
+    ...bonus,
+  });
+
+  it('Case 51: limit hand scores the cap, valid, with no shape noise', () => {
+    const result = scoreHand(wonders(), makeCtx());
+    expect(result.cappedTai).toBe(5);
+    expect(result.isValid).toBe(true);
+    expect(result.elements.map(e => e.id)).toEqual(['thirteen_wonders']);
+    expect(result.elements[0].nameZh).toBe('十三幺');
+  });
+
+  it('Case 52: scores 13 when the table has no tai cap', () => {
+    const result = scoreHand(wonders(), makeCtx(), mergeRules({ taiCap: null }));
+    expect(result.totalTai).toBe(13);
+    expect(result.cappedTai).toBe(13);
+  });
+
+  it('Case 53: flower tiles still count, but the cap still holds', () => {
+    const hand = wonders({ flowers: [flower('plum')] });
+    expect(hasTaiElement(scoreHand(hand, makeCtx()).elements, 'flower_plum')).toBe(true);
+    expect(scoreHand(hand, makeCtx()).cappedTai).toBe(5);
+    expect(scoreHand(hand, makeCtx(), mergeRules({ taiCap: null })).totalTai).toBe(14);
+  });
+
+  it('Case 54: win circumstances still score', () => {
+    const result = scoreHand(
+      wonders(),
+      makeCtx({ winType: 'zimo', isLastTile: true }),
+      mergeRules({ taiCap: null, zimoAsTai: true }),
+    );
+    const ids = result.elements.map(e => e.id);
+    expect(ids).toContain('zimo');
+    expect(ids).toContain('last_tile');
+    expect(result.totalTai).toBe(15);
+  });
+
+  it('Case 55: builder makes 14 concealed tiles and accepts any orphan as the pair', () => {
+    for (const pair of [suit('bamboo', 1), suit('dot', 9), wind('north'), dragon('white')]) {
+      const meld = thirteenWonders(pair);
+      expect(meld.type).toBe('wonders');
+      expect(meld.tiles).toHaveLength(14);
+      expect(meld.exposed).toBe(false);
+    }
+  });
+
+  it('Case 56: builder rejects a pair that is not a terminal or honour', () => {
+    expect(() => thirteenWonders(suit('dot', 5))).toThrow();
+  });
+
+  it('Case 57: a malformed wonders meld does not score the limit', () => {
+    const bad: Hand = {
+      melds: [{ type: 'wonders', tiles: Array(14).fill(wind('east')), exposed: false }],
+      flowers: [],
+      seasons: [],
+      animals: [],
+    };
+    expect(hasTaiElement(scoreHand(bad, makeCtx()).elements, 'thirteen_wonders')).toBe(false);
   });
 });

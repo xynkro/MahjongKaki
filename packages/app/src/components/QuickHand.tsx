@@ -48,7 +48,7 @@ export function QuickHand({ onDetect, onCancel }: QuickHandProps) {
 
   function detect() {
     if (!onDetect(tiles.map(tileToIndex), concealed)) {
-      setMessage('These tiles don\'t split into 4 sets + a pair. Check for a mistyped tile. Special hands like Thirteen Wonders can\'t be scored here.');
+      setMessage('These tiles don\'t split into 4 sets + a pair. Check for a mistyped tile.');
     }
   }
 

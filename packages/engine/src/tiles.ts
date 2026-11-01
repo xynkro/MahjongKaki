@@ -74,6 +74,24 @@ export function eyes(tile: PlayTile): Meld {
   return { type: 'eyes', tiles: [tile, tile], exposed: false };
 }
 
+// Thirteen Wonders has no sets to split into, so the whole hand is one meld: one of
+// each terminal and honour, plus a second copy of `pair`.
+export function thirteenWonders(pair: PlayTile): Meld {
+  if (!isTerminalOrHonour(pair)) {
+    throw new Error('Thirteen Wonders pair must be a terminal or honour tile');
+  }
+  const orphans: PlayTile[] = [
+    ...SUITS.flatMap(s => [suit(s, 1), suit(s, 9)]),
+    ...WINDS.map(wind),
+    ...DRAGONS.map(dragon),
+  ];
+  return {
+    type: 'wonders',
+    tiles: orphans.flatMap(t => (tilesEqual(t, pair) ? [t, t] : [t])),
+    exposed: false,
+  };
+}
+
 export function tilesEqual(a: PlayTile, b: PlayTile): boolean {
   if (a.kind !== b.kind) return false;
   if (a.kind === 'suit' && b.kind === 'suit') {

@@ -17,7 +17,7 @@ export type PlayTile = SuitTile | WindTile | DragonTile;
 export type BonusTile = FlowerTile | SeasonTile | AnimalTile;
 export type Tile = PlayTile | BonusTile;
 
-export type MeldType = 'chow' | 'pung' | 'kong' | 'pair' | 'eyes';
+export type MeldType = 'chow' | 'pung' | 'kong' | 'pair' | 'eyes' | 'wonders';
 
 export interface Meld {
   type: MeldType;

@@ -3,13 +3,15 @@ import {
   scoreWinningHand, canDeclareTsumo, isDiscardWinValid, detectHandFromTiles,
   type GameState,
 } from '../src/index.js';
-import { DEFAULT_RULES } from '@mahjongkaki/engine';
+import { DEFAULT_RULES, pung, wind } from '@mahjongkaki/engine';
 
 // A concealed full-flush bamboo win: pair b1 + chow 1-2-3 + chow 4-5-6 + chow 7-8-9 + pung b9.
 // indices: b1=0..b9=8.
 const FULL_FLUSH = [0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8];
 // b111 222 333 + d789 + c55: three pungs, or three 1-2-3 chows.
 const TWO_READINGS = [0, 0, 0, 1, 1, 1, 2, 2, 2, 24, 25, 26, 13, 13];
+// One of each terminal + honour, with red dragon doubled.
+const THIRTEEN_WONDERS = [0, 8, 9, 17, 18, 26, 27, 28, 29, 30, 31, 31, 32, 33];
 
 function fakeState(hand: number[]): GameState {
   return {
@@ -120,5 +122,49 @@ describe('isDiscardWinValid', () => {
     expect(isDiscardWinValid(waiting, [], [], 'east', 'east', 0, { ...DEFAULT_RULES, minTai: 6 })).toBe(false);
     // minimum at the hand's tai → legal
     expect(isDiscardWinValid(waiting, [], [], 'east', 'east', 0, { ...DEFAULT_RULES, minTai: 5 })).toBe(true);
+  });
+});
+
+describe('Thirteen Wonders', () => {
+  const ctx = {
+    seatWind: 'east', prevailingWind: 'east', winType: 'discard',
+    isKongReplacement: false, isLastTile: false, isRobbingKong: false,
+  } as const;
+  const noBonus = { flowers: [], seasons: [], animals: [] };
+
+  it('scoreWinningHand scores it as a limit hand', () => {
+    const res = scoreWinningHand(THIRTEEN_WONDERS, [], [], 'east', 'east', 'zimo', 0);
+    expect(res!.cappedTai).toBe(5);
+    expect(res!.isValid).toBe(true);
+    expect(res!.elements.map(e => e.id)).toEqual(['thirteen_wonders']);
+  });
+
+  it('can be declared on a self-draw', () => {
+    expect(canDeclareTsumo(fakeState(THIRTEEN_WONDERS), 0)).toBe(true);
+  });
+
+  it('can be claimed off a discard', () => {
+    const waiting = THIRTEEN_WONDERS.filter((_, i) => i !== 11); // drop one red dragon
+    expect(isDiscardWinValid(waiting, [], [], 'east', 'east', 31)).toBe(true);
+  });
+
+  it('is not a win alongside exposed melds', () => {
+    const exposed = [pung(wind('east'))];
+    expect(scoreWinningHand(THIRTEEN_WONDERS, exposed, [], 'east', 'east', 'zimo', 0)).toBeNull();
+  });
+
+  it('seven pairs is still unsupported', () => {
+    const sevenPairs = [27, 27, 28, 28, 29, 29, 30, 30, 31, 31, 32, 32, 33, 33];
+    expect(scoreWinningHand(sevenPairs, [], [], 'east', 'east', 'zimo', 0)).toBeNull();
+    expect(canDeclareTsumo(fakeState(sevenPairs), 0)).toBe(false);
+  });
+
+  it('quick entry reads it, concealed whatever the tick says', () => {
+    const res = detectHandFromTiles(THIRTEEN_WONDERS, { concealed: false, bonus: noBonus, ctx });
+    expect(res!.melds).toHaveLength(1);
+    expect(res!.melds[0].type).toBe('wonders');
+    expect(res!.melds[0].exposed).toBe(false);
+    expect(res!.readings).toBe(1);
+    expect(res!.scoring.cappedTai).toBe(5);
   });
 });

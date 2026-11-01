@@ -7,9 +7,9 @@ import {
   scoreHand,
   type Hand, type Meld, type WinContext, type Wind, type ScoringResult,
   type BonusTile, type FlowerTile, type SeasonTile, type AnimalTile, type Suit,
-  indexToTile, pung, chow, eyes, WINDS, DEFAULT_RULES, type RulesConfig,
+  indexToTile, pung, chow, eyes, thirteenWonders, WINDS, DEFAULT_RULES, type RulesConfig,
 } from '@mahjongkaki/engine';
-import { canWin, decomposeWinningHand, type WinDecomposition } from './win-detect.js';
+import { canWin, decomposeWinningHand, isThirteenOrphans, type WinDecomposition } from './win-detect.js';
 import type { GameState } from './game-state.js';
 
 export function seatWindForSeat(seat: number, dealerSeat: number): Wind {
@@ -34,9 +34,15 @@ function suitOf(idx: number): Suit {
   return idx < 9 ? 'bamboo' : idx < 18 ? 'character' : 'dot';
 }
 
-// Score a complete hand (concealed tiles + exposed melds + bonus). Returns the
-// best-scoring decomposition, or null if the concealed tiles can't form a
-// standard winning shape (e.g. seven pairs, which SG scoring doesn't support).
+function wondersMeld(tiles: number[]): Meld | null {
+  if (!isThirteenOrphans(tiles)) return null;
+  const pair = tiles.find((t, i) => tiles.indexOf(t) !== i)!;
+  return thirteenWonders(indexToTile(pair));
+}
+
+// Score a complete hand (concealed tiles + exposed melds + bonus). Returns Thirteen
+// Wonders or the best-scoring decomposition, or null if the concealed tiles can't
+// form a winning shape (e.g. seven pairs, which SG scoring doesn't support).
 export function scoreWinningHand(
   concealed: number[],
   exposed: Meld[],
@@ -47,15 +53,18 @@ export function scoreWinningHand(
   winTileIdx: number,
   rules: RulesConfig = DEFAULT_RULES,
 ): ScoringResult | null {
-  const decomps = decomposeWinningHand(concealed);
-  if (decomps.length === 0) return null;
-
   const { flowers, seasons, animals } = splitBonus(bonus);
   const ctx: WinContext = {
     seatWind, prevailingWind, winType,
     winTile: indexToTile(winTileIdx),
     isKongReplacement: false, isLastTile: false, isRobbingKong: false,
   };
+
+  const wonders = exposed.length === 0 ? wondersMeld(concealed) : null;
+  if (wonders) return scoreHand({ melds: [wonders], flowers, seasons, animals }, ctx, rules);
+
+  const decomps = decomposeWinningHand(concealed);
+  if (decomps.length === 0) return null;
 
   let best: ScoringResult | null = null;
   for (const d of decomps) {
@@ -81,13 +90,14 @@ function decompToMelds(d: WinDecomposition, exposed: boolean): Meld[] {
 export interface DetectedHand {
   melds: Meld[];
   scoring: ScoringResult;
-  /** How many legal ways the tiles could be split into 4 sets + a pair. */
+  /** How many legal ways the tiles could be read as a hand. */
   readings: number;
 }
 
 // Calculator quick entry: read a flat list of 14 tiles as the best-scoring 4 sets
 // + a pair. Tiles alone don't say what was exposed, and a concealed hand scores
-// more, so `concealed` must come from the player. Kongs can't be inferred (a
+// more, so `concealed` must come from the player. Thirteen Wonders is the exception:
+// it has no sets to expose, so it is always concealed. Kongs can't be inferred (a
 // kong hand holds more than 14 tiles).
 export function detectHandFromTiles(
   tiles: number[],
@@ -99,6 +109,17 @@ export function detectHandFromTiles(
   },
 ): DetectedHand | null {
   if (tiles.length !== 14) return null;
+
+  const wonders = wondersMeld(tiles);
+  if (wonders) {
+    const scoring = scoreHand(
+      { melds: [wonders], ...opts.bonus },
+      { ...opts.ctx, winTile: wonders.tiles[0] },
+      opts.rules ?? DEFAULT_RULES,
+    );
+    return { melds: [wonders], scoring, readings: 1 };
+  }
+
   const decomps = decomposeWinningHand(tiles);
 
   let best: DetectedHand | null = null;
