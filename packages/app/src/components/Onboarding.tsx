@@ -75,7 +75,7 @@ export function Onboarding({ onDone, onLearn }: { onDone: () => void; onLearn: (
           <div className="card p-4 space-y-3">
             <Feature icon="🎯" title="Play & train" desc="Practise against AI and drill the fundamentals." />
             <Feature icon="🀄" title="Count My Tais" desc="Enter a hand and see the tai and who pays what." />
-            <Feature icon="🪙" title="No Chips Game" desc="No chips at the table? Record each round and keep a running tally." />
+            <Feature icon="🪙" title="No Chips" desc="No chips at the table? Record each round and keep a running tally." />
           </div>
 
           <button

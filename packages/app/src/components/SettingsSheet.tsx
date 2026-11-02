@@ -83,7 +83,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
       <div className="flex-1 overflow-y-auto overscroll-contain">
         <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
           <p className="text-sm text-slate-400">
-            These apply to AI matches, Count My Tais and the No Chips Game. Set them to match how your table plays.
+            These apply to AI matches, Count My Tais and No Chips. Set them to match how your table plays.
           </p>
 
           <section className="card p-4">

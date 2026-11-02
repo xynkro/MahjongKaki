@@ -6,7 +6,7 @@ export type NoobTool = 'tais' | 'chips' | 'table';
 interface ToolDef { id: NoobTool; label: string; description: string; icon: ReactNode }
 
 const TOOLS: ToolDef[] = [
-  { id: 'chips', label: 'No Chips Game', description: 'No chips at the table? Record each round and keep a running tally.', icon: <IconChips /> },
+  { id: 'chips', label: 'No Chips', description: 'No chips at the table? Record each round and keep a running tally.', icon: <IconChips /> },
   { id: 'tais', label: 'Count My Tais', description: 'Enter a hand and see the tai and who pays what.', icon: <IconScore /> },
   { id: 'table', label: 'Table Tracker', description: 'Roll dice, shuffle seats, and track the round and dealer.', icon: <IconTable /> },
 ];
