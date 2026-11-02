@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "npm run dev -w @mahjongkaki/app",
     "build": "npm run build -w @mahjongkaki/engine && npm run build -w @mahjongkaki/app",
-    "test": "npm run test -w @mahjongkaki/engine",
+    "test": "npm run test --workspaces --if-present",
     "test:watch": "npm run test:watch -w @mahjongkaki/engine",
     "lint": "eslint packages/*/src --ext .ts,.tsx",
     "typecheck": "tsc -b",

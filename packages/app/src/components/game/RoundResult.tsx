@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { type GameState, scoreWinForSeat } from '@mahjongkaki/game';
+import { type GameState, type MatchProgress, scoreWinForSeat } from '@mahjongkaki/game';
 import { tileToIndex, type Wind, WINDS } from '@mahjongkaki/engine';
 import { TileRow } from './TileRow';
-import { Scoreboard } from './Scoreboard';
+import { Scoreboard, type Amount } from './Scoreboard';
 import { ChipFlight, FIRST_LAND_MS, chipCountForTai, countDurationMs, dealChips } from './ChipFlight';
-import { type MatchState } from './match';
 import { haptics, sound } from '../../lib/haptics';
 import { TermTip } from '../TermTip';
 import { WinTileScene } from '../three/WinTileScene';
@@ -14,10 +13,15 @@ const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西
 
 interface RoundResultProps {
   state: GameState;
-  match: MatchState;
+  match: MatchProgress & { humanSeat: number };
   deltas: number[];
   onNextHand: () => void;
   onEndMatch: () => void;
+  amount?: Amount;
+  names?: string[];
+  /** Replaces the Next hand button once you're ready and waiting on the others. */
+  waitingNote?: string;
+  endLabel?: string;
 }
 
 function seatWind(seat: number, dealerSeat: number): Wind {
@@ -34,7 +38,7 @@ function winningTile(state: GameState, seat: number): number {
 
 const delay = (ms: number) => ({ animationDelay: `${ms}ms` });
 
-export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: RoundResultProps) {
+export function RoundResult({ state, match, deltas, onNextHand, onEndMatch, amount, names, waitingNote, endLabel = 'End match' }: RoundResultProps) {
   const isDraw = state.winner === null;
   const isHumanWin = state.winner === state.humanSeat;
   const scoring = state.winner !== null ? scoreWinForSeat(state, state.winner) : null;
@@ -73,7 +77,7 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
           <>
             {isHumanWin && <WinTileScene tile={winningTile(state, state.winner!)} />}
             <h2 className={`text-2xl font-bold mb-1 ${isHumanWin ? 'text-emerald-400' : 'text-red-400'}`}>
-              {isHumanWin ? 'You Win!' : `${WIND_CHARS[seatWind(state.winner!, playedDealer)]} Wins`}
+              {isHumanWin ? 'You Win!' : `${names?.[state.winner!] ?? WIND_CHARS[seatWind(state.winner!, playedDealer)]} Wins`}
             </h2>
             <p className="text-slate-400 text-xs mb-3">
               {state.winType === 'zimo' ? <>Self-drawn (<TermTip term="zimo">Zimo</TermTip>)</> : 'Discard win'}
@@ -92,6 +96,8 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
         <Scoreboard
           match={match}
           deltas={deltas}
+          amount={amount}
+          names={names}
           count={celebrate
             ? { delayMs: FIRST_LAND_MS, durationMs: countDurationMs(chipCount), winner: state.humanSeat }
             : undefined}
@@ -123,17 +129,21 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
       )}
 
       <div className="anim-rise flex gap-2" style={delay(240)}>
-        <button
-          onClick={onNextHand}
-          className="flex-1 min-h-[48px] btn-primary text-base font-semibold rounded-xl"
-        >
-          Next hand →
-        </button>
+        {waitingNote ? (
+          <div className="flex-1 min-h-[48px] grid place-items-center text-sm text-slate-300 text-center">{waitingNote}</div>
+        ) : (
+          <button
+            onClick={onNextHand}
+            className="flex-1 min-h-[48px] btn-primary text-base font-semibold rounded-xl"
+          >
+            Next hand →
+          </button>
+        )}
         <button
           onClick={onEndMatch}
           className="min-h-[48px] px-5 text-sm font-medium btn-ghost rounded-xl active:scale-95 active:bg-slate-600"
         >
-          End match
+          {endLabel}
         </button>
       </div>
     </div>

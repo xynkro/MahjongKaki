@@ -28,6 +28,10 @@ interface GameBoardProps {
   onQuit: () => void;
   /** Play the born-home discard settle (suppressed at fast/instant speed). */
   animateDiscards?: boolean;
+  /** Online: who's in each seat. Without it seats read across/left/right. */
+  seatNames?: string[];
+  /** Online: overrides the status text at the top right. */
+  statusText?: string;
 }
 
 function seatWind(seat: number, dealerSeat: number): Wind {
@@ -82,7 +86,7 @@ function Seat({
           <TileRow tiles={state.melds[seat].flatMap(meldToIndices)} size="sm" sortTiles={false} animateEntrance={false} />
         </div>
       )}
-      <div className="text-[11px] text-slate-600 mt-0.5">{label}</div>
+      <div className="text-[11px] text-slate-500 mt-0.5 truncate">{label}</div>
     </div>
   );
 }
@@ -100,7 +104,7 @@ function BigTile({ tile, cls }: { tile: number; cls: string }) {
 }
 
 export function GameBoard({
-  state, availableActions, onDiscard, onDeclareKong, onTsumo, onQuit, animateDiscards = true,
+  state, availableActions, onDiscard, onDeclareKong, onTsumo, onQuit, animateDiscards = true, seatNames, statusText,
 }: GameBoardProps) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [selectedTileValue, setSelectedTileValue] = useState<number | null>(null);
@@ -213,7 +217,7 @@ export function GameBoard({
         </button>
         <span className="round-badge">{WIND_CHARS[state.prevailingWind]} {state.roundNumber}</span>
         <span className={isHumanTurn ? 'text-emerald-300 font-bold' : 'text-amber-100/70'}>
-          {isHumanTurn ? 'Your turn' : `${WIND_CHARS[seatWind(state.currentPlayer, state.dealerSeat)]} playing…`}
+          {statusText ?? (isHumanTurn ? 'Your turn' : `${WIND_CHARS[seatWind(state.currentPlayer, state.dealerSeat)]} playing…`)}
         </span>
       </div>
 
@@ -225,11 +229,11 @@ export function GameBoard({
        <div className="relative isolate h-full felt rounded-[0.85rem] overflow-hidden flex flex-col p-2 gap-2">
         <div className="felt-medallion -z-10" />
         <div className="flex justify-center">
-          <div className="w-44"><Seat state={state} seat={acrossSeat} label="across" showBacks /></div>
+          <div className="w-44"><Seat state={state} seat={acrossSeat} label={seatNames?.[acrossSeat] ?? 'across'} showBacks /></div>
         </div>
 
         <div className="flex-1 flex items-stretch gap-2 min-h-0">
-          <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={leftSeat} label="left" /></div></div>
+          <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={leftSeat} label={seatNames?.[leftSeat] ?? 'left'} /></div></div>
 
           {/* Centre discard pool — born-home tiles, latest leans in from its seat */}
           <div className="flex-1 relative rounded-xl border border-emerald-950/25 bg-emerald-950/10 p-2 overflow-y-auto">
@@ -258,7 +262,7 @@ export function GameBoard({
             )}
           </div>
 
-          <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={rightSeat} label="right" /></div></div>
+          <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={rightSeat} label={seatNames?.[rightSeat] ?? 'right'} /></div></div>
         </div>
        </div>
       </div>

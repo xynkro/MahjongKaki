@@ -120,6 +120,20 @@ export function getAvailableClaims(
   return claims;
 }
 
+const CLAIM_PRIORITY: Record<ClaimType, number> = { win: 0, kong: 1, pung: 1, chow: 2 };
+
+// Which of several claims on one discard takes it: win beats kong/pung beats chow,
+// and two wins go to the player next in turn after the discarder.
+export function pickClaim<T extends { player: number; claimType: ClaimType }>(
+  claims: T[],
+  discardPlayer: number,
+): T | null {
+  const turnsAway = (seat: number) => (seat - discardPlayer + 4) % 4;
+  return [...claims].sort((a, b) =>
+    CLAIM_PRIORITY[a.claimType] - CLAIM_PRIORITY[b.claimType] || turnsAway(a.player) - turnsAway(b.player),
+  )[0] ?? null;
+}
+
 export function resolveClaims(claims: Claim[]): Claim | null {
   if (claims.length === 0) return null;
   const sorted = [...claims].sort((a, b) => a.priority - b.priority);

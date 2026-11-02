@@ -12,6 +12,7 @@
   "references": [
     { "path": "../engine" },
     { "path": "../game" },
-    { "path": "../ai" }
+    { "path": "../ai" },
+    { "path": "../online" }
   ]
 }

@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import {
   type GameState,
-  type GameAction,
+  type ClaimAction,
   type Claim,
   createGame,
   applyAction,
   getAvailableActions,
+  pickClaim,
 } from '@mahjongkaki/game';
 import { ALL_PROFILES, aiDecide } from '@mahjongkaki/ai';
 import { GameSetup, type SpeedSetting, type MatchConfig } from './GameSetup';
@@ -16,10 +17,14 @@ import { Scoreboard } from './Scoreboard';
 import { type MatchState, newMatch, advanceMatch, handDeltas } from './match';
 import { db } from '../../lib/db';
 import { getRules } from '../../lib/settings';
+import { consumeLinkedRoom, peekLinkedRoom, savedRoom } from '../../lib/room-link';
+
+// Lazy so Firebase only loads for people who play online; solo stays offline and light.
+const OnlinePlay = lazy(() => import('../online/OnlinePlay').then(m => ({ default: m.OnlinePlay })));
 
 const SPEED_MS: Record<SpeedSetting, number> = { slow: 2000, normal: 1000, fast: 400, instant: 50 };
 
-type PlayView = 'setup' | 'playing' | 'result' | 'matchover';
+type PlayView = 'setup' | 'playing' | 'result' | 'matchover' | 'online';
 
 function startHand(match: MatchState): GameState {
   const gs = createGame(match.humanSeat, match.dealerSeat, match.prevailingWind, match.rules);
@@ -28,7 +33,10 @@ function startHand(match: MatchState): GameState {
 }
 
 export function PlayTab() {
-  const [view, setView] = useState<PlayView>('setup');
+  const [linkedRoom] = useState(peekLinkedRoom);
+  const [linkOpen, setLinkOpen] = useState(true);
+  useEffect(consumeLinkedRoom, []);
+  const [view, setView] = useState<PlayView>(linkedRoom || savedRoom() ? 'online' : 'setup');
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [match, setMatch] = useState<MatchState | null>(null);
   const [deltas, setDeltas] = useState<number[] | null>(null);
@@ -81,7 +89,7 @@ export function PlayTab() {
     (async () => {
       try {
         const save = await db.gameSaves.where('isActive').equals(1).last();
-        if (!cancelled && save) {
+        if (!cancelled && save && !linkedRoom && !savedRoom()) {
           const parsed = JSON.parse(save.state);
           const gs: GameState | undefined = parsed?.game;
           const m: MatchState | undefined = parsed?.match;
@@ -177,16 +185,14 @@ export function PlayTab() {
   function resolveAiClaims() {
     setGameState(prev => {
       if (!prev) return prev;
-      const accepted: GameAction[] = [];
+      const accepted: ClaimAction[] = [];
       for (let seat = 0; seat < 4; seat++) {
         if (seat === prev.humanSeat) continue;
         const action = aiDecide(prev, seat, profile);
         if (action.type === 'claim') accepted.push(action);
       }
       if (accepted.length === 0) return applyAction(prev, { type: 'skip_claim' });
-      const pri: Record<string, number> = { win: 0, kong: 1, pung: 1, chow: 2 };
-      accepted.sort((a, b) => (a.type !== 'claim' || b.type !== 'claim' ? 0 : (pri[a.claimType] ?? 9) - (pri[b.claimType] ?? 9)));
-      return applyAction(prev, accepted[0]);
+      return applyAction(prev, pickClaim(accepted, prev.lastDiscard!.player)!);
     });
   }
 
@@ -202,15 +208,13 @@ export function PlayTab() {
   function handleClaim(claim: Claim) {
     setGameState(prev => {
       if (!prev) return prev;
-      const all: GameAction[] = [{ type: 'claim', claimType: claim.claimType, player: claim.player, tilesFromHand: claim.tilesFromHand }];
+      const all: ClaimAction[] = [{ type: 'claim', claimType: claim.claimType, player: claim.player, tilesFromHand: claim.tilesFromHand }];
       for (let seat = 0; seat < 4; seat++) {
         if (seat === prev.humanSeat) continue;
         const action = aiDecide(prev, seat, profile);
         if (action.type === 'claim') all.push(action);
       }
-      const pri: Record<string, number> = { win: 0, kong: 1, pung: 1, chow: 2 };
-      all.sort((a, b) => (a.type !== 'claim' || b.type !== 'claim' ? 0 : (pri[a.claimType] ?? 9) - (pri[b.claimType] ?? 9)));
-      return applyAction(prev, all[0]);
+      return applyAction(prev, pickClaim(all, prev.lastDiscard!.player)!);
     });
   }
   function handleSkipClaim() { resolveAiClaims(); }
@@ -242,8 +246,16 @@ export function PlayTab() {
     return <div className="h-full flex items-center justify-center text-slate-500 text-sm">Loading…</div>;
   }
 
+  if (view === 'online') {
+    return (
+      <Suspense fallback={<div className="h-full flex items-center justify-center text-slate-500 text-sm">Loading…</div>}>
+        <OnlinePlay initialCode={linkOpen ? linkedRoom : null} onExit={() => { setLinkOpen(false); setView('setup'); }} />
+      </Suspense>
+    );
+  }
+
   if (view === 'setup' || !match) {
-    return <div className="px-4 pt-4"><GameSetup onStart={handleStart} /></div>;
+    return <div className="px-4 pt-4"><GameSetup onStart={handleStart} onOnline={() => setView('online')} /></div>;
   }
 
   if (view === 'matchover') {

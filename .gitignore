@@ -7,6 +7,12 @@ dist/
 android/
 ios/
 
+# Firebase
+functions/lib/
+functions/node_modules/
+.firebase/
+*-debug.log
+
 # Environment
 .env
 .env.local

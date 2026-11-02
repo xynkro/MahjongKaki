@@ -36,7 +36,8 @@ export function FirstRunDisclaimer({ onAccept }: { onAccept: () => void }) {
           directly among yourselves.
         </p>
         <p className="text-xs text-slate-400 leading-relaxed">
-          Everything you enter stays on this device. No account, no tracking, nothing uploaded.
+          Everything you enter stays on this device, with no account and no tracking. The one exception is Play with
+          friends, which sends your nickname and moves through our server for that game.
         </p>
         <button
           onClick={onAccept}
@@ -88,10 +89,15 @@ export function LegalSheet({ open, onClose }: { open: boolean; onClose: () => vo
 
           <Section title="Your data &amp; privacy">
             <p>
-              All your data — sessions, scores, saved games, and training stats — is stored
-              <strong className="text-amber-400"> only on this device</strong>, in your browser's local storage. Nothing
-              is uploaded to any server. There is no account, no sign-in, and no analytics or tracking. Player names you
-              type stay on your device.
+              Your sessions, scores, solo games, and training stats are stored
+              <strong className="text-amber-400"> only on this device</strong>, in your browser's local storage. There
+              is no account, no sign-in, and no analytics or tracking. Player names you type stay on your device.
+            </p>
+            <p>
+              <strong className="text-amber-400">Play with friends</strong> is the one exception. The nickname you
+              choose, your moves, and an anonymous ID go through Google Firebase servers in Singapore so the game can
+              run. The room is deleted automatically within about two days of its last move. Online games use points
+              only and are not for playing for money.
             </p>
             <p className="text-slate-400 text-xs">
               Clearing your browser's site data, or uninstalling, removes everything. There is no cloud backup.

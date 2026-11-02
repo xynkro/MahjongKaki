@@ -36,10 +36,12 @@ export interface GameState {
   rules: RulesConfig;
 }
 
+export type ClaimAction = { type: 'claim'; claimType: 'chow' | 'pung' | 'kong' | 'win'; player: number; tilesFromHand: number[] };
+
 export type GameAction =
   | { type: 'draw' }
   | { type: 'discard'; tile: number }
-  | { type: 'claim'; claimType: 'chow' | 'pung' | 'kong' | 'win'; player: number; tilesFromHand: number[] }
+  | ClaimAction
   | { type: 'skip_claim' }
   | { type: 'declare_kong'; tile: number }
   | { type: 'auto_draw' };

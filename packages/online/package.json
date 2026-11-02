@@ -1,0 +1,25 @@
+{
+  "name": "@mahjongkaki/online",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest watch"
+  },
+  "dependencies": {
+    "@mahjongkaki/ai": "*",
+    "@mahjongkaki/engine": "*",
+    "@mahjongkaki/game": "*"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0"
+  }
+}

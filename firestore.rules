@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Clients never write. All changes go through the Cloud Functions.
+    match /rooms/{code}/views/{seat} {
+      // A seat's view carries that player's tiles, so only they can read it.
+      allow read: if request.auth != null && request.auth.uid == resource.data.uid;
+    }
+    // /rooms/{code}/secret holds the wall and every hand: no rule, so no client access.
+  }
+}

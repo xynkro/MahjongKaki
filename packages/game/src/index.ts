@@ -5,3 +5,4 @@ export * from './claims.js';
 export * from './game-state.js';
 export * from './score.js';
 export * from './trainer.js';
+export * from './match.js';

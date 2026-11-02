@@ -15,9 +15,10 @@ export interface MatchConfig {
 
 interface GameSetupProps {
   onStart: (config: MatchConfig) => void;
+  onOnline: () => void;
 }
 
-export function GameSetup({ onStart }: GameSetupProps) {
+export function GameSetup({ onStart, onOnline }: GameSetupProps) {
   const [difficulty, setDifficulty] = useState<AiProfile['difficulty']>('medium');
   const [speed, setSpeed] = useState<SpeedSetting>('normal');
   const [humanSeat, setHumanSeat] = useState(0);
@@ -36,6 +37,18 @@ export function GameSetup({ onStart }: GameSetupProps) {
   return (
     <div className="space-y-4">
       <CinematicHero aspect="aspect-[21/9]" />
+
+      <button
+        type="button"
+        onClick={() => { haptics.select(); onOnline(); }}
+        className="card w-full p-4 flex items-center justify-between gap-3 text-left border-amber-400/30 active:scale-[0.99]"
+      >
+        <span>
+          <span className="block text-base font-semibold text-slate-100">Play with friends</span>
+          <span className="block text-xs text-slate-400 mt-0.5">Private room, points only. AI fills empty seats.</span>
+        </span>
+        <span aria-hidden className="text-amber-400 text-lg">→</span>
+      </button>
 
       <div>
         <h2 className="page-title">New Match</h2>

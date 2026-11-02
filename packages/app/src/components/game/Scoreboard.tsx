@@ -1,12 +1,20 @@
 import { useEffect, useState } from 'react';
 import { formatCurrency } from '@mahjongkaki/engine';
-import { type MatchState, seatWindOf } from './match';
+import type { MatchProgress } from '@mahjongkaki/game';
+import { seatWindOf } from './match';
 
 const WIND_CHARS: Record<string, string> = { east: '東', south: '南', west: '西', north: '北' };
+
+export type Amount = (n: number) => string;
 
 function money(n: number): string {
   if (n === 0) return '—';
   return (n > 0 ? '+' : '') + formatCurrency(n);
+}
+
+export function points(n: number): string {
+  if (n === 0) return '—';
+  return (n > 0 ? '+' : '') + n.toLocaleString('en-SG');
 }
 
 export interface TotalCount { delayMs: number; durationMs: number; winner: number }
@@ -31,14 +39,14 @@ function useCountedTotal(from: number, to: number, count?: TotalCount): number {
   return shown;
 }
 
-function SeatTotal({ seat, total, delta, count }: { seat: number; total: number; delta: number; count?: TotalCount }) {
+function SeatTotal({ seat, total, delta, count, amount }: { seat: number; total: number; delta: number; count?: TotalCount; amount: Amount }) {
   const shown = useCountedTotal(Math.round((total - delta) * 100) / 100, total, count);
   return (
     <div
       data-seat-total={seat}
       className={`text-sm font-bold tabular-nums ${shown > 0 ? 'text-emerald-400' : shown < 0 ? 'text-red-400' : 'text-slate-500'}`}
     >
-      <span className="sr-only">{money(total)}</span>
+      <span className="sr-only">{amount(total)}</span>
       <span
         aria-hidden
         className="inline-block"
@@ -46,13 +54,19 @@ function SeatTotal({ seat, total, delta, count }: { seat: number; total: number;
           ? { animation: `totalPunch ${count.durationMs}ms ease-out ${count.delayMs}ms backwards` }
           : undefined}
       >
-        {money(shown)}
+        {amount(shown)}
       </span>
     </div>
   );
 }
 
-export function Scoreboard({ match, deltas, count }: { match: MatchState; deltas?: number[]; count?: TotalCount }) {
+export function Scoreboard({ match, deltas, count, amount = money, names }: {
+  match: MatchProgress & { humanSeat: number };
+  deltas?: number[];
+  count?: TotalCount;
+  amount?: Amount;
+  names?: string[];
+}) {
   return (
     <div className="card p-3">
       <div className="flex items-center justify-between mb-2">
@@ -80,10 +94,10 @@ export function Scoreboard({ match, deltas, count }: { match: MatchState; deltas
                 <span className="text-base font-bold text-slate-200">{WIND_CHARS[seatWindOf(seat, match.dealerSeat)]}</span>
                 {isDealer && <span className="text-[11px] text-amber-400 font-bold">庄</span>}
               </div>
-              <div className="text-[12px] text-slate-500">{isYou ? 'You' : 'AI'}</div>
-              <SeatTotal seat={seat} total={total} delta={d} count={count} />
+              <div className="text-[12px] text-slate-500 truncate">{isYou ? 'You' : names?.[seat] ?? 'AI'}</div>
+              <SeatTotal seat={seat} total={total} delta={d} count={count} amount={amount} />
               {d !== 0 && (
-                <div className={`text-[12px] ${d > 0 ? 'text-emerald-400/70' : 'text-red-400/70'}`}>{money(d)}</div>
+                <div className={`text-[12px] ${d > 0 ? 'text-emerald-400/70' : 'text-red-400/70'}`}>{amount(d)}</div>
               )}
             </div>
           );
