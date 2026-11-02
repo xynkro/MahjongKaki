@@ -9,7 +9,8 @@ export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'prompt',
+      // No update prompt exists in the UI, so 'prompt' left new versions waiting until every window closed.
+      registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'MahjongKaki',
