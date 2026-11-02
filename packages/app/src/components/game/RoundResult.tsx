@@ -1,12 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { type GameState, scoreWinForSeat } from '@mahjongkaki/game';
 import { tileToIndex, type Wind, WINDS } from '@mahjongkaki/engine';
 import { TileRow } from './TileRow';
 import { Scoreboard } from './Scoreboard';
+import { ChipFlight, FIRST_LAND_MS, chipCountForTai, countDurationMs, dealChips } from './ChipFlight';
 import { type MatchState } from './match';
 import { haptics, sound } from '../../lib/haptics';
 import { TermTip } from '../TermTip';
 import { WinTileScene } from '../three/WinTileScene';
+import { prefersReducedMotion } from '../three/motion';
 
 const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西', north: '北' };
 
@@ -36,14 +38,17 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
   const isDraw = state.winner === null;
   const isHumanWin = state.winner === state.humanSeat;
   const scoring = state.winner !== null ? scoreWinForSeat(state, state.winner) : null;
+  const myDelta = deltas[state.humanSeat] ?? 0;
+  const chipCount = chipCountForTai(scoring?.cappedTai ?? 0);
+  const boardRef = useRef<HTMLDivElement>(null);
+  const [celebrate] = useState(() => isHumanWin && myDelta > 0 && !prefersReducedMotion());
 
   // Fanfare, then your chips land as the tile settles. Paying out stays low-key.
   useEffect(() => {
-    const myDelta = deltas[state.humanSeat] ?? 0;
     if (isHumanWin) haptics.win();
     else if (isDraw) sound.handDrawn();
     else if (myDelta < 0) sound.loss();
-    if (myDelta > 0) sound.chips(Math.min(10, 3 + (scoring?.cappedTai ?? 0)), isHumanWin ? 1.3 : 0);
+    if (myDelta > 0) sound.chips(chipCount, isHumanWin ? FIRST_LAND_MS / 1000 : 0);
     else if (myDelta < 0) sound.chips(2, 0.4);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -83,9 +88,18 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
         )}
       </section>
 
-      <div className="anim-rise" style={delay(80)}>
-        <Scoreboard match={match} deltas={deltas} />
+      <div ref={boardRef} className="anim-rise" style={delay(80)}>
+        <Scoreboard
+          match={match}
+          deltas={deltas}
+          count={celebrate
+            ? { delayMs: FIRST_LAND_MS, durationMs: countDurationMs(chipCount), winner: state.humanSeat }
+            : undefined}
+        />
       </div>
+      {celebrate && (
+        <ChipFlight sources={dealChips(deltas, state.humanSeat, chipCount)} winner={state.humanSeat} boardRef={boardRef} />
+      )}
 
       {scoring && state.winner !== null && (
         <section className="anim-rise card p-4" style={delay(160)} aria-live="polite">

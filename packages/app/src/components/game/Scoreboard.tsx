@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { formatCurrency } from '@mahjongkaki/engine';
 import { type MatchState, seatWindOf } from './match';
 
@@ -8,7 +9,50 @@ function money(n: number): string {
   return (n > 0 ? '+' : '') + formatCurrency(n);
 }
 
-export function Scoreboard({ match, deltas }: { match: MatchState; deltas?: number[] }) {
+export interface TotalCount { delayMs: number; durationMs: number; winner: number }
+
+// Timer, not rAF: it reads the clock each tick, so a throttled or hidden page still lands on the true total.
+function useCountedTotal(from: number, to: number, count?: TotalCount): number {
+  const [shown, setShown] = useState(count ? from : to);
+  const delayMs = count?.delayMs;
+  const durationMs = count?.durationMs;
+
+  useEffect(() => {
+    if (delayMs === undefined || durationMs === undefined || from === to) { setShown(to); return; }
+    const start = performance.now();
+    const id = window.setInterval(() => {
+      const t = (performance.now() - start - delayMs) / durationMs;
+      if (t >= 1) { setShown(to); clearInterval(id); return; }
+      if (t > 0) setShown(Math.round((from + (to - from) * (1 - (1 - t) ** 3)) * 100) / 100);
+    }, 40);
+    return () => clearInterval(id);
+  }, [from, to, delayMs, durationMs]);
+
+  return shown;
+}
+
+function SeatTotal({ seat, total, delta, count }: { seat: number; total: number; delta: number; count?: TotalCount }) {
+  const shown = useCountedTotal(Math.round((total - delta) * 100) / 100, total, count);
+  return (
+    <div
+      data-seat-total={seat}
+      className={`text-sm font-bold tabular-nums ${shown > 0 ? 'text-emerald-400' : shown < 0 ? 'text-red-400' : 'text-slate-500'}`}
+    >
+      <span className="sr-only">{money(total)}</span>
+      <span
+        aria-hidden
+        className="inline-block"
+        style={count?.winner === seat
+          ? { animation: `totalPunch ${count.durationMs}ms ease-out ${count.delayMs}ms backwards` }
+          : undefined}
+      >
+        {money(shown)}
+      </span>
+    </div>
+  );
+}
+
+export function Scoreboard({ match, deltas, count }: { match: MatchState; deltas?: number[]; count?: TotalCount }) {
   return (
     <div className="card p-3">
       <div className="flex items-center justify-between mb-2">
@@ -37,9 +81,7 @@ export function Scoreboard({ match, deltas }: { match: MatchState; deltas?: numb
                 {isDealer && <span className="text-[11px] text-amber-400 font-bold">庄</span>}
               </div>
               <div className="text-[12px] text-slate-500">{isYou ? 'You' : 'AI'}</div>
-              <div className={`text-sm font-bold ${total > 0 ? 'text-emerald-400' : total < 0 ? 'text-red-400' : 'text-slate-500'}`}>
-                {money(total)}
-              </div>
+              <SeatTotal seat={seat} total={total} delta={d} count={count} />
               {d !== 0 && (
                 <div className={`text-[12px] ${d > 0 ? 'text-emerald-400/70' : 'text-red-400/70'}`}>{money(d)}</div>
               )}
