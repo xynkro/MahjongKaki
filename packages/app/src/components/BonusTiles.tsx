@@ -31,7 +31,8 @@ export function BonusTiles({
               <ToggleChip
                 key={f}
                 label={FLOWER_LABELS[f]}
-                sublabel={f === 'bamboo_flower' ? 'bamboo' : f}
+                sublabel={f === 'bamboo_flower' ? 'bamboo' : f === 'chrysanthemum' ? 'chrysanth.' : f} // full word can't fit a 4-up chip at 320-375px
+                ariaLabel={f === 'chrysanthemum' ? 'chrysanthemum' : undefined}
                 active={active}
                 color="amber"
                 onClick={() => { haptics.select(); onToggleFlower(flower(f)); }}
@@ -76,17 +77,17 @@ export function BonusTiles({
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-[12px] text-slate-500 w-14 shrink-0">{label}</span>
-      <div className="flex gap-1">{children}</div>
+    <div>
+      <span className="text-[12px] text-slate-500 block mb-1">{label}</span>
+      <div className="grid grid-cols-4 gap-1">{children}</div>
     </div>
   );
 }
 
 function ToggleChip({
-  label, sublabel, active, color, onClick,
+  label, sublabel, ariaLabel, active, color, onClick,
 }: {
-  label: string; sublabel: string; active: boolean; color: 'amber' | 'emerald' | 'yellow'; onClick: () => void;
+  label: string; sublabel: string; ariaLabel?: string; active: boolean; color: 'amber' | 'emerald' | 'yellow'; onClick: () => void;
 }) {
   // Inactive chips read as tappable (premium dark gradient); active lights up on-brand.
   const inactive = 'bg-gradient-to-b from-[#2c2820] to-[#241f18] text-slate-200 border-[#3a3328] active:brightness-110';
@@ -100,7 +101,8 @@ function ToggleChip({
     <button
       type="button"
       onClick={onClick}
-      className={`flex flex-col items-center px-2.5 py-1.5 rounded-md border text-xs transition-all ${colors[color]}`}
+      aria-label={ariaLabel}
+      className={`flex flex-col items-center justify-center min-h-[44px] min-w-0 px-1 py-1.5 rounded-md border text-xs transition-all ${colors[color]}`}
     >
       <span className="font-bold text-base leading-none">{label}</span>
       <span className="text-[11px] leading-tight opacity-75 mt-0.5">{sublabel}</span>

@@ -4,7 +4,6 @@ import {
   gradeWaits,
   type WaitsDrill as DrillData,
 } from '@mahjongkaki/game';
-import { indexToTile, tileKey } from '@mahjongkaki/engine';
 import { TileRow } from '../game/TileRow';
 import { db } from '../../lib/db';
 import { haptics } from '../../lib/haptics';
@@ -76,7 +75,7 @@ export function WaitsDrill({ onBack }: Props) {
       <div className="card p-4">
         <h3 className="text-sm font-semibold text-slate-300 mb-1">Wait Training</h3>
         <p className="text-xs text-slate-400 mb-3">
-          This hand is tenpai. Select all tiles that complete it.
+          This hand is one tile from winning. Select every tile that would complete it.
         </p>
         <TileRow tiles={drill.hand} sortTiles={true} />
       </div>
@@ -108,17 +107,20 @@ export function WaitsDrill({ onBack }: Props) {
           </div>
           {result.correct.length > 0 && (
             <div className="text-xs text-emerald-400">
-              Correct: {result.correct.map(t => tileKey(indexToTile(t))).join(', ')}
+              Correct:
+              <TileRow tiles={result.correct} size="sm" animateEntrance={false} />
             </div>
           )}
           {result.missed.length > 0 && (
             <div className="text-xs text-amber-400">
-              Missed: {result.missed.map(t => tileKey(indexToTile(t))).join(', ')}
+              Missed:
+              <TileRow tiles={result.missed} size="sm" animateEntrance={false} />
             </div>
           )}
           {result.wrong.length > 0 && (
             <div className="text-xs text-red-400">
-              Wrong: {result.wrong.map(t => tileKey(indexToTile(t))).join(', ')}
+              Wrong:
+              <TileRow tiles={result.wrong} size="sm" animateEntrance={false} />
             </div>
           )}
           <button

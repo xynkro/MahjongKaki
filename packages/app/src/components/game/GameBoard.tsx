@@ -204,7 +204,13 @@ export function GameBoard({
     <div className="relative flex flex-col h-full" style={{ background: 'radial-gradient(130% 100% at 50% 22%, #34160c, #190a06)' }}>
       {/* Status bar */}
       <div className="flex items-center justify-between px-3 py-2 bg-black/30 border-b border-amber-400/10 text-xs text-amber-100/70 backdrop-blur">
-        <button onClick={onQuit} className="text-amber-100/60 active:text-amber-100 text-base leading-none active:scale-90">✕</button>
+        <button
+          onClick={onQuit}
+          aria-label="End match"
+          className="-ml-3 -my-2 w-11 h-11 grid place-items-center text-amber-100/60 active:text-amber-100 text-base leading-none active:scale-90"
+        >
+          ✕
+        </button>
         <span className="round-badge">{WIND_CHARS[state.prevailingWind]} {state.roundNumber}</span>
         <span className={isHumanTurn ? 'text-emerald-300 font-bold' : 'text-amber-100/70'}>
           {isHumanTurn ? 'Your turn' : `${WIND_CHARS[seatWind(state.currentPlayer, state.dealerSeat)]} playing…`}
@@ -282,35 +288,38 @@ export function GameBoard({
           drawnTile={drawnTile}
         />
 
-        {showActions && (
-          <div className="anim-pop flex gap-2 mt-2 justify-center">
-            {selectedTileValue !== null && (
-              <button
-                onClick={() => { haptics.select(); onDiscard(selectedTileValue); setSelectedIdx(null); setSelectedTileValue(null); }}
-                className="px-5 py-2 btn-primary rounded-lg text-sm font-medium active:scale-95 active:bg-emerald-600"
-              >
-                Discard
-              </button>
-            )}
-            {kongActions.map((a, i) => (
-              <button
-                key={i}
-                onClick={() => { if (a.type === 'declare_kong') { haptics.select(); onDeclareKong(a.tile); } }}
-                className="px-5 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium active:scale-95 active:bg-amber-500"
-              >
-                Kong
-              </button>
-            ))}
-            {canTsumo && (
-              <button
-                onClick={() => { haptics.success(); onTsumo(); }}
-                className="anim-tsumo px-5 py-2 bg-red-600 text-white rounded-lg text-sm font-bold shadow-[0_0_18px_rgba(218,90,68,0.5)] active:scale-95 active:bg-red-500"
-              >
-                Tsumo!
-              </button>
-            )}
-          </div>
-        )}
+        {/* Reserved 44px row: buttons appear inside it, so selecting a tile never shifts the hand */}
+        <div className="mt-2 h-11">
+          {showActions && (
+            <div className="anim-pop flex gap-2 justify-center">
+              {selectedTileValue !== null && (
+                <button
+                  onClick={() => { haptics.select(); onDiscard(selectedTileValue); setSelectedIdx(null); setSelectedTileValue(null); }}
+                  className="flex-1 min-w-0 max-w-[8.5rem] h-11 px-2 btn-primary rounded-lg text-sm font-medium active:scale-95 active:bg-emerald-600"
+                >
+                  Discard
+                </button>
+              )}
+              {kongActions.map((a, i) => (
+                <button
+                  key={i}
+                  onClick={() => { if (a.type === 'declare_kong') { haptics.select(); onDeclareKong(a.tile); } }}
+                  className="flex-1 min-w-0 max-w-[8.5rem] h-11 px-2 bg-amber-600 text-white rounded-lg text-sm font-medium active:scale-95 active:bg-amber-500"
+                >
+                  Kong
+                </button>
+              ))}
+              {canTsumo && (
+                <button
+                  onClick={() => { haptics.success(); onTsumo(); }}
+                  className="anim-tsumo flex-1 min-w-0 max-w-[8.5rem] h-11 px-2 bg-red-600 text-white rounded-lg text-sm font-bold shadow-[0_0_18px_rgba(218,90,68,0.5)] active:scale-95 active:bg-red-500"
+                >
+                  Tsumo!
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Flower pop — the hero moment */}

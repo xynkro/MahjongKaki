@@ -8,6 +8,7 @@ import {
 import { TileRow } from '../game/TileRow';
 import { db } from '../../lib/db';
 import { haptics } from '../../lib/haptics';
+import { readyDistance } from '../../lib/drill-copy';
 
 interface Props {
   onBack: () => void;
@@ -89,7 +90,7 @@ export function PushFoldDrill({ onBack }: Props) {
         </div>
 
         <h4 className="text-xs font-semibold text-slate-500 mb-1">
-          Your hand · {drill.yourShanten === 0 ? 'tenpai' : `${drill.yourShanten}-shanten`}
+          Your hand · {readyDistance(drill.yourShanten)}
         </h4>
         <TileRow tiles={drill.hand} sortTiles={true} />
       </div>
@@ -120,6 +121,12 @@ export function PushFoldDrill({ onBack }: Props) {
           <ul className="text-xs text-slate-400 space-y-1 list-disc list-inside">
             {result.reasons.map((r, i) => <li key={i}>{r}</li>)}
           </ul>
+          {result.recommendation !== 'push' && drill.safeTiles.length > 0 && (
+            <div className="text-xs text-slate-400">
+              Safe tiles in your hand:
+              <TileRow tiles={drill.safeTiles} size="sm" animateEntrance={false} />
+            </div>
+          )}
           <button
             onClick={newDrill}
             className="w-full mt-3 py-2 btn-primary rounded-lg text-sm font-medium active:bg-emerald-600"

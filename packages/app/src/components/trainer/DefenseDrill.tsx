@@ -4,7 +4,6 @@ import {
   gradeDefense,
   type DefenseDrill as DrillData,
 } from '@mahjongkaki/game';
-import { indexToTile, tileKey } from '@mahjongkaki/engine';
 import { TileRow } from '../game/TileRow';
 import { db } from '../../lib/db';
 import { haptics } from '../../lib/haptics';
@@ -63,9 +62,9 @@ export function DefenseDrill({ onBack }: Props) {
       </div>
 
       <div className="card p-4">
-        <h3 className="text-sm font-semibold text-slate-300 mb-1">Defense Training</h3>
+        <h3 className="text-sm font-semibold text-slate-300 mb-1">Defence Training</h3>
         <p className="text-xs text-slate-400 mb-3">
-          An opponent may be tenpai. Pick the safest discard.
+          An opponent may be one tile from winning. Tap the discard least likely to give them the win.
         </p>
 
         <div className="space-y-2 mb-3">
@@ -94,22 +93,26 @@ export function DefenseDrill({ onBack }: Props) {
           <div className={`text-lg font-bold ${result.isOptimal ? 'text-emerald-400' : 'text-amber-400'}`}>
             {result.isOptimal ? 'Safest choice!' : 'Not optimal'}
           </div>
-          <div className="text-xs text-slate-400">
-            Your pick: {tileKey(indexToTile(chosenTile))} (safety: {Math.round(result.safety * 100)}%)
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <span>Your discard:</span>
+            <TileRow tiles={[chosenTile]} size="sm" sortTiles={false} animateEntrance={false} />
+            <span>{Math.round(result.safety * 100)}% safe</span>
           </div>
           {!result.isOptimal && (
-            <div className="text-xs text-slate-400">
-              Safest: {drill.safestTiles.map(t => tileKey(indexToTile(t))).join(', ')} (safety: {Math.round(result.bestSafety * 100)}%)
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <span>Safest:</span>
+              <TileRow tiles={drill.safestTiles} size="sm" sortTiles={false} animateEntrance={false} />
+              <span>{Math.round(result.bestSafety * 100)}% safe</span>
             </div>
           )}
 
           <div className="mt-3">
-            <h4 className="text-xs font-semibold text-slate-500 mb-1">Safety ranking</h4>
-            <div className="space-y-0.5 max-h-32 overflow-y-auto">
+            <h4 className="text-xs font-semibold text-slate-500 mb-1">Safest discards first</h4>
+            <div className="space-y-1">
               {drill.tileRanking.slice(0, 6).map((r, i) => (
-                <div key={i} className="flex justify-between text-xs text-slate-500">
-                  <span>{tileKey(indexToTile(r.tile))}</span>
-                  <span>{Math.round(r.safety * 100)}%</span>
+                <div key={i} className="flex items-center justify-between text-xs text-slate-500">
+                  <TileRow tiles={[r.tile]} size="sm" sortTiles={false} animateEntrance={false} />
+                  <span>{Math.round(r.safety * 100)}% safe</span>
                 </div>
               ))}
             </div>

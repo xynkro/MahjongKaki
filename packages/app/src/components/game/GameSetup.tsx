@@ -34,7 +34,7 @@ export function GameSetup({ onStart }: GameSetupProps) {
   const pill = (active: boolean) => `seg min-h-[44px] text-sm ${active ? 'seg-on' : 'seg-off'}`;
 
   return (
-    <div className="space-y-4 pb-4">
+    <div className="space-y-4">
       <CinematicHero aspect="aspect-[21/9]" />
 
       <div>
@@ -111,11 +111,14 @@ export function GameSetup({ onStart }: GameSetupProps) {
         </div>
       </section>
 
-      <button type="button"
-        onClick={() => { haptics.success(); onStart({ difficulty, speed, humanSeat, stakeIndex }); }}
-        className="btn-primary w-full min-h-[52px] text-base font-semibold rounded-xl">
-        Start Match
-      </button>
+      {/* Sticky footer: solid backing so cards scrolling beneath stay legible */}
+      <div className="sticky bottom-0 z-10 -mx-4 px-4 pt-3 pb-4 bg-[#14110d] border-t border-amber-400/10">
+        <button type="button"
+          onClick={() => { haptics.success(); onStart({ difficulty, speed, humanSeat, stakeIndex }); }}
+          className="btn-primary w-full min-h-[52px] text-base font-semibold rounded-xl">
+          Start Match
+        </button>
+      </div>
     </div>
   );
 }

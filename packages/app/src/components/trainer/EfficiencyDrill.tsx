@@ -4,10 +4,10 @@ import {
   gradeEfficiency,
   type EfficiencyDrill as DrillData,
 } from '@mahjongkaki/game';
-import { indexToTile, tileKey } from '@mahjongkaki/engine';
 import { TileRow } from '../game/TileRow';
 import { db } from '../../lib/db';
 import { haptics } from '../../lib/haptics';
+import { readyDistance, winningTiles } from '../../lib/drill-copy';
 
 interface Props {
   onBack: () => void;
@@ -59,10 +59,10 @@ export function EfficiencyDrill({ onBack }: Props) {
 
       <div className="card p-4">
         <h3 className="text-sm font-semibold text-slate-300 mb-1">
-          Tile Efficiency ({drill.shantenValue}-shanten)
+          Tile Efficiency: {readyDistance(drill.shantenValue)}
         </h3>
         <p className="text-xs text-slate-400 mb-3">
-          Tap the tile you would discard to maximize acceptance
+          Tap the tile to discard that keeps the most winning tiles
         </p>
         <TileRow
           tiles={drill.hand}
@@ -73,25 +73,26 @@ export function EfficiencyDrill({ onBack }: Props) {
 
       {result && (
         <div className="card p-4 space-y-2">
-          <div className={`text-lg font-bold ${result.isOptimal ? 'text-emerald-400' : 'text-amber-400'}`}>
-            {result.isOptimal ? 'Optimal!' : `${Math.round(result.ratio * 100)}% efficiency`}
+          <div className={`text-lg font-bold ${result.ratio >= 1 ? 'text-emerald-400' : 'text-amber-400'}`}>
+            {result.isOptimal ? 'Best discard!' : `${Math.round(result.ratio * 100)}% as good as the best`}
           </div>
           <div className="text-xs text-slate-400">
-            Your acceptance: {result.acceptance} | Best: {result.optimalAcceptance}
+            Your discard keeps {winningTiles(result.acceptance)}. The best keeps {result.optimalAcceptance}.
           </div>
-          {!result.isOptimal && (
-            <div className="text-xs text-slate-400">
-              Optimal discard: {tileKey(indexToTile(drill.optimalDiscard))}
+          {result.ratio < 1 && (
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <span>Best discard:</span>
+              <TileRow tiles={[drill.optimalDiscard]} size="sm" sortTiles={false} animateEntrance={false} />
             </div>
           )}
 
           <div className="mt-3">
-            <h4 className="text-xs font-semibold text-slate-500 mb-1">All candidates</h4>
-            <div className="space-y-0.5 max-h-40 overflow-y-auto">
+            <h4 className="text-xs font-semibold text-slate-500 mb-1">Discards, best first</h4>
+            <div className="space-y-1">
               {drill.allCandidates.slice(0, 8).map((c, i) => (
-                <div key={i} className="flex justify-between text-xs text-slate-500">
-                  <span>{tileKey(indexToTile(c.tileIndex))}</span>
-                  <span>{c.totalAcceptance} acceptance</span>
+                <div key={i} className="flex items-center justify-between text-xs text-slate-500">
+                  <TileRow tiles={[c.tileIndex]} size="sm" sortTiles={false} animateEntrance={false} />
+                  <span>keeps {winningTiles(c.totalAcceptance)}</span>
                 </div>
               ))}
             </div>

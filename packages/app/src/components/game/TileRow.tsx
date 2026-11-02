@@ -35,9 +35,15 @@ export function TileRow({
   const start = useRef<{ idx: number; x: number; y: number; moved: boolean; dy: number } | null>(null);
   const [drag, setDrag] = useState<{ idx: number; dx: number; dy: number } | null>(null);
 
+  const seen = new Map<number, number>();
+
   return (
     <div className="flex flex-wrap gap-1">
       {displayTiles.map((tile, i) => {
+        // Keyed by tile, not slot: otherwise the next tile inherits a thrown tile's
+        // element and slides back from where the drag released.
+        const copy = seen.get(tile) ?? 0;
+        seen.set(tile, copy + 1);
         const isSelected = selectedTiles?.has(i);
         const isHighlight = highlightTiles?.has(tile);
         const dragging = drag?.idx === i;
@@ -72,7 +78,7 @@ export function TileRow({
 
         return (
           <button
-            key={i}
+            key={`${tile}:${copy}`}
             type="button"
             {...handlers}
             style={{

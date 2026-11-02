@@ -33,6 +33,7 @@ export function PlayTab() {
   const [match, setMatch] = useState<MatchState | null>(null);
   const [deltas, setDeltas] = useState<number[] | null>(null);
   const [resumeChecked, setResumeChecked] = useState(false);
+  const [confirmEnd, setConfirmEnd] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const profile = match
@@ -136,7 +137,7 @@ export function PlayTab() {
 
   // Game loop + end-of-hand handling.
   useEffect(() => {
-    if (!gameState || !match || view !== 'playing') return;
+    if (!gameState || !match || view !== 'playing' || confirmEnd) return; // paused behind the confirm
     if (timerRef.current) clearTimeout(timerRef.current);
 
     if (gameState.phase === 'finished') {
@@ -171,7 +172,7 @@ export function PlayTab() {
         return () => { if (timerRef.current) clearTimeout(timerRef.current); };
       }
     }
-  }, [gameState, match, view]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [gameState, match, view, confirmEnd]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function resolveAiClaims() {
     setGameState(prev => {
@@ -225,6 +226,7 @@ export function PlayTab() {
 
   function endMatch() {
     void endSave();
+    setConfirmEnd(false);
     setView('matchover');
   }
 
@@ -241,14 +243,14 @@ export function PlayTab() {
   }
 
   if (view === 'setup' || !match) {
-    return <GameSetup onStart={handleStart} />;
+    return <div className="px-4 pt-4"><GameSetup onStart={handleStart} /></div>;
   }
 
   if (view === 'matchover') {
     const leader = match.totals.indexOf(Math.max(...match.totals));
     const youWon = leader === match.humanSeat;
     return (
-      <div className="space-y-4 p-1">
+      <div className="space-y-4 px-4 pt-4 pb-4">
         <section className="card anim-rise p-6 text-center">
           <h2 className={`text-2xl font-bold mb-1 ${youWon ? 'text-emerald-400' : 'text-slate-200'}`}>
             {youWon ? 'You came out ahead!' : 'Match over'}
@@ -271,13 +273,15 @@ export function PlayTab() {
 
   if (view === 'result' && gameState) {
     return (
-      <RoundResult
-        state={gameState}
-        match={match}
-        deltas={deltas ?? [0, 0, 0, 0]}
-        onNextHand={nextHand}
-        onEndMatch={endMatch}
-      />
+      <div className="px-4 pt-4">
+        <RoundResult
+          state={gameState}
+          match={match}
+          deltas={deltas ?? [0, 0, 0, 0]}
+          onNextHand={nextHand}
+          onEndMatch={endMatch}
+        />
+      </div>
     );
   }
 
@@ -298,7 +302,7 @@ export function PlayTab() {
           onDiscard={handleDiscard}
           onDeclareKong={handleDeclareKong}
           onTsumo={handleTsumo}
-          onQuit={endMatch}
+          onQuit={() => setConfirmEnd(true)}
           animateDiscards={speedMs >= 1000}
         />
       </div>
@@ -309,6 +313,30 @@ export function PlayTab() {
           onClaim={handleClaim}
           onSkip={handleSkipClaim}
         />
+      )}
+      {confirmEnd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/75 backdrop-blur-sm">
+          <div role="dialog" aria-modal="true" aria-labelledby="end-match-title" className="card anim-pop w-full max-w-sm p-6 text-center space-y-4">
+            <h2 id="end-match-title" className="font-display text-xl text-slate-100">End this match?</h2>
+            <p className="text-sm text-slate-300">The hand in progress will be lost.</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmEnd(false)}
+                className="min-h-[44px] btn-ghost rounded-xl text-sm font-medium"
+              >
+                Keep playing
+              </button>
+              <button
+                type="button"
+                onClick={endMatch}
+                className="min-h-[44px] text-sm font-medium text-red-300 bg-red-900/40 rounded-xl active:bg-red-900/60"
+              >
+                End match
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

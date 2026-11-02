@@ -102,6 +102,17 @@ describe('grading', () => {
     expect(grade.ratio).toBe(1);
   });
 
+  it('gradeEfficiency counts a discard tied with the best as optimal', () => {
+    const drill = generateEfficiencyDrill(1);
+    if (!drill) return;
+
+    const tied = { tileIndex: 33, totalAcceptance: drill.optimalAcceptance };
+    const withTie = { ...drill, allCandidates: [...drill.allCandidates, tied] } as typeof drill;
+    const grade = gradeEfficiency(withTie, 33);
+    expect(grade.isOptimal).toBe(true);
+    expect(grade.ratio).toBe(1);
+  });
+
   it('gradeWaits gives perfect score for correct waits', () => {
     const drill = generateWaitsDrill();
     if (!drill) return;

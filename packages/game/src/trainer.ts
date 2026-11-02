@@ -1,5 +1,5 @@
 import {
-  indexToTile, tileKey,
+  indexToTile,
   type Wind, WINDS,
 } from '@mahjongkaki/engine';
 import { shanten, tenpaiWaits, ukeire, shantenWithMelds, type UkeireResult } from './shanten.js';
@@ -31,6 +31,12 @@ function shuffleArray<T>(arr: T[]): T[] {
     [result[i], result[j]] = [result[j], result[i]];
   }
   return result;
+}
+
+// Plain-English distance from a ready hand, for learner-facing copy (no "shanten").
+function fromReady(s: number): string {
+  if (s <= 0) return 'ready';
+  return `${s} ${s === 1 ? 'tile' : 'tiles'} from ready`;
 }
 
 function randomHand(tileCount: number): number[] {
@@ -193,7 +199,8 @@ export function gradeEfficiency(drill: EfficiencyDrill, chosenDiscard: number): 
   const acceptance = chosen?.totalAcceptance ?? 0;
 
   return {
-    isOptimal: chosenDiscard === drill.optimalDiscard,
+    // Any discard tied with the best keeps just as many winning tiles, so it counts.
+    isOptimal: chosenDiscard === drill.optimalDiscard || acceptance >= drill.optimalAcceptance,
     acceptance,
     optimalAcceptance: drill.optimalAcceptance,
     ratio: drill.optimalAcceptance > 0 ? acceptance / drill.optimalAcceptance : 0,
@@ -413,15 +420,15 @@ export function generateCallDrill(maxAttempts = 400): CallDrill | null {
 
     if (!advances) {
       recommendation = 'pass';
-      reasons.push(`Calling doesn't bring you closer to tenpai (${shantenBefore}→${shantenAfterCall} shanten).`);
+      reasons.push(`Calling doesn't bring you closer to a ready hand (${fromReady(shantenBefore)} before, ${fromReady(shantenAfterCall)} after).`);
       reasons.push('Calling for no speed gain just exposes your hand and weakens your defence for nothing.');
     } else if (floor >= 1) {
       recommendation = 'call';
-      reasons.push(`Calling advances you from ${shantenBefore} to ${shantenAfterCall} shanten.`);
+      reasons.push(`Calling moves you from ${fromReady(shantenBefore)} to ${fromReady(shantenAfterCall)}.`);
       reasons.push(`You keep a scoring path: ${signals.map(s => s.label).join(', ')}.`);
     } else {
       recommendation = 'pass';
-      reasons.push(`Calling would speed you up (${shantenBefore}→${shantenAfterCall}) — but look at the value.`);
+      reasons.push(`Calling would speed you up (${fromReady(shantenBefore)} to ${fromReady(shantenAfterCall)}) — but look at the value.`);
       reasons.push('Opened, this hand has no guaranteed tai. In Singapore mahjong a 0-tai hand cannot win — the classic "no tai" trap.');
     }
 
@@ -486,8 +493,8 @@ export function generatePushFoldDrill(maxAttempts = 500): PushFoldDrill | null {
         hand, opponentDiscards: pond, opponentExposed: DRAGON_PUNG, threatLevel: 'high', yourShanten,
         recommendation: 'push',
         reasons: [
-          'You are already tenpai — one tile away from winning.',
-          'In a tenpai-vs-tenpai race you almost always push your ready hand rather than fold it.',
+          'Your hand is already ready — one tile away from winning.',
+          'When both of you are one tile from winning, you almost always keep attacking with your ready hand rather than fold it.',
         ],
         safeTiles: safe,
       };
@@ -523,9 +530,9 @@ export function generatePushFoldDrill(maxAttempts = 500): PushFoldDrill | null {
         hand, opponentDiscards: pond, opponentExposed: DRAGON_PUNG, threatLevel: 'high', yourShanten,
         recommendation: 'fold',
         reasons: [
-          `Opponent looks tenpai (exposed dragon pung + ${pond.length} discards) and you are still ${yourShanten} shanten away.`,
-          'Too far to win the race; dealing in is the worst outcome. Fold out on safe tiles (betaori).',
-          `You hold safe tiles to fold with: ${safe.map(t => tileKey(indexToTile(t))).join(', ')}.`,
+          `The opponent looks one tile from winning (exposed dragon pung + ${pond.length} discards) and you are still ${fromReady(yourShanten)}.`,
+          'Too far to win the race; dealing in is the worst outcome. Fold by discarding safe tiles.',
+          'You hold safe tiles to fold with (shown below).',
         ],
         safeTiles: safe,
       };
@@ -542,9 +549,9 @@ export function generatePushFoldDrill(maxAttempts = 500): PushFoldDrill | null {
       hand, opponentDiscards: pond, opponentExposed: DRAGON_PUNG, threatLevel: 'high', yourShanten,
       recommendation: 'sidestep',
       reasons: [
-        'Opponent looks tenpai, but you are only 1 shanten — close enough to keep trying.',
-        'Sidestep (mawashi): discard your safe tiles while still pushing toward tenpai, instead of fully folding.',
-        `Safe tiles available: ${safe.map(t => tileKey(indexToTile(t))).join(', ')}.`,
+        'The opponent looks one tile from winning, but you are only one tile from ready — close enough to keep trying.',
+        'Sidestep: discard your safe tiles while still working towards a ready hand, instead of fully folding.',
+        'You have safe tiles to throw (shown below).',
       ],
       safeTiles: safe,
     };

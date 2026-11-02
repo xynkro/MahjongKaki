@@ -15,7 +15,7 @@ interface DrillDef { type: DrillType; label: string; description: string }
 
 const FUNDAMENTALS: DrillDef[] = [
   { type: 'efficiency', label: 'Tile Efficiency', description: 'Pick the discard that keeps the most winning tiles' },
-  { type: 'waits', label: 'Wait Training', description: 'Identify which tiles complete a tenpai hand' },
+  { type: 'waits', label: 'Wait Training', description: 'Find every tile that completes a hand one tile from winning' },
   { type: 'defense', label: 'Safe Tiles', description: 'Find the safest tile to discard' },
 ];
 
