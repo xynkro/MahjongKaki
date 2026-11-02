@@ -311,7 +311,7 @@ export function GameBoard({
               ))}
               {canTsumo && (
                 <button
-                  onClick={() => { haptics.success(); onTsumo(); }}
+                  onClick={() => { haptics.select(); onTsumo(); }}
                   className="anim-tsumo flex-1 min-w-0 max-w-[8.5rem] h-11 px-2 bg-red-600 text-white rounded-lg text-sm font-bold shadow-[0_0_18px_rgba(218,90,68,0.5)] active:scale-95 active:bg-red-500"
                 >
                   Tsumo!

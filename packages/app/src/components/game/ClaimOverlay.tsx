@@ -27,7 +27,7 @@ export function ClaimOverlay({ claims, lastDiscardTile, onClaim, onSkip }: Claim
         {claims.map((claim, i) => (
           <button
             key={`${claim.claimType}-${i}`}
-            onClick={() => { claim.claimType === 'win' ? haptics.success() : haptics.select(); onClaim(claim); }}
+            onClick={() => { haptics.select(); onClaim(claim); }}
             className={`px-5 py-2.5 text-white rounded-lg font-semibold text-sm active:scale-95 ${CLAIM_COLORS[claim.claimType]}`}
           >
             {claim.claimType === 'win' ? 'Hu!' : claim.claimType.charAt(0).toUpperCase() + claim.claimType.slice(1)}

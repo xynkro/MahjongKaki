@@ -4,7 +4,7 @@ import { tileToIndex, type Wind, WINDS } from '@mahjongkaki/engine';
 import { TileRow } from './TileRow';
 import { Scoreboard } from './Scoreboard';
 import { type MatchState } from './match';
-import { haptics } from '../../lib/haptics';
+import { haptics, sound } from '../../lib/haptics';
 import { TermTip } from '../TermTip';
 import { WinTileScene } from '../three/WinTileScene';
 
@@ -37,7 +37,15 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
   const isHumanWin = state.winner === state.humanSeat;
   const scoring = state.winner !== null ? scoreWinForSeat(state, state.winner) : null;
 
-  useEffect(() => { if (isHumanWin) haptics.success(); }, [isHumanWin]);
+  // Fanfare, then your chips land as the tile settles. Paying out stays low-key.
+  useEffect(() => {
+    const myDelta = deltas[state.humanSeat] ?? 0;
+    if (isHumanWin) haptics.win();
+    else if (isDraw) sound.handDrawn();
+    else if (myDelta < 0) sound.loss();
+    if (myDelta > 0) sound.chips(Math.min(10, 3 + (scoring?.cappedTai ?? 0)), isHumanWin ? 1.3 : 0);
+    else if (myDelta < 0) sound.chips(2, 0.4);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // seatWind here uses the dealer of the hand just played; match.dealerSeat has already
   // advanced, so derive the played hand's dealer from the gameState itself.

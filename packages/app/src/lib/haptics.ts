@@ -27,6 +27,7 @@ export const haptics = {
   tap: () => { buzz(8); sound.tap(); },
   select: () => { buzz(12); sound.select(); },
   success: () => { buzz([20, 40, 28]); sound.success(); },
+  win: () => { buzz([20, 40, 28, 60, 40]); sound.win(); },
   flower: () => { buzz([10, 28, 10]); sound.flower(); },
   error: () => { buzz([28, 30, 28]); sound.error(); },
 };
