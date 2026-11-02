@@ -1,11 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { haptics } from '../lib/haptics';
 import { useTableState, setTableState, getTableState } from '../lib/table-state';
+import { DiceStage, type DiceRoll } from './three/DiceStage';
+import type { DiceValues } from './three/dice';
 
 const WINDS = ['East', 'South', 'West', 'North'] as const;
 const WIND_ZH: Record<string, string> = { East: '東', South: '南', West: '西', North: '北' };
 
-function rollDice(): [number, number, number] {
+function rollDice(): DiceValues {
   return [
     Math.floor(Math.random() * 6) + 1,
     Math.floor(Math.random() * 6) + 1,
@@ -23,14 +25,28 @@ function shuffleSeats(): [string, string, string, string] {
 }
 
 export function TableUtils() {
-  const [dice, setDice] = useState<[number, number, number] | null>(null);
+  // The RNG draws first; the 3D dice only animate onto these values. `settled` is
+  // the id of the last roll whose faces are showing, so the total can never lead them.
+  const [roll, setRoll] = useState<DiceRoll | null>(null);
+  const [settled, setSettled] = useState(0);
+  const rollId = useRef(0);
+  const rolling = useRef(false);
   const [seats, setSeats] = useState<[string, string, string, string] | null>(null);
   const { roundWindIdx: windRound, dealerIdx: dealerIndex } = useTableState();
 
   const handleRollDice = useCallback(() => {
+    if (rolling.current) return; // taps while the dice are tumbling are ignored
+    rolling.current = true;
     haptics.tap();
-    setDice(rollDice());
+    setRoll({ id: ++rollId.current, values: rollDice() });
   }, []);
+
+  const handleSettled = useCallback((id: number) => {
+    if (id === rollId.current) rolling.current = false;
+    setSettled(id);
+  }, []);
+
+  const total = roll && settled === roll.id ? roll.values[0] + roll.values[1] + roll.values[2] : null;
 
   const handleShuffleSeats = useCallback(() => {
     haptics.tap();
@@ -60,25 +76,26 @@ export function TableUtils() {
     <div className="space-y-4 pb-4">
       <section className="card p-4">
         <h3 className="section-title">Dice Roller</h3>
-        <div className="flex items-center gap-4 mt-3" aria-live="polite">
+        <div className="flex items-center justify-between gap-3 mt-3">
           <button
             type="button"
             onClick={handleRollDice}
-            className="px-4 py-2 min-h-[44px] text-sm font-medium btn-primary rounded-lg active:bg-emerald-600"
+            aria-busy={roll !== null && total === null}
+            className="shrink-0 whitespace-nowrap px-4 py-2 min-h-[44px] text-sm font-medium btn-primary rounded-lg active:bg-emerald-600"
           >
             Roll 3 Dice
           </button>
-          {dice && (
-            <div className="flex gap-2">
-              {dice.map((d, i) => (
-                <DiceFace key={i} value={d} />
-              ))}
-              <span className="text-2xl font-bold text-amber-400 self-center ml-1">
-                = {dice[0] + dice[1] + dice[2]}
+          {/* Reserved width + height: the total fills in when the dice land, nothing moves. */}
+          <div className="min-h-[2rem] min-w-[5rem] text-right text-2xl font-bold tabular-nums text-amber-400" aria-live="polite">
+            {roll && total !== null && (
+              <span className="anim-pop inline-block">
+                <span className="sr-only">Rolled {roll.values.join(', ')}. Total </span>
+                <span aria-hidden="true">= {total}</span>
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
+        <DiceStage roll={roll} onSettled={handleSettled} fallback={values => values.map((d, i) => <DiceFace key={i} value={d} />)} />
       </section>
 
       <section className="card p-4">

@@ -6,6 +6,7 @@ import { Scoreboard } from './Scoreboard';
 import { type MatchState } from './match';
 import { haptics } from '../../lib/haptics';
 import { TermTip } from '../TermTip';
+import { WinTileScene } from '../three/WinTileScene';
 
 const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西', north: '北' };
 
@@ -19,6 +20,14 @@ interface RoundResultProps {
 
 function seatWind(seat: number, dealerSeat: number): Wind {
   return WINDS[(seat - dealerSeat + 4) % 4];
+}
+
+// The tile that completed the hand. Same pick as scoreWinForSeat: the discard for
+// a discard win, otherwise the last tile of the winner's concealed hand (the draw).
+function winningTile(state: GameState, seat: number): number {
+  if (state.winType === 'discard' && state.lastDiscard) return state.lastDiscard.tile;
+  const hand = state.hands[seat];
+  return hand[hand.length - 1] ?? 0;
 }
 
 const delay = (ms: number) => ({ animationDelay: `${ms}ms` });
@@ -49,16 +58,7 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch }: Ro
           </>
         ) : (
           <>
-            {isHumanWin && (
-              <div className="wintile-scene mb-3">
-                <div className="wintile3d">
-                  <div className="wintile-front">
-                    <span style={{ color: '#b5392a', fontWeight: 800, fontSize: '2.5rem', lineHeight: 1 }}>中</span>
-                  </div>
-                  <div className="wintile-back" />
-                </div>
-              </div>
-            )}
+            {isHumanWin && <WinTileScene tile={winningTile(state, state.winner!)} />}
             <h2 className={`text-2xl font-bold mb-1 ${isHumanWin ? 'text-emerald-400' : 'text-red-400'}`}>
               {isHumanWin ? 'You Win!' : `${WIND_CHARS[seatWind(state.winner!, playedDealer)]} Wins`}
             </h2>
