@@ -72,12 +72,12 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
   const set = <K extends keyof RulesConfig>(k: K, v: RulesConfig[K]) => setRule(k, v);
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">
+    <div className="app-full z-50 bg-slate-950 flex flex-col">
       <header
         className="shrink-0 px-4 pb-3 bg-slate-900/95 border-b border-amber-400/15"
         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.85rem)' }}
       >
-        <h2 className="font-display text-xl text-slate-100 max-w-lg mx-auto">House Rules</h2>
+        <h2 className="font-display text-2xl text-slate-100 max-w-lg mx-auto">House Rules</h2>
       </header>
 
       <div className="flex-1 overflow-y-auto overscroll-contain">

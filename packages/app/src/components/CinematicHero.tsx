@@ -34,7 +34,7 @@ export function CinematicHero({ className = '', caption, aspect = 'aspect-[16/9]
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-black/15 pointer-events-none" />
       {caption && (
         <div className="absolute bottom-0 inset-x-0 px-4 pb-3 pointer-events-none">
-          <p className="font-display text-lg font-semibold text-amber-50 drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]">
+          <p className="font-display text-xl text-amber-50 drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]">
             {caption}
           </p>
         </div>

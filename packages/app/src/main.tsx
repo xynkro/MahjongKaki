@@ -2,9 +2,21 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 // Self-hosted fonts (bundled + precached → fully offline, no Google CDN).
-import '@fontsource-variable/plus-jakarta-sans/wght.css';
-import '@fontsource-variable/fraunces/wght.css';
+import '@fontsource-variable/inter/wght.css';
+import '@fontsource/instrument-serif/400.css';
+import '@fontsource/instrument-serif/400-italic.css';
 import './styles/index.css';
+
+// iPhone home-screen apps report a viewport shorter than the screen (WebKit bug
+// 316008), leaving a dead band under the tab bar. Size the app from the screen.
+if ((navigator as Navigator & { standalone?: boolean }).standalone && /iPhone/.test(navigator.userAgent)) {
+  const setAppHeight = () => {
+    const landscape = matchMedia('(orientation: landscape)').matches;
+    document.documentElement.style.setProperty('--app-h', `${landscape ? screen.width : screen.height}px`);
+  };
+  setAppHeight();
+  addEventListener('resize', setAppHeight);
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

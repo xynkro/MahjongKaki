@@ -315,9 +315,9 @@ export function PlayTab() {
         />
       )}
       {confirmEnd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/75 backdrop-blur-sm">
+        <div className="app-full z-50 flex items-center justify-center p-5 bg-black/75 backdrop-blur-sm">
           <div role="dialog" aria-modal="true" aria-labelledby="end-match-title" className="card anim-pop w-full max-w-sm p-6 text-center space-y-4">
-            <h2 id="end-match-title" className="font-display text-xl text-slate-100">End this match?</h2>
+            <h2 id="end-match-title" className="font-display text-2xl text-slate-100">End this match?</h2>
             <p className="text-sm text-slate-300">The hand in progress will be lost.</p>
             <div className="grid grid-cols-2 gap-2">
               <button

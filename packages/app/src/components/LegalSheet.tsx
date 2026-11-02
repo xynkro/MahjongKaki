@@ -26,10 +26,10 @@ export function useFirstRunDisclaimer() {
 
 export function FirstRunDisclaimer({ onAccept }: { onAccept: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/75 backdrop-blur-sm">
+    <div className="app-full z-50 flex items-center justify-center p-5 bg-black/75 backdrop-blur-sm">
       <div className="card anim-pop w-full max-w-sm p-6 text-center space-y-3">
         <div className="text-3xl" aria-hidden>🀄</div>
-        <h2 className="font-display text-xl text-slate-100">Welcome to MahjongKaki</h2>
+        <h2 className="font-display text-2xl text-slate-100">Welcome to MahjongKaki</h2>
         <p className="text-sm text-slate-300 leading-relaxed">
           MahjongKaki is a <strong className="text-amber-400">scorekeeper and calculator</strong> — not a gambling app.
           It never holds or moves money and it doesn't take bets. Any chip amounts are just a tally; you settle
@@ -61,12 +61,12 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export function LegalSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">
+    <div className="app-full z-50 bg-slate-950 flex flex-col">
       <header
         className="shrink-0 px-4 pb-3 bg-slate-900/95 border-b border-amber-400/15"
         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.85rem)' }}
       >
-        <h2 className="font-display text-xl text-slate-100 max-w-lg mx-auto">About &amp; Legal</h2>
+        <h2 className="font-display text-2xl text-slate-100 max-w-lg mx-auto">About &amp; Legal</h2>
       </header>
 
       <div className="flex-1 overflow-y-auto overscroll-contain">

@@ -56,8 +56,10 @@ export default {
         ivory: '#F1E7D2',
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans Variable"', '"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['"Fraunces Variable"', 'Fraunces', 'ui-serif', 'Georgia', 'serif'],
+        sans: ['"Inter Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Instrument Serif"', 'ui-serif', 'Georgia', 'serif'],
+        // Numbers used to render in a code font; keep them in Inter (tabular via .font-mono).
+        mono: ['"Inter Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       // Bumped type scale (~+15%) — the whole app reads larger without touching
       // every className. [size, line-height].

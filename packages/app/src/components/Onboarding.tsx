@@ -60,7 +60,7 @@ export function Onboarding({ onDone, onLearn }: { onDone: () => void; onLearn: (
   const beginner = tileMode === 'beginner';
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">
+    <div className="app-full z-50 bg-slate-950 flex flex-col">
       <div className="flex-1 overflow-y-auto overscroll-contain">
         <div
           className="max-w-sm mx-auto px-5 pb-4 space-y-5"

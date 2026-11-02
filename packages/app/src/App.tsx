@@ -33,13 +33,13 @@ export function App() {
   }, [settingsOpen, legalOpen, disclaimer.show, onboarding.show]);
 
   return (
-    <div className="flex flex-col h-dvh">
+    <div className="app-full flex flex-col">
       <header
         className="relative pb-3 bg-slate-900/80 backdrop-blur border-b border-amber-400/15"
         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}
       >
         <div className="relative flex items-center justify-center">
-          <h1 className="font-display text-2xl font-semibold tracking-[0.01em] text-slate-50">
+          <h1 className="font-display text-[1.75rem] leading-none text-slate-50">
             Mahjong<span className="gold-foil-live">Kaki</span>
           </h1>
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
@@ -55,7 +55,7 @@ export function App() {
               aria-label="About and legal"
               className="w-9 h-9 grid place-items-center rounded-full border border-slate-700/60 text-slate-400 active:scale-90"
             >
-              <span className="font-serif text-base font-semibold leading-none italic">i</span>
+              <span className="font-display text-lg leading-none italic">i</span>
             </button>
           </div>
         </div>
