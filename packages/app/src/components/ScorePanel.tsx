@@ -173,7 +173,7 @@ export function ScorePanel({
               onClick={onSendToChips}
               className="w-full min-h-[44px] mt-1 btn-gold rounded-xl text-sm font-semibold"
             >
-              Send to chip tracker →
+              Send to No Chips Game →
             </button>
           )}
         </div>

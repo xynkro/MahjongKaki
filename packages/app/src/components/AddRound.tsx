@@ -71,7 +71,7 @@ export function AddRound({
 
       {fromCalculator && (
         <div className="text-xs text-emerald-200 bg-emerald-900/25 border border-emerald-500/25 rounded-lg px-3 py-2">
-          <span className="font-semibold">{initialTai} tai</span> from the calculator — just pick the winner{winType === 'discard' ? ' and shooter' : ''}.
+          <span className="font-semibold">{initialTai} tai</span> from Count My Tais — just pick the winner{winType === 'discard' ? ' and shooter' : ''}.
         </div>
       )}
 

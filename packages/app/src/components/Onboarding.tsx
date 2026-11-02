@@ -69,13 +69,13 @@ export function Onboarding({ onDone, onLearn }: { onDone: () => void; onLearn: (
           <CinematicHero caption="Welcome to MahjongKaki" />
 
           <p className="text-sm text-slate-300 leading-relaxed text-center">
-            Your companion for Singapore mahjong — score hands, settle chips, run the table, and sharpen your play.
+            Your companion for Singapore mahjong — play against AI, sharpen your skills, and keep score at a real table.
           </p>
 
           <div className="card p-4 space-y-3">
-            <Feature icon="🀄" title="Score any hand" desc="Tap in the tiles — get the tai and who pays what." />
-            <Feature icon="🪙" title="Track the chips" desc="Record each round; balances settle automatically." />
-            <Feature icon="🎯" title="Play & learn" desc="Practise against AI and drill the fundamentals." />
+            <Feature icon="🎯" title="Play & train" desc="Practise against AI and drill the fundamentals." />
+            <Feature icon="🀄" title="Count My Tais" desc="Enter a hand and see the tai and who pays what." />
+            <Feature icon="🪙" title="No Chips Game" desc="No chips at the table? Record each round and keep a running tally." />
           </div>
 
           <button
