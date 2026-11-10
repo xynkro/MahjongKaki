@@ -16,12 +16,17 @@ export function LevelPick({ onPicked }: { onPicked: (level: Level) => void }) {
   };
 
   return (
-    <div className="app-full z-50 bg-bg flex flex-col px-5" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 3rem)' }}>
+    <div className="app-full z-50 bg-bg flex flex-col px-5 overflow-y-auto" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1.25rem)' }}>
       <div className="max-w-lg w-full mx-auto">
+        <img
+          src={`${import.meta.env.BASE_URL}art/may-wave.webp`}
+          alt="May, your mahjong teacher, waving hello from the table"
+          className="w-full h-56 object-cover object-[50%_35%] rounded-2xl mb-6 anim-pop"
+        />
         <h1 className="font-display text-[32px] leading-tight text-ink">
           Mahjong<span className="text-accent">Kaki</span>
         </h1>
-        <p className="text-mute mt-2 text-[17px]">Singapore mahjong, in plain English. How much do you know already?</p>
+        <p className="text-mute mt-2 text-[17px]">Hi, I’m May. I’ll teach you Singapore mahjong in plain English. How much do you know already?</p>
         <div className="mt-8 flex flex-col gap-3">
           {OPTIONS.map((o, i) => (
             <button
