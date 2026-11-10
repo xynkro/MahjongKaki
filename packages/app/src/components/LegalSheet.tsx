@@ -27,21 +27,19 @@ export function useFirstRunDisclaimer() {
 export function FirstRunDisclaimer({ onAccept }: { onAccept: () => void }) {
   return (
     <div className="app-full z-50 flex items-center justify-center p-5 bg-black/75 backdrop-blur-sm">
-      <div className="card anim-pop w-full max-w-sm p-6 text-center space-y-3">
-        <div className="text-3xl" aria-hidden>🀄</div>
-        <h2 className="font-display text-2xl text-slate-100">Welcome to MahjongKaki</h2>
-        <p className="text-sm text-slate-300 leading-relaxed">
-          MahjongKaki is a <strong className="text-amber-400">scorekeeper and calculator</strong> — not a gambling app.
-          It never holds or moves money and it doesn't take bets. Any chip amounts are just a tally; you settle
-          directly among yourselves.
+      <div className="card anim-pop w-full max-w-sm p-6 space-y-3">
+        <h2 className="font-display text-2xl text-ink">Welcome to MahjongKaki</h2>
+        <p className="text-[15px] text-ink leading-relaxed">
+          A place to learn Singapore mahjong and practise it. Games are scored in points, never money, and the app
+          doesn’t take bets.
         </p>
-        <p className="text-xs text-slate-400 leading-relaxed">
-          Everything you enter stays on this device, with no account and no tracking. The one exception is Play with
-          friends, which sends your nickname and moves through our server for that game.
+        <p className="text-sm text-mute leading-relaxed">
+          Your progress stays on this phone, with no account and no tracking. Playing online with friends sends your
+          nickname and moves through our server, only for that game.
         </p>
         <button
           onClick={onAccept}
-          className="w-full min-h-[44px] mt-2 btn-primary rounded-xl font-medium active:scale-95 active:bg-emerald-600"
+          className="w-full h-12 mt-2 btn-primary rounded-xl text-[16px]"
         >
           I understand
         </button>
