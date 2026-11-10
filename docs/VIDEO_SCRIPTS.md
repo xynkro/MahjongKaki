@@ -47,6 +47,10 @@ Take 1 of every host clip started from the same still, so they all share one med
 `@MayMahjong` character element (made from four W1–C1 frames) instead of a start frame, plus Kling **multi-shot**,
 so each clip cuts between two or three angles. Same room, same lines (the approved or corrected ones).
 
+**Kling needs a start frame whenever the prompt holds an element chip** (11 Nov: without one, Generate only shows a
+small toast and nothing renders). Each clip starts from a 9:16 still from the art batch (`media-src/video/start/`),
+and shot 1 of the prompt must describe that still. U1 starts from A1 (May waving), cropped to 9:16.
+
 | # | Shot plan |
 |---|---|
 | U1 | Wide from the doorway, May at the table under the lamp → close-up of her hands lifting a short stack of tiles (backs to camera) → medium on her face as she finishes the line |

@@ -163,6 +163,9 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
             <Row label="Coach in games" desc="On your turn against the AI, suggests a tile to throw and says why.">
               <Toggle value={display.coach} onChange={v => setDisplay('coach', v)} />
             </Row>
+            <Row label="Score in cents" desc="Off: games against the AI keep score in points. On: amounts show as cents and dollars, for home games that settle that way.">
+              <Toggle value={display.money} onChange={v => setDisplay('money', v)} />
+            </Row>
             <Row label="Term tooltips" desc="Tap underlined terms (Tai, Shooter…) anywhere for a quick definition.">
               <Toggle value={display.tooltips} onChange={v => setDisplay('tooltips', v)} />
             </Row>

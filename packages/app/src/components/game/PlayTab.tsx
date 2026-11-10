@@ -13,7 +13,7 @@ import { GameSetup, type SpeedSetting, type MatchConfig } from './GameSetup';
 import { GameBoard } from './GameBoard';
 import { ClaimOverlay } from './ClaimOverlay';
 import { RoundResult } from './RoundResult';
-import { Scoreboard } from './Scoreboard';
+import { Scoreboard, points } from './Scoreboard';
 import { type MatchState, newMatch, advanceMatch, handDeltas } from './match';
 import { db } from '../../lib/db';
 import { getRules } from '../../lib/settings';
@@ -259,18 +259,18 @@ export function PlayTab() {
   }
 
   if (view === 'matchover') {
-    const leader = match.totals.indexOf(Math.max(...match.totals));
-    const youWon = leader === match.humanSeat;
+    const top = Math.max(...match.totals);
+    const youWon = top > 0 && match.totals[match.humanSeat] === top;
     return (
       <div className="space-y-4 px-4 pt-4 pb-4">
         <section className="card anim-rise p-6 text-center">
           <h2 className={`text-2xl font-bold mb-1 ${youWon ? 'text-emerald-400' : 'text-slate-200'}`}>
-            {youWon ? 'You came out ahead!' : 'Match over'}
+            {youWon ? 'You finished on top' : 'Match over'}
           </h2>
           <p className="text-slate-400 text-xs">{match.handNo - 1} hands played</p>
         </section>
         <div className="anim-rise" style={{ animationDelay: '80ms' }}>
-          <Scoreboard match={match} />
+          <Scoreboard match={match} amount={match.stakeIndex < 0 ? points : undefined} />
         </div>
         <button
           onClick={newMatchSetup}
@@ -290,6 +290,7 @@ export function PlayTab() {
           state={gameState}
           match={match}
           deltas={deltas ?? [0, 0, 0, 0]}
+          amount={match.stakeIndex < 0 ? points : undefined}
           onNextHand={nextHand}
           onEndMatch={endMatch}
         />

@@ -9,9 +9,11 @@ export interface DisplayConfig {
   tooltips: boolean;
   /** Play vs AI: suggest a throw on your turn, with a one-line reason. */
   coach: boolean;
+  /** Show AI-game scores in cents/dollars instead of points. Off by default; never used online. */
+  money: boolean;
 }
 
-const DEFAULT: DisplayConfig = { tileMode: 'beginner', tooltips: true, coach: true };
+const DEFAULT: DisplayConfig = { tileMode: 'beginner', tooltips: true, coach: true, money: false };
 const KEY = 'mk_display';
 
 let cfg: DisplayConfig = load();

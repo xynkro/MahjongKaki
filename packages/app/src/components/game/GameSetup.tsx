@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { type AiProfile, ALL_PROFILES } from '@mahjongkaki/ai';
 import { STAKE_PRESETS } from '@mahjongkaki/engine';
 import { haptics } from '../../lib/haptics';
-import { CinematicHero } from '../CinematicHero';
+import { useDisplay } from '../../lib/display';
 
 export type SpeedSetting = 'slow' | 'normal' | 'fast' | 'instant';
 
@@ -19,61 +19,28 @@ interface GameSetupProps {
 }
 
 export function GameSetup({ onStart, onOnline }: GameSetupProps) {
-  const [difficulty, setDifficulty] = useState<AiProfile['difficulty']>('medium');
+  const { money, coach } = useDisplay();
+  const [difficulty, setDifficulty] = useState<AiProfile['difficulty']>('easy');
   const [speed, setSpeed] = useState<SpeedSetting>('normal');
   const [humanSeat, setHumanSeat] = useState(0);
-  const [stakeIndex, setStakeIndex] = useState(1);
-  const [showHint, setShowHint] = useState(() => {
-    try { return localStorage.getItem('mk_play_hint') !== '0'; } catch { return true; }
-  });
-  const dismissHint = () => {
-    setShowHint(false);
-    try { localStorage.setItem('mk_play_hint', '0'); } catch { /* ignore */ }
-  };
+  const [stakeIndex, setStakeIndex] = useState(0);
+  const [more, setMore] = useState(false);
 
   const seatLabels = ['East', 'South', 'West', 'North'];
   const pill = (active: boolean) => `seg min-h-[44px] text-sm ${active ? 'seg-on' : 'seg-off'}`;
 
   return (
-    <div className="space-y-4">
-      <CinematicHero aspect="aspect-[21/9]" />
-
-      <button
-        type="button"
-        onClick={() => { haptics.select(); onOnline(); }}
-        className="card w-full p-4 flex items-center justify-between gap-3 text-left border-amber-400/30 active:scale-[0.99]"
-      >
-        <span>
-          <span className="block text-base font-semibold text-slate-100">Play with friends</span>
-          <span className="block text-xs text-slate-400 mt-0.5">Private room, points only. AI fills empty seats.</span>
-        </span>
-        <span aria-hidden className="text-amber-400 text-lg">→</span>
-      </button>
-
-      <div>
-        <h2 className="page-title">New Match</h2>
-        <div className="page-title-rule" />
+    <div className="max-w-lg mx-auto space-y-4 pb-2">
+      <div className="pt-2">
+        <h1 className="font-display text-[28px] leading-tight text-ink">Play a game</h1>
+        <p className="text-mute mt-1">
+          You against three AI players, scored in {money ? 'cents' : 'points'}.
+          {coach ? ' The coach suggests a throw on each turn; tap Hide to play on your own.' : ' The coach is off; turn it on in Settings.'}
+        </p>
       </div>
 
-      {showHint && (
-        <section className="card p-4 border-amber-400/25">
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="section-title">How to play</h3>
-            <button onClick={dismissHint} aria-label="Dismiss" className="-mt-1 -mr-1 w-7 h-7 grid place-items-center text-slate-500 active:scale-90 text-base">✕</button>
-          </div>
-          <ul className="mt-2 space-y-1.5 text-sm text-slate-300 list-disc list-inside marker:text-amber-400/60">
-            <li><strong className="text-slate-100">Drag a tile up &amp; release</strong> to throw it — or tap to select, tap again to discard.</li>
-            <li>When someone discards, <strong className="text-slate-100">Pung / Chow / Kong</strong> or <strong className="text-emerald-400">Hu!</strong> if offered — or Skip.</li>
-            <li>Win with <strong className="text-slate-100">4 sets + a pair</strong> at the minimum tai. Chips settle after each hand; dealer rotates.</li>
-          </ul>
-          <button onClick={dismissHint} className="mt-3 w-full min-h-[40px] rounded-lg bg-slate-700 text-slate-200 text-sm font-medium active:bg-slate-600">
-            Got it
-          </button>
-        </section>
-      )}
-
       <section className="card p-4">
-        <h3 className="section-title mb-3">AI Difficulty</h3>
+        <h3 className="section-title mb-3">How strong are the AI players?</h3>
         <div className="grid grid-cols-2 gap-2">
           {ALL_PROFILES.map(p => (
             <button key={p.difficulty} type="button"
@@ -85,53 +52,72 @@ export function GameSetup({ onStart, onOnline }: GameSetupProps) {
         </div>
       </section>
 
-      <section className="card p-4">
-        <h3 className="section-title mb-3">Stake (for the chip scoreboard)</h3>
-        <div className="grid grid-cols-3 gap-2">
-          {STAKE_PRESETS.map((s, i) => (
-            <button key={s.label} type="button"
-              onClick={() => { haptics.select(); setStakeIndex(i); }}
-              className={pill(stakeIndex === i)}>
-              {s.label}
-            </button>
-          ))}
-        </div>
-      </section>
+      <button type="button" onClick={() => setMore(m => !m)} className="w-full text-left text-sm text-mute px-1 py-1" aria-expanded={more}>
+        {more ? 'Fewer options' : 'More options: speed, seat'}{money ? ', stake' : ''}
+      </button>
 
-      <section className="card p-4">
-        <h3 className="section-title mb-3">Game Speed</h3>
-        <div className="grid grid-cols-4 gap-1.5">
-          {(['slow', 'normal', 'fast', 'instant'] as const).map(s => (
-            <button key={s} type="button"
-              onClick={() => { haptics.select(); setSpeed(s); }}
-              className={`${pill(speed === s)} text-xs`}>
-              {s.charAt(0).toUpperCase() + s.slice(1)}
-            </button>
-          ))}
-        </div>
-      </section>
+      {more && (
+        <>
+          <section className="card p-4">
+            <h3 className="section-title mb-3">Game speed</h3>
+            <div className="grid grid-cols-4 gap-1.5">
+              {(['slow', 'normal', 'fast', 'instant'] as const).map(s => (
+                <button key={s} type="button"
+                  onClick={() => { haptics.select(); setSpeed(s); }}
+                  className={`${pill(speed === s)} text-xs`}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </button>
+              ))}
+            </div>
+          </section>
 
-      <section className="card p-4">
-        <h3 className="section-title mb-3">Your Seat</h3>
-        <div className="grid grid-cols-4 gap-1.5">
-          {seatLabels.map((label, i) => (
-            <button key={i} type="button"
-              onClick={() => { haptics.select(); setHumanSeat(i); }}
-              className={`${pill(humanSeat === i)} text-xs`}>
-              {label}
-            </button>
-          ))}
-        </div>
-      </section>
+          <section className="card p-4">
+            <h3 className="section-title mb-3">Your seat</h3>
+            <div className="grid grid-cols-4 gap-1.5">
+              {seatLabels.map((label, i) => (
+                <button key={i} type="button"
+                  onClick={() => { haptics.select(); setHumanSeat(i); }}
+                  className={`${pill(humanSeat === i)} text-xs`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </section>
 
-      {/* Sticky footer: solid backing so cards scrolling beneath stay legible */}
-      <div className="sticky bottom-0 z-10 -mx-4 px-4 pt-3 pb-4 bg-[#14110d] border-t border-amber-400/10">
-        <button type="button"
-          onClick={() => { haptics.success(); onStart({ difficulty, speed, humanSeat, stakeIndex }); }}
-          className="btn-primary w-full min-h-[52px] text-base font-semibold rounded-xl">
-          Start Match
-        </button>
-      </div>
+          {money && (
+            <section className="card p-4">
+              <h3 className="section-title mb-3">Stake</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {STAKE_PRESETS.map((s, i) => (
+                  <button key={s.label} type="button"
+                    onClick={() => { haptics.select(); setStakeIndex(i); }}
+                    className={pill(stakeIndex === i)}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+        </>
+      )}
+
+      <button type="button"
+        onClick={() => { haptics.success(); onStart({ difficulty, speed, humanSeat, stakeIndex: money ? stakeIndex : -1 }); }}
+        className="btn-primary w-full h-14 text-[17px] rounded-xl">
+        Start game
+      </button>
+
+      <button
+        type="button"
+        onClick={() => { haptics.select(); onOnline(); }}
+        className="card w-full p-4 flex items-center justify-between gap-3 text-left active:scale-[0.99]"
+      >
+        <span>
+          <span className="block text-base font-semibold text-ink">Play with friends</span>
+          <span className="block text-sm text-mute mt-0.5">A private room for up to four, scored in points. AI fills empty seats.</span>
+        </span>
+        <span aria-hidden className="text-accent text-lg">→</span>
+      </button>
     </div>
   );
 }

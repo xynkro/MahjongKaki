@@ -33,8 +33,11 @@ export function seatWindOf(seat: number, dealerSeat: number): Wind {
 }
 
 // Chip deltas for a finished hand (seat-indexed). Draw / invalid → all zero.
+/** Points scoring: 1 per base unit, 2 when doubled. stakeIndex -1 means points. */
+export const POINTS_STAKE = { label: 'Points', base: 1, doubled: 2 };
+
 export function handDeltas(state: GameState, stakeIndex: number): SeatTotals {
-  return handNet(state, STAKE_PRESETS[stakeIndex]);
+  return handNet(state, stakeIndex < 0 ? POINTS_STAKE : STAKE_PRESETS[stakeIndex]);
 }
 
 export const advanceMatch = advanceProgress<MatchState>;
