@@ -36,3 +36,6 @@ coverage/
 
 # Build
 *.log
+
+# Raw generated media (encode before shipping)
+media-src/

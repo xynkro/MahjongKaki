@@ -1,101 +1,83 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { Calculator } from './components/Calculator';
-import { ChipTracker } from './components/ChipTracker';
-import { TableUtils } from './components/TableUtils';
 import { PlayTab } from './components/game/PlayTab';
-import { TrainTab } from './components/trainer/TrainTab';
+import { LearnTab } from './learn/LearnTab';
+import { LevelPick } from './learn/LevelPick';
 import { LegalSheet, FirstRunDisclaimer, useFirstRunDisclaimer } from './components/LegalSheet';
-import { Onboarding, useFirstRunOnboarding } from './components/Onboarding';
 import { SettingsSheet } from './components/SettingsSheet';
-import { NoobMenu, NoobBack, type NoobTool } from './components/NoobTools';
+import { useProgress } from './lib/progress';
 
-type Tab = 'play' | 'train' | 'noobs';
+// Three jobs, three tabs (docs/REDESIGN.md): Learn the game, Play it, explain a Hand.
+type Tab = 'learn' | 'play' | 'hand';
 
 const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
+  { id: 'learn', label: 'Learn', icon: <IconLearn /> },
   { id: 'play', label: 'Play', icon: <IconPlay /> },
-  { id: 'train', label: 'Train', icon: <IconTrain /> },
-  { id: 'noobs', label: 'For Noobs', icon: <IconNoobs /> },
+  { id: 'hand', label: 'Hand', icon: <IconHand /> },
 ];
 
 export function App() {
-  const [tab, setTab] = useState<Tab>('play');
-  const [noobTool, setNoobTool] = useState<NoobTool | null>(null);
+  const { level } = useProgress();
+  const [tab, setTab] = useState<Tab>(level === 'player' ? 'play' : 'learn');
   const [legalOpen, setLegalOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [pendingChipRound, setPendingChipRound] = useState<{ tai: number; winType: 'zimo' | 'discard' } | null>(null);
   const disclaimer = useFirstRunDisclaimer();
-  const onboarding = useFirstRunOnboarding();
+  const askLevel = !disclaimer.show && level === null;
 
   // Lock the page behind any open sheet so iOS doesn't scroll-chain ("phantom" scroll).
   useEffect(() => {
-    document.body.style.overflow = (settingsOpen || legalOpen || disclaimer.show || onboarding.show) ? 'hidden' : '';
+    document.body.style.overflow = (settingsOpen || legalOpen || disclaimer.show || askLevel) ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [settingsOpen, legalOpen, disclaimer.show, onboarding.show]);
+  }, [settingsOpen, legalOpen, disclaimer.show, askLevel]);
 
   return (
-    <div className="app-full flex flex-col">
+    <div className="app-full flex flex-col bg-bg">
       <header
-        className="relative pb-3 bg-slate-900/80 backdrop-blur border-b border-amber-400/15"
+        className="relative pb-3 border-b border-line"
         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}
       >
         <div className="relative flex items-center justify-center">
-          <h1 className="font-display text-[1.75rem] leading-none text-slate-50">
-            Mahjong<span className="gold-foil-live">Kaki</span>
+          <h1 className="font-display text-[1.6rem] leading-none text-ink">
+            Mahjong<span className="text-accent">Kaki</span>
           </h1>
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
             <button
               onClick={() => setSettingsOpen(true)}
-              aria-label="House rules and settings"
-              className="w-9 h-9 grid place-items-center rounded-full border border-slate-700/60 text-slate-400 active:scale-90"
+              aria-label="Settings"
+              className="w-9 h-9 grid place-items-center rounded-full text-mute active:scale-90"
             >
               <IconGear />
             </button>
             <button
               onClick={() => setLegalOpen(true)}
               aria-label="About and legal"
-              className="w-9 h-9 grid place-items-center rounded-full border border-slate-700/60 text-slate-400 active:scale-90"
+              className="w-9 h-9 grid place-items-center rounded-full text-mute active:scale-90"
             >
-              <span className="font-display text-lg leading-none italic">i</span>
+              <IconInfo />
             </button>
           </div>
         </div>
       </header>
 
       <main className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div key={tab === 'noobs' ? `noobs-${noobTool}` : tab} className={`anim-tab ${tab === 'play' ? 'h-full' : 'p-4'}`}>
+        <div key={tab} className={`anim-tab ${tab === 'play' ? 'h-full' : 'p-4'}`}>
+          {tab === 'learn' && <LearnTab />}
           {tab === 'play' && <PlayTab />}
-          {tab === 'train' && <TrainTab />}
-          {tab === 'noobs' && (noobTool === null
-            ? <NoobMenu onSelect={setNoobTool} />
-            : <NoobBack onBack={() => setNoobTool(null)} />
-          )}
-          {tab === 'noobs' && noobTool === 'tais' && (
-            <Calculator onSendToChips={(r) => { setPendingChipRound(r); setNoobTool('chips'); }} />
-          )}
-          {tab === 'noobs' && noobTool === 'chips' && (
-            <ChipTracker
-              pendingRound={pendingChipRound}
-              onConsumePending={() => setPendingChipRound(null)}
-            />
-          )}
-          {tab === 'noobs' && noobTool === 'table' && <TableUtils />}
+          {tab === 'hand' && <HandTab />}
         </div>
       </main>
 
-      <nav className="flex border-t border-amber-400/10 bg-slate-900/95 backdrop-blur pb-safe">
+      <nav className="flex border-t border-line bg-surface pb-safe">
         {TABS.map(t => {
           const active = tab === t.id;
           return (
             <button
               key={t.id}
-              onClick={() => { setTab(t.id); if (t.id === 'noobs' && tab === 'noobs') setNoobTool(null); }}
-              className={`relative flex-1 flex flex-col items-center gap-1 pt-2.5 pb-2 active:scale-95 ${
-                active ? 'text-emerald-400' : 'text-slate-500'
-              }`}
+              onClick={() => setTab(t.id)}
+              aria-current={active ? 'page' : undefined}
+              className={`relative flex-1 flex flex-col items-center gap-1 pt-2.5 pb-2 active:scale-95 ${active ? 'text-accent' : 'text-mute'}`}
             >
-              {active && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-0.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(63,182,131,0.6)]" />
-              )}
+              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-0.5 rounded-full bg-accent" />}
               <span className="w-6 h-6">{t.icon}</span>
               <span className="text-[13px] font-medium">{t.label}</span>
             </button>
@@ -107,9 +89,19 @@ export function App() {
       <LegalSheet open={legalOpen} onClose={() => setLegalOpen(false)} />
       {disclaimer.show ? (
         <FirstRunDisclaimer onAccept={disclaimer.accept} />
-      ) : onboarding.show ? (
-        <Onboarding onDone={onboarding.done} onLearn={() => { onboarding.done(); setTab('train'); }} />
+      ) : askLevel ? (
+        <LevelPick onPicked={l => setTab(l === 'player' ? 'play' : 'learn')} />
       ) : null}
+    </div>
+  );
+}
+
+function HandTab() {
+  return (
+    <div className="max-w-lg mx-auto">
+      <h1 className="font-display text-[28px] leading-tight text-ink pt-2">Explain my hand</h1>
+      <p className="text-mute mt-1 mb-4">Tap in a winning hand and see what it’s worth, and why.</p>
+      <Calculator />
     </div>
   );
 }
@@ -119,14 +111,17 @@ const SVG = (props: { children: ReactNode }) => (
     strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">{props.children}</svg>
 );
 
-function IconNoobs() {
-  return <SVG><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" /></SVG>;
+function IconLearn() {
+  return <SVG><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z" /><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z" /></SVG>;
 }
 function IconPlay() {
-  return <SVG><rect x="6" y="3" width="12" height="18" rx="2.5" /><circle cx="12" cy="9" r="2.2" /><line x1="9.5" y1="15" x2="14.5" y2="15" /><line x1="9.5" y1="17.5" x2="14.5" y2="17.5" /></SVG>;
+  return <SVG><rect x="3.5" y="5" width="7" height="10" rx="1.6" /><rect x="13.5" y="9" width="7" height="10" rx="1.6" /></SVG>;
 }
-function IconTrain() {
-  return <SVG><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="4" /><circle cx="12" cy="12" r="1" fill="currentColor" /></SVG>;
+function IconHand() {
+  return <SVG><rect x="4" y="8" width="4.4" height="7" rx="1" /><rect x="9.8" y="8" width="4.4" height="7" rx="1" /><rect x="15.6" y="8" width="4.4" height="7" rx="1" /><path d="M6 18.5h12" /></SVG>;
+}
+function IconInfo() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="w-[18px] h-[18px]"><circle cx="12" cy="12" r="8.5" /><path d="M12 11v5" /><circle cx="12" cy="8" r="0.6" fill="currentColor" /></svg>;
 }
 function IconGear() {
   return (

@@ -89,20 +89,16 @@ function ToggleChip({
 }: {
   label: string; sublabel: string; ariaLabel?: string; active: boolean; color: 'amber' | 'emerald' | 'yellow'; onClick: () => void;
 }) {
-  // Inactive chips read as tappable (premium dark gradient); active lights up on-brand.
-  const inactive = 'bg-gradient-to-b from-[#2c2820] to-[#241f18] text-slate-200 border-[#3a3328] active:brightness-110';
-  const colors = {
-    amber: active ? 'bg-gradient-to-b from-amber-600 to-amber-800 text-amber-50 border-amber-300/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_0_12px_rgba(201,162,75,0.45)]' : inactive,
-    emerald: active ? 'bg-gradient-to-b from-emerald-600 to-emerald-800 text-emerald-50 border-emerald-300/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_0_12px_rgba(63,182,131,0.4)]' : inactive,
-    yellow: active ? 'bg-gradient-to-b from-yellow-600 to-yellow-800 text-yellow-50 border-yellow-300/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_0_12px_rgba(205,170,82,0.45)]' : inactive,
-  };
+  // Theme tokens, so the chips read in Jade Night and Daylight alike. Active = the accent colour.
+  void color;
+  const cls = active ? 'bg-accent text-accent-ink border-accent' : 'bg-surface-2 text-ink border-line active:brightness-110';
 
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={ariaLabel}
-      className={`flex flex-col items-center justify-center min-h-[44px] min-w-0 px-1 py-1.5 rounded-md border text-xs transition-all ${colors[color]}`}
+      className={`flex flex-col items-center justify-center min-h-[44px] min-w-0 px-1 py-1.5 rounded-md border text-xs transition-all ${cls}`}
     >
       <span className="font-bold text-base leading-none">{label}</span>
       <span className="text-[11px] leading-tight opacity-75 mt-0.5">{sublabel}</span>

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MahjongKaki directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Nunito:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --page: #2a2a2e; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--page); color: #f4f4f5; font-family: Inter, system-ui, sans-serif; padding: 32px 24px 48px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .lede { color: #a1a1aa; font-size: 14px; margin-bottom: 28px; max-width: 760px; line-height: 1.5; }
+  .row { margin-bottom: 44px; }
+  .row h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .row p.note { color: #a1a1aa; font-size: 13px; margin-bottom: 16px; max-width: 760px; line-height: 1.5; }
+  .phones { display: flex; gap: 22px; flex-wrap: wrap; }
+  .phone { width: 300px; height: 620px; border-radius: 38px; overflow: hidden; position: relative; box-shadow: 0 18px 40px rgba(0,0,0,.45); border: 6px solid #0b0b0c; display: flex; flex-direction: column; }
+  .cap { color: #a1a1aa; font-size: 12px; margin-top: 8px; text-align: center; width: 300px; }
+
+  /* shared tile */
+  .tile { width: 34px; height: 46px; border-radius: 6px; background: linear-gradient(#fffdf8, #f1ead9); box-shadow: inset 0 -3px 0 #d9ccb0, 0 2px 0 rgba(0,0,0,.25); display: grid; place-items: center; position: relative; font-weight: 800; flex: none; }
+  .tile .lbl { position: absolute; top: 2px; left: 3px; font: 700 9px Inter, sans-serif; color: #6b6b6b; }
+  .tile.char { color: #c2412d; font-size: 15px; line-height: 1; text-align: center; }
+  .tile.char small { display: block; font-size: 11px; }
+  .tile.bam { color: #1f7a52; font-size: 19px; }
+  .st { display: flex; gap: 2px; align-items: center; }
+  .st i { display: block; width: 4px; height: 18px; border-radius: 2px; background: linear-gradient(#2a9a69, #1b6b48); }
+  .tile.lg .st i { width: 6px; height: 28px; }
+  .pool .st i { width: 3px; height: 13px; gap: 1px; }
+  .hand .st { gap: 1px; } .hand .st i { width: 2px; height: 11px; }
+  .dots { display: grid; grid-template-columns: repeat(2, 7px); gap: 3px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: #2b5fb8; display: block; }
+  .tile.lg { width: 50px; height: 68px; border-radius: 8px; }
+  .tile.lg.char { font-size: 21px; } .tile.lg.char small { font-size: 15px; }
+  .tile.sel { outline: 3px solid var(--acc); outline-offset: 2px; transform: translateY(-6px); }
+  .tile.back { background: linear-gradient(#2f6b52, #214c3a); box-shadow: inset 0 -3px 0 #183a2c, 0 2px 0 rgba(0,0,0,.25); }
+
+  /* ---------- Direction A: Jade Night ---------- */
+  .a { --bg: #16181b; --card: #1f2226; --line: #2c3036; --ink: #f2f0ea; --mute: #9aa0a6; --acc: #3ccf8e; background: var(--bg); color: var(--ink); font-family: Inter, sans-serif; }
+  .a .disp { font-family: 'Bricolage Grotesque', sans-serif; }
+  .a .top { padding: 46px 20px 10px; display: flex; justify-content: space-between; align-items: center; }
+  .a .streak { font-size: 13px; color: var(--mute); }
+  .a .streak b { color: var(--ink); }
+  .a .title { font-size: 26px; font-weight: 800; padding: 4px 20px 14px; letter-spacing: -.01em; }
+  .a .path { flex: 1; overflow: hidden; padding: 4px 20px; position: relative; }
+  .a .unit { margin-bottom: 18px; }
+  .a .unit h4 { font-size: 13px; color: var(--mute); font-weight: 600; margin-bottom: 10px; }
+  .a .nodes { display: flex; flex-direction: column; gap: 12px; }
+  .a .node { display: flex; align-items: center; gap: 12px; }
+  .a .dot { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 15px; flex: none; }
+  .a .done .dot { background: var(--acc); color: #0c2a1d; }
+  .a .now .dot { background: var(--card); color: var(--acc); box-shadow: 0 0 0 3px var(--acc); }
+  .a .lock .dot { background: var(--card); color: #50565d; }
+  .a .node span { font-size: 15px; font-weight: 600; }
+  .a .lock span { color: #5c6168; }
+  .a .node:nth-child(2) { margin-left: 28px; } .a .node:nth-child(3) { margin-left: 56px; } .a .node:nth-child(4) { margin-left: 28px; }
+  .a .may { margin: 6px 20px 12px; background: var(--card); border-radius: 18px; padding: 12px; display: flex; gap: 12px; align-items: center; }
+  .a .may .face { width: 48px; height: 48px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, #e8c3a5 0 30%, #2a2420 31% 100%); flex: none; }
+  .a .may p { font-size: 13px; line-height: 1.4; }
+  .a .may b { display: block; font-size: 14px; }
+  .a .cta { margin: 0 20px 12px; background: var(--acc); color: #0c2a1d; text-align: center; padding: 15px; border-radius: 16px; font-weight: 800; font-size: 16px; }
+  .a .nav { display: flex; justify-content: space-around; border-top: 1px solid var(--line); padding: 10px 0 22px; font-size: 12px; color: var(--mute); }
+  .a .nav .on { color: var(--acc); font-weight: 700; }
+
+  .a .lesson-top { padding: 46px 20px 8px; display: flex; align-items: center; gap: 12px; }
+  .a .x { color: var(--mute); font-size: 20px; }
+  .a .bar { flex: 1; height: 10px; border-radius: 999px; background: var(--card); overflow: hidden; }
+  .a .bar i { display: block; width: 60%; height: 100%; background: var(--acc); border-radius: 999px; }
+  .a .q { padding: 22px 20px 6px; font-size: 22px; font-weight: 800; line-height: 1.2; }
+  .a .hint { padding: 0 20px 18px; color: var(--mute); font-size: 14px; line-height: 1.45; }
+  .a .pick { display: flex; flex-wrap: wrap; gap: 10px; padding: 8px 20px; justify-content: center; }
+  .a .tray { margin: 18px 20px 0; border: 2px dashed var(--line); border-radius: 16px; height: 92px; display: flex; gap: 8px; align-items: center; justify-content: center; color: #5c6168; font-size: 13px; }
+  .a .feedback { margin-top: auto; background: #173326; padding: 16px 20px 26px; }
+  .a .feedback b { color: var(--acc); font-size: 17px; display: block; margin-bottom: 4px; }
+  .a .feedback p { font-size: 14px; color: #cfe9dc; margin-bottom: 12px; line-height: 1.4; }
+
+  .a .table-top { padding: 46px 16px 8px; display: flex; justify-content: space-between; font-size: 13px; color: var(--mute); }
+  .a .felt { margin: 4px 12px; flex: 1; border-radius: 22px; background: radial-gradient(120% 90% at 50% 40%, #1f5a43, #143a2c); position: relative; padding: 12px; display: flex; flex-direction: column; }
+  .a .opp { display: flex; justify-content: center; gap: 3px; }
+  .a .opp .tile { width: 14px; height: 20px; border-radius: 3px; }
+  .a .seat { font-size: 11px; color: #bfe3d2; text-align: center; margin: 4px 0 8px; }
+  .a .pool { flex: 1; display: flex; flex-wrap: wrap; gap: 4px; align-content: center; justify-content: center; }
+  .a .pool .tile { width: 24px; height: 32px; border-radius: 4px; font-size: 11px; }
+  .a .pool .tile .lbl { display: none; }
+  .a .pool .dots { grid-template-columns: repeat(2, 5px); gap: 2px; } .a .pool .dots i { width: 5px; height: 5px; }
+  .a .coach { margin: 8px 12px; background: var(--card); border-radius: 14px; padding: 10px 12px; font-size: 13px; line-height: 1.4; display: flex; gap: 10px; }
+  .a .coach .face { width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, #e8c3a5 0 30%, #2a2420 31% 100%); flex: none; }
+  .a .hand { display: flex; gap: 1px; justify-content: center; padding: 8px 4px 4px; flex-wrap: nowrap; }
+  .a .hand .tile { width: 18px; height: 27px; font-size: 10px; border-radius: 4px; }
+  .a .hand .tile .lbl { font-size: 7px; }
+  .a .hand .tile.char { font-size: 9px; } .a .hand .tile.char small { font-size: 8px; }
+  .a .hand .dots { grid-template-columns: repeat(2, 4px); gap: 2px; } .a .hand .dots i { width: 4px; height: 4px; }
+  .a .act { display: flex; gap: 8px; padding: 8px 12px 24px; }
+  .a .act div { flex: 1; text-align: center; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 15px; background: var(--card); }
+  .a .act .go { background: var(--acc); color: #0c2a1d; }
+
+  /* ---------- Direction B: Daylight ---------- */
+  .b { --bg: #ffffff; --soft: #f3f6f4; --line: #e4e9e6; --ink: #142019; --mute: #627068; --acc: #ef5b3c; background: var(--bg); color: var(--ink); font-family: Nunito, sans-serif; }
+  .b .top { padding: 46px 20px 6px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; }
+  .b .pill { background: var(--soft); border-radius: 999px; padding: 6px 12px; font-size: 13px; }
+  .b .hero { margin: 8px 16px 14px; border-radius: 24px; background: #1d5b45; color: #fff; padding: 18px; position: relative; overflow: hidden; min-height: 150px; }
+  .b .hero h3 { font-size: 24px; font-weight: 900; line-height: 1.1; max-width: 150px; position: relative; z-index: 1; }
+  .b .hero p { font-size: 13px; opacity: .85; margin-top: 6px; max-width: 140px; position: relative; z-index: 1; }
+  .b .hero .face { position: absolute; right: 10px; bottom: 0; width: 92px; height: 116px; border-radius: 60px 60px 0 0; background: radial-gradient(circle at 50% 30%, #e8c3a5 0 26%, #2a2420 27% 44%, #6f7a52 45% 100%); }
+  .b .hero .go { position: relative; z-index: 1; display: inline-block; margin-top: 14px; background: var(--acc); color: #fff; font-weight: 900; padding: 10px 16px; border-radius: 14px; font-size: 15px; }
+  .b .list { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .b .item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 18px; background: var(--soft); }
+  .b .num { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; font-weight: 900; background: #fff; border: 2px solid var(--line); flex: none; }
+  .b .item.done .num { background: #1d5b45; color: #fff; border-color: #1d5b45; }
+  .b .item b { display: block; font-size: 15px; }
+  .b .item small { color: var(--mute); font-size: 12px; font-weight: 700; }
+  .b .item.lock { opacity: .55; }
+  .b .nav { display: flex; justify-content: space-around; padding: 10px 0 22px; font-size: 12px; font-weight: 800; color: var(--mute); border-top: 1px solid var(--line); }
+  .b .nav .on { color: var(--acc); }
+
+  .b .lesson-top { padding: 46px 20px 8px; display: flex; align-items: center; gap: 12px; }
+  .b .x { color: var(--mute); font-size: 20px; font-weight: 800; }
+  .b .bar { flex: 1; height: 12px; border-radius: 999px; background: var(--soft); overflow: hidden; }
+  .b .bar i { display: block; width: 60%; height: 100%; background: var(--acc); }
+  .b .bubble { margin: 18px 20px 4px; display: flex; gap: 10px; align-items: flex-end; }
+  .b .bubble .face { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, #e8c3a5 0 30%, #2a2420 31% 100%); flex: none; }
+  .b .bubble p { background: var(--soft); border-radius: 18px 18px 18px 4px; padding: 12px 14px; font-size: 16px; font-weight: 800; line-height: 1.3; }
+  .b .pick { display: flex; flex-wrap: wrap; gap: 10px; padding: 22px 20px 8px; justify-content: center; }
+  .b .feedback { margin-top: auto; background: #e9f6ef; padding: 16px 20px 26px; }
+  .b .feedback b { color: #1d7a52; font-size: 18px; font-weight: 900; display: block; margin-bottom: 4px; }
+  .b .feedback p { font-size: 14px; font-weight: 700; color: #2f5b45; margin-bottom: 12px; line-height: 1.4; }
+  .b .btn { background: var(--acc); color: #fff; text-align: center; padding: 14px; border-radius: 16px; font-weight: 900; font-size: 16px; }
+
+  .b .table-top { padding: 46px 16px 8px; display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: var(--mute); }
+  .b .felt { margin: 4px 12px; flex: 1; border-radius: 26px; background: #1d5b45; padding: 12px; display: flex; flex-direction: column; }
+  .b .opp { display: flex; justify-content: center; gap: 3px; }
+  .b .opp .tile { width: 14px; height: 20px; border-radius: 3px; }
+  .b .seat { font-size: 11px; color: #cde8db; text-align: center; margin: 4px 0 8px; font-weight: 800; }
+  .b .pool { flex: 1; display: flex; flex-wrap: wrap; gap: 4px; align-content: center; justify-content: center; }
+  .b .pool .tile { width: 24px; height: 32px; border-radius: 4px; font-size: 11px; }
+  .b .pool .tile .lbl { display: none; }
+  .b .pool .dots { grid-template-columns: repeat(2, 5px); gap: 2px; } .b .pool .dots i { width: 5px; height: 5px; }
+  .b .coach { margin: 8px 12px; border-radius: 16px; padding: 10px 12px; font-size: 13px; font-weight: 700; line-height: 1.4; display: flex; gap: 10px; background: var(--soft); }
+  .b .coach .face { width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, #e8c3a5 0 30%, #2a2420 31% 100%); flex: none; }
+  .b .hand { display: flex; gap: 1px; justify-content: center; padding: 8px 4px 4px; }
+  .b .hand .tile { width: 18px; height: 27px; font-size: 10px; border-radius: 4px; }
+  .b .hand .tile .lbl { font-size: 7px; }
+  .b .hand .tile.char { font-size: 9px; } .b .hand .tile.char small { font-size: 8px; }
+  .b .hand .dots { grid-template-columns: repeat(2, 4px); gap: 2px; } .b .hand .dots i { width: 4px; height: 4px; }
+  .b .act { display: flex; gap: 8px; padding: 8px 12px 24px; }
+  .b .act div { flex: 1; text-align: center; padding: 12px; border-radius: 16px; font-weight: 900; font-size: 15px; background: var(--soft); }
+  .b .act .go { background: var(--acc); color: #fff; }
+</style>
+</head>
+<body>
+  <h1>Pick a direction</h1>
+  <p class="lede">Same three screens in two looks: the Learn path, a lesson task, and a game with the coach on. May's face is a placeholder circle; the real app uses her video still. Tiles carry the beginner corner labels by default.</p>
+
+  <section class="row">
+    <h2>A · Jade Night</h2>
+    <p class="note">Dark and calm with one bright jade accent. Feels like a game you play in the evening. Display type is Bricolage Grotesque, body is Inter.</p>
+    <div class="phones">
+      <div>
+        <div class="phone a">
+          <div class="top"><span class="disp" style="font-weight:800;font-size:18px">MahjongKaki</span><span class="streak"><b>3</b> day streak</span></div>
+          <div class="title disp">Learn</div>
+          <div class="may"><div class="face"></div><p><b>Next up: Sets</b>Three of a kind, or three in a row. 3 minutes.</p></div>
+          <div class="path">
+            <div class="unit"><h4>Unit 1 · Meet the tiles</h4>
+              <div class="nodes">
+                <div class="node done"><div class="dot">✓</div><span>The three suits</span></div>
+                <div class="node done"><div class="dot">✓</div><span>Winds and dragons</span></div>
+                <div class="node done"><div class="dot">✓</div><span>Flowers and animals</span></div>
+              </div>
+            </div>
+            <div class="unit"><h4>Unit 2 · Sets</h4>
+              <div class="nodes">
+                <div class="node now"><div class="dot">1</div><span>Three of a kind</span></div>
+                <div class="node lock"><div class="dot">2</div><span>Three in a row</span></div>
+                <div class="node lock"><div class="dot">3</div><span>The pair</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cta">Start lesson</div>
+          <div class="nav"><span class="on">Learn</span><span>Play</span><span>Hand</span></div>
+        </div>
+        <div class="cap">Learn path</div>
+      </div>
+
+      <div>
+        <div class="phone a">
+          <div class="lesson-top"><span class="x">✕</span><div class="bar"><i></i></div></div>
+          <div class="q disp">Tap the three that make a set</div>
+          <div class="hint">A set can be three of the same tile. Look for an exact match.</div>
+          <div class="pick">
+            <div class="tile lg char"><span class="lbl">5</span>五<small>萬</small></div>
+            <div class="tile lg bam sel"><span class="lbl">3</span><span class="st"><i></i><i></i><i></i></span></div>
+            <div class="tile lg char"><span class="lbl">2</span>二<small>萬</small></div>
+            <div class="tile lg bam sel"><span class="lbl">3</span><span class="st"><i></i><i></i><i></i></span></div>
+            <div class="tile lg"><span class="lbl">4</span><span class="dots"><i></i><i></i><i></i><i></i></span></div>
+            <div class="tile lg bam sel"><span class="lbl">3</span><span class="st"><i></i><i></i><i></i></span></div>
+          </div>
+          <div class="tray">Your set goes here</div>
+          <div class="feedback"><b>Nice, that's a pung</b><p>Three matching tiles. You'll hear people call it "pung" at the table.</p><div class="cta" style="margin:0">Continue</div></div>
+        </div>
+        <div class="cap">Lesson task with instant feedback</div>
+      </div>
+
+      <div>
+        <div class="phone a">
+          <div class="table-top"><span>East round · hand 2</span><span style="color:#3ccf8e;font-weight:700">Your turn</span></div>
+          <div class="felt">
+            <div class="opp"><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div></div>
+            <div class="seat">AI Tan · across</div>
+            <div class="pool">
+              <div class="tile char">七<small>萬</small></div><div class="tile bam"><span class="st"><i></i><i></i><i></i></span></div><div class="tile"><span class="dots"><i></i><i></i></span></div><div class="tile char">九<small>萬</small></div><div class="tile bam"><span class="st"><i></i><i></i><i></i></span></div><div class="tile char">一<small>萬</small></div>
+            </div>
+          </div>
+          <div class="coach"><div class="face"></div><div><b>Coach:</b> Throw the 9 of characters. It doesn't fit anything in your hand.</div></div>
+          <div class="hand">
+            <div class="tile char"><span class="lbl">1</span>一<small>萬</small></div><div class="tile char"><span class="lbl">2</span>二<small>萬</small></div><div class="tile char"><span class="lbl">3</span>三<small>萬</small></div><div class="tile bam"><span class="lbl">3</span><span class="st"><i></i><i></i><i></i></span></div><div class="tile bam"><span class="lbl">3</span><span class="st"><i></i><i></i><i></i></span></div><div class="tile"><span class="lbl">4</span><span class="dots"><i></i><i></i><i></i><i></i></span></div><div class="tile"><span class="lbl">5</span><span class="dots"><i></i><i></i><i></i><i></i></span></div><div class="tile"><span class="lbl">6</span><span class="dots"><i></i><i></i><i></i><i></i></span></div><div class="tile char sel" style="--acc:#3ccf8e"><span class="lbl">9</span>九<small>萬</small></div><div class="tile bam"><span class="lbl">5</span><span class="st"><i></i><i></i><i></i></span></div><div class="tile bam"><span class="lbl">6</span><span class="st"><i></i><i></i><i></i></span></div><div class="tile char"><span class="lbl">7</span>七<small>萬</small></div><div class="tile char"><span class="lbl">7</span>七<small>萬</small></div><div class="tile bam"><span class="lbl">7</span><span class="st"><i></i><i></i><i></i></span></div>
+          </div>
+          <div class="act"><div>Hint</div><div class="go">Throw 9</div></div>
+        </div>
+        <div class="cap">Game with the coach on</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="row">
+    <h2>B · Daylight</h2>
+    <p class="note">Bright white with a green felt table and one coral accent. Rounder and friendlier, closer to a learning app. Type is Nunito throughout.</p>
+    <div class="phones">
+      <div>
+        <div class="phone b">
+          <div class="top"><span style="font-size:18px">MahjongKaki</span><span class="pill">3 days in a row</span></div>
+          <div class="hero"><h3>Next up: Sets</h3><p>Three of a kind, or three in a row.</p><div class="go">Start · 3 min</div><div class="face"></div></div>
+          <div class="list">
+            <div class="item done"><div class="num">✓</div><div><b>Meet the tiles</b><small>3 of 3 lessons</small></div></div>
+            <div class="item"><div class="num">2</div><div><b>Sets</b><small>0 of 3 lessons</small></div></div>
+            <div class="item lock"><div class="num">3</div><div><b>A turn</b><small>Unlocks after Sets</small></div></div>
+            <div class="item lock"><div class="num">4</div><div><b>Claiming</b><small>Unlocks after A turn</small></div></div>
+          </div>
+          <div class="nav"><span class="on">Learn</span><span>Play</span><span>Hand</span></div>
+        </div>
+        <div class="cap">Learn path</div>
+      </div>
+
+      <div>
+        <div class="phone b">
+          <div class="lesson-top"><span class="x">✕</span><div class="bar"><i></i></div></div>
+          <div class="bubble"><div class="face"></div><p>Tap the three that make a set. Look for an exact match.</p></div>
+          <div class="pick">
+            <div class="tile lg char"><span class="lbl">5</span>五<small>萬</small></div>
+            <div class="tile lg bam sel" style="--acc:#ef5b3c"><span class="lbl">3</span><span class="st"><i></i><i></i><i></i></span></div>
+            <div class="tile lg char"><span class="lbl">2</span>二<small>萬</small></div>
+            <div class="tile lg bam sel" style="--acc:#ef5b3c"><span class="lbl">3</span><span class="st"><i></i><i></i><i></i></span></div>
+            <div class="tile lg"><span class="lbl">4</span><span class="dots"><i></i><i></i><i></i><i></i></span></div>
+            <div class="tile lg bam sel" style="--acc:#ef5b3c"><span class="lbl">3</span><span class="st"><i></i><i></i><i></i></span></div>
+          </div>
+          <div class="feedback"><b>Nice, that's a pung</b><p>Three matching tiles. You'll hear people call it "pung" at the table.</p><div class="btn">Continue</div></div>
+        </div>
+        <div class="cap">Lesson task with instant feedback</div>
+      </div>
+
+      <div>
+        <div class="phone b">
+          <div class="table-top"><span>East round · hand 2</span><span style="color:#ef5b3c">Your turn</span></div>
+          <div class="felt">
+            <div class="opp"><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div><div class="tile back"></div></div>
+            <div class="seat">AI Tan · across</div>
+            <div class="pool">
+              <div class="tile char">七<small>萬</small></div><div class="tile bam"><span class="st"><i></i><i></i><i></i></span></div><div class="tile"><span class="dots"><i></i><i></i></span></div><div class="tile char">九<small>萬</small></div><div class="tile bam"><span class="st"><i></i><i></i><i></i></span></div><div class="tile char">一<small>萬</small></div>
+            </div>
+          </div>
+          <div class="coach"><div class="face"></div><div>Throw the 9 of characters. It doesn't fit anything in your hand.</div></div>
+          <div class="hand">
+            <div class="tile char"><span class="lbl">1</span>一<small>萬</small></div><div class="tile char"><span class="lbl">2</span>二<small>萬</small></div><div class="tile char"><span class="lbl">3</span>三<small>萬</small></div><div class="tile bam"><span class="lbl">3</span><span class="st"><i></i><i></i><i></i></span></div><div class="tile bam"><span class="lbl">3</span><span class="st"><i></i><i></i><i></i></span></div><div class="tile"><span class="lbl">4</span><span class="dots"><i></i><i></i><i></i><i></i></span></div><div class="tile"><span class="lbl">5</span><span class="dots"><i></i><i></i><i></i><i></i></span></div><div class="tile"><span class="lbl">6</span><span class="dots"><i></i><i></i><i></i><i></i></span></div><div class="tile char sel" style="--acc:#ef5b3c"><span class="lbl">9</span>九<small>萬</small></div><div class="tile bam"><span class="lbl">5</span><span class="st"><i></i><i></i><i></i></span></div><div class="tile bam"><span class="lbl">6</span><span class="st"><i></i><i></i><i></i></span></div><div class="tile char"><span class="lbl">7</span>七<small>萬</small></div><div class="tile char"><span class="lbl">7</span>七<small>萬</small></div><div class="tile bam"><span class="lbl">7</span><span class="st"><i></i><i></i><i></i></span></div>
+          </div>
+          <div class="act"><div>Hint</div><div class="go">Throw 9</div></div>
+        </div>
+        <div class="cap">Game with the coach on</div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

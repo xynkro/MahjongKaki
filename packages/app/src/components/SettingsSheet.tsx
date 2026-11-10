@@ -3,6 +3,7 @@ import { type RulesConfig } from '@mahjongkaki/engine';
 import { useRules, setRule, resetRules } from '../lib/settings';
 import { useDisplay, setDisplay } from '../lib/display';
 import { haptics, sound, setHapticsEnabled, hapticsEnabled } from '../lib/haptics';
+import { useTheme, setTheme } from '../lib/theme';
 
 function Row({ label, desc, children }: { label: string; desc?: string; children: ReactNode }) {
   return (
@@ -65,6 +66,7 @@ function Stepper({ value, min, max, onChange }: { value: number; min: number; ma
 export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const rules = useRules();
   const display = useDisplay();
+  const theme = useTheme();
   const [snd, setSnd] = useState(sound.enabled);
   const [hap, setHap] = useState(hapticsEnabled());
   if (!open) return null;
@@ -77,7 +79,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
         className="shrink-0 px-4 pb-3 bg-slate-900/95 border-b border-amber-400/15"
         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.85rem)' }}
       >
-        <h2 className="font-display text-2xl text-slate-100 max-w-lg mx-auto">House Rules</h2>
+        <h2 className="font-display text-2xl text-slate-100 max-w-lg mx-auto">Settings</h2>
       </header>
 
       <div className="flex-1 overflow-y-auto overscroll-contain">
@@ -148,6 +150,13 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
 
           <section className="card p-4">
             <h3 className="section-title mb-1">Display</h3>
+            <Row label="Look" desc="Jade Night is easy on the eyes; Daylight is bright and clear outdoors.">
+              <Segmented
+                options={[{ value: 'jade', label: 'Jade Night' }, { value: 'daylight', label: 'Daylight' }]}
+                value={theme}
+                onChange={v => setTheme(v)}
+              />
+            </Row>
             <Row label="Beginner tile labels" desc="Adds readable tags to every tile — 1–9, E/S/W/N, Rd/Gn/Wt — for non-Chinese readers.">
               <Toggle value={display.tileMode === 'beginner'} onChange={v => setDisplay('tileMode', v ? 'beginner' : 'classic')} />
             </Row>

@@ -9,7 +9,7 @@ export interface DisplayConfig {
   tooltips: boolean;
 }
 
-const DEFAULT: DisplayConfig = { tileMode: 'classic', tooltips: true };
+const DEFAULT: DisplayConfig = { tileMode: 'beginner', tooltips: true };
 const KEY = 'mk_display';
 
 let cfg: DisplayConfig = load();

@@ -15,11 +15,13 @@ export default {
     extend: {
       colors: {
         // warm neutral ramp (bone → espresso)
-        slate: {
-          50: '#F8F2E6', 100: '#F1E7D2', 200: '#E4D6B9', 300: '#CBB994',
-          400: '#A2926F', 500: '#7E7058', 600: '#5C5341', 700: '#3C372E',
-          800: '#2A2620', 900: '#1E1B16', 950: '#161310',
-        },
+        // neutral ramp from theme tokens (styles/index.css): dark in Jade Night, inverted in Daylight
+        slate: Object.fromEntries([50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
+          .map(k => [k, `rgb(var(--s-${k}) / <alpha-value>)`])),
+        // semantic tokens for new screens
+        bg: 'var(--bg)', surface: 'var(--surface)', 'surface-2': 'var(--surface-2)', line: 'var(--line)',
+        ink: 'var(--ink)', mute: 'var(--mute)', accent: 'var(--accent)', 'accent-ink': 'var(--accent-ink)',
+        'accent-soft': 'var(--accent-soft)',
         // jade (interactive / primary)
         emerald: {
           50: '#E7F6EE', 100: '#C6EAD6', 200: '#94D8B5', 300: '#5FC494',
@@ -56,8 +58,8 @@ export default {
         ivory: '#F1E7D2',
       },
       fontFamily: {
-        sans: ['"Inter Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['"Instrument Serif"', 'ui-serif', 'Georgia', 'serif'],
+        sans: ['var(--font-body)'],
+        display: ['var(--font-display)'],
         // Numbers used to render in a code font; keep them in Inter (tabular via .font-mono).
         mono: ['"Inter Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },

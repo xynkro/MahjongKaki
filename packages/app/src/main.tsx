@@ -3,8 +3,9 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 // Self-hosted fonts (bundled + precached → fully offline, no Google CDN).
 import '@fontsource-variable/inter/wght.css';
-import '@fontsource/instrument-serif/400.css';
-import '@fontsource/instrument-serif/400-italic.css';
+import '@fontsource-variable/bricolage-grotesque/wght.css';
+import '@fontsource-variable/nunito/wght.css';
+import { applyTheme } from './lib/theme';
 import './styles/index.css';
 
 // iPhone home-screen apps report a viewport shorter than the screen (WebKit bug
@@ -17,6 +18,8 @@ if ((navigator as Navigator & { standalone?: boolean }).standalone && /iPhone/.t
   setAppHeight();
   addEventListener('resize', setAppHeight);
 }
+
+applyTheme();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
