@@ -62,3 +62,17 @@ and shot 1 of the prompt must describe that still. U1 starts from A1 (May waving
 | U7 | Medium as she pulls her chair in → handheld push-in to a close-up nod |
 | C1 | Close-up clap and grin (single shot, short) |
 | C2 | Top-down: four pairs of hands slap the table edge in a cheer, faces out of frame |
+
+## Version 2 prompts, ready to paste (11 Nov)
+
+Each prompt starts with the `@MayMahjong` chip, and each clip uses its `media-src/video/start/U<n>_start.jpg`.
+Settings: multi-shot Auto, sound ON, 9–10 s, 1080p, Unlimited ON. Shot 1 always describes the start frame.
+U5 and U6 lines were reworded so they don't end on "wind" or "win", which Kling clips.
+
+- **U1** (done, U1_v2.mp4): start A1 (waving).
+- **U2** (start S2, hands at the edge of the tile wall): ` sits at the green-cloth mahjong table in a Singapore HDB living room at night. Shot 1: low angle along the square wall of mahjong tiles, plain green backs only, her hands resting at the table edge. Shot 2: overhead view as one finger taps the cloth three times, slowly. Shot 3: low angle up to her smiling face as she says warmly, "Mahjong is about making sets. Three of a kind, or three in a row." No tile faces visible. Friendly Singaporean English accent, gentle handheld documentary feel.`
+- **U3** (start S3, over her shoulder): ` at the green-cloth mahjong table at night. Shot 1: over her shoulder from behind, the wall of tiles in front of her showing plain green backs. Shot 2: close-up of her hand drawing one tile from the wall and placing another face down in the middle in one easy motion. Shot 3: she turns to the camera and says, "Each go works the same way. Pick one up, put one down." No tile faces visible. Friendly Singaporean English accent, gentle handheld feel.`
+- **U4** (start S4, side profile glancing left): ` at the green-cloth mahjong table at night. Shot 1: side profile, she glances to her left at someone off screen. Shot 2: quick push-in as she raises one hand like she's calling out. Shot 3: front medium shot, she laughs and says, "Someone throws the tile you need? You can call for it." No tile faces visible. Friendly Singaporean English accent.`
+- **U5** (start S5, empty table): ` Shot 1: slow orbit around the empty green-cloth mahjong table and four chairs in a Singapore HDB living room at night. Shot 2: she sits down into frame and sweeps a hand across the four seats. Shot 3: medium shot, she says, "Where you sit matters. Every seat has its own wind, and East goes first." No tile faces visible. Friendly Singaporean English accent.`
+- **U6** (start S6, low angle, leaning back grinning): ` at the green-cloth mahjong table at night. Shot 1: low angle from the table edge, she leans back in her chair grinning. Shot 2: close-up as she leans in like she's sharing a secret and counts on her fingers. Shot 3: medium shot, she says, "In Singapore we count tai. More tai means a bigger score." No tile faces visible. Friendly Singaporean English accent.`
+- **U7** (start S7, pulling her chair in): ` Shot 1: medium shot, she pulls her chair in to the green-cloth mahjong table at night. Shot 2: handheld push-in to a close-up as she rubs her hands together. Shot 3: she nods and says, "Ready? Let's play a real hand. I'll be right here." No tile faces visible. Friendly Singaporean English accent.`

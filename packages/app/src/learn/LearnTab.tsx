@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { CURRICULUM, lessonKey, type Lesson, type Unit } from './curriculum';
 import { LessonPlayer } from './LessonPlayer';
+import { UNIT_VIDEOS } from './VideoIntro';
 import { markDone, useProgress } from '../lib/progress';
 import { haptics } from '../lib/haptics';
 
@@ -83,6 +84,7 @@ export function LearnTab() {
         <LessonPlayer
           key={lessonKey(open.unit, open.lesson)}
           lesson={open.lesson}
+          intro={open.unit.video && open.unit.lessons[0] === open.lesson && UNIT_VIDEOS.has(open.unit.video) ? open.unit.video : undefined}
           nextTitle={after(open)?.lesson.title}
           onNextLesson={after(open) ? () => setOpen(after(open)!) : undefined}
           onExit={() => setOpen(null)}

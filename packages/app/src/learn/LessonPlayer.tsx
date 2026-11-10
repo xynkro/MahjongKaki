@@ -3,11 +3,13 @@ import { useState } from 'react';
 import { TileRow } from '../components/game/TileRow';
 import { haptics } from '../lib/haptics';
 import type { Lesson, Task } from './curriculum';
+import { VideoIntro } from './VideoIntro';
 
-interface Props { lesson: Lesson; onExit: () => void; onComplete: () => void; nextTitle?: string; onNextLesson?: () => void }
+interface Props { lesson: Lesson; onExit: () => void; onComplete: () => void; nextTitle?: string; onNextLesson?: () => void; intro?: string }
 
-export function LessonPlayer({ lesson, onExit, onComplete, nextTitle, onNextLesson }: Props) {
+export function LessonPlayer({ lesson, onExit, onComplete, nextTitle, onNextLesson, intro }: Props) {
   const [step, setStep] = useState(0);
+  const [showIntro, setShowIntro] = useState(Boolean(intro));
   const [finished, setFinished] = useState(false);
   const task = lesson.tasks[step];
 
@@ -32,7 +34,9 @@ export function LessonPlayer({ lesson, onExit, onComplete, nextTitle, onNextLess
 
       <main className="flex-1 overflow-y-auto px-4 pb-6">
         <div className="max-w-lg mx-auto">
-          {finished ? (
+          {showIntro && intro ? (
+            <VideoIntro id={intro} onDone={() => setShowIntro(false)} />
+          ) : finished ? (
             <Finished title={lesson.title} onDone={onExit} nextTitle={nextTitle} onNextLesson={onNextLesson} />
           ) : (
             <TaskView key={step} task={task} onNext={next} />
