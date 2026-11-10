@@ -4,9 +4,9 @@ import { TileRow } from '../components/game/TileRow';
 import { haptics } from '../lib/haptics';
 import type { Lesson, Task } from './curriculum';
 
-interface Props { lesson: Lesson; onExit: () => void; onComplete: () => void }
+interface Props { lesson: Lesson; onExit: () => void; onComplete: () => void; nextTitle?: string; onNextLesson?: () => void }
 
-export function LessonPlayer({ lesson, onExit, onComplete }: Props) {
+export function LessonPlayer({ lesson, onExit, onComplete, nextTitle, onNextLesson }: Props) {
   const [step, setStep] = useState(0);
   const [finished, setFinished] = useState(false);
   const task = lesson.tasks[step];
@@ -33,7 +33,7 @@ export function LessonPlayer({ lesson, onExit, onComplete }: Props) {
       <main className="flex-1 overflow-y-auto px-4 pb-6">
         <div className="max-w-lg mx-auto">
           {finished ? (
-            <Finished title={lesson.title} onDone={onExit} />
+            <Finished title={lesson.title} onDone={onExit} nextTitle={nextTitle} onNextLesson={onNextLesson} />
           ) : (
             <TaskView key={step} task={task} onNext={next} />
           )}
@@ -43,7 +43,7 @@ export function LessonPlayer({ lesson, onExit, onComplete }: Props) {
   );
 }
 
-function Finished({ title, onDone }: { title: string; onDone: () => void }) {
+function Finished({ title, onDone, nextTitle, onNextLesson }: { title: string; onDone: () => void; nextTitle?: string; onNextLesson?: () => void }) {
   return (
     <div className="pt-16 text-center anim-pop">
       <div className="mx-auto w-16 h-16 rounded-full bg-accent-soft grid place-items-center text-accent">
@@ -51,7 +51,14 @@ function Finished({ title, onDone }: { title: string; onDone: () => void }) {
       </div>
       <h2 className="font-display text-2xl text-ink mt-5">Lesson done</h2>
       <p className="text-mute mt-1">{title}</p>
-      <button onClick={onDone} className="btn-primary w-full h-12 rounded-xl text-[16px] mt-10">Back to lessons</button>
+      {onNextLesson && nextTitle ? (
+        <>
+          <button onClick={onNextLesson} className="btn-primary w-full h-12 rounded-xl text-[16px] mt-10">Next: {nextTitle}</button>
+          <button onClick={onDone} className="btn-ghost w-full h-12 rounded-xl text-[16px] mt-3">Back to lessons</button>
+        </>
+      ) : (
+        <button onClick={onDone} className="btn-primary w-full h-12 rounded-xl text-[16px] mt-10">Back to lessons</button>
+      )}
     </div>
   );
 }

@@ -12,6 +12,7 @@ export function LearnTab() {
   const all = CURRICULUM.flatMap(u => u.lessons.map(l => ({ unit: u, lesson: l })));
   const nextUp = all.find(x => !done.includes(lessonKey(x.unit, x.lesson)));
   const total = all.length;
+  const after = (x: { unit: Unit; lesson: Lesson }) => all[all.findIndex(y => y.lesson === x.lesson) + 1];
   const doneCount = all.filter(x => done.includes(lessonKey(x.unit, x.lesson))).length;
 
   return (
@@ -80,7 +81,10 @@ export function LearnTab() {
 
       {open && (
         <LessonPlayer
+          key={lessonKey(open.unit, open.lesson)}
           lesson={open.lesson}
+          nextTitle={after(open)?.lesson.title}
+          onNextLesson={after(open) ? () => setOpen(after(open)!) : undefined}
           onExit={() => setOpen(null)}
           onComplete={() => markDone(lessonKey(open.unit, open.lesson))}
         />
