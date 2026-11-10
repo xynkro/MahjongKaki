@@ -160,6 +160,9 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
             <Row label="Beginner tile labels" desc="Adds readable tags to every tile — 1–9, E/S/W/N, Rd/Gn/Wt — for non-Chinese readers.">
               <Toggle value={display.tileMode === 'beginner'} onChange={v => setDisplay('tileMode', v ? 'beginner' : 'classic')} />
             </Row>
+            <Row label="Coach in games" desc="On your turn against the AI, suggests a tile to throw and says why.">
+              <Toggle value={display.coach} onChange={v => setDisplay('coach', v)} />
+            </Row>
             <Row label="Term tooltips" desc="Tap underlined terms (Tai, Shooter…) anywhere for a quick definition.">
               <Toggle value={display.tooltips} onChange={v => setDisplay('tooltips', v)} />
             </Row>

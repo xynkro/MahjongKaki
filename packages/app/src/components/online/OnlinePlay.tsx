@@ -284,6 +284,7 @@ function Room({ code, seat, onLeft }: { code: string; seat: number; onLeft: () =
       )}
       <div className="flex-1 overflow-hidden">
         <GameBoard
+          allowCoach={false}
           state={game}
           availableActions={s.actions}
           onDiscard={tile => s.move({ type: 'discard', tile })}

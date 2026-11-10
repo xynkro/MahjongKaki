@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { coachDiscard } from '../../lib/coach';
+import { useDisplay, setDisplay } from '../../lib/display';
 import { type GameState, type GameAction } from '@mahjongkaki/game';
 import { tileToIndex, type Meld, type Wind, type BonusTile, WINDS } from '@mahjongkaki/engine';
 import { TileRow } from './TileRow';
@@ -32,6 +34,8 @@ interface GameBoardProps {
   seatNames?: string[];
   /** Online: overrides the status text at the top right. */
   statusText?: string;
+  /** Online games with friends pass false: the coach is for practice against the AI only. */
+  allowCoach?: boolean;
 }
 
 function seatWind(seat: number, dealerSeat: number): Wind {
@@ -104,13 +108,20 @@ function BigTile({ tile, cls }: { tile: number; cls: string }) {
 }
 
 export function GameBoard({
-  state, availableActions, onDiscard, onDeclareKong, onTsumo, onQuit, animateDiscards = true, seatNames, statusText,
+  state, availableActions, onDiscard, onDeclareKong, onTsumo, onQuit, animateDiscards = true, seatNames, statusText, allowCoach = true,
 }: GameBoardProps) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [selectedTileValue, setSelectedTileValue] = useState<number | null>(null);
 
   const hs = state.humanSeat;
   const isHumanTurn = state.currentPlayer === hs && state.phase === 'discard';
+  const { coach } = useDisplay();
+  const tip = useMemo(
+    () => (allowCoach && coach && isHumanTurn ? coachDiscard(state.hands[hs], state.melds[hs], state.discardLog) : null),
+    // Recompute once per turn, not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allowCoach, coach, isHumanTurn, state.turnCount, state.hands[hs].length],
+  );
 
   useEffect(() => {
     setSelectedIdx(null);
@@ -283,6 +294,15 @@ export function GameBoard({
           )}
         </div>
 
+        {tip && (
+          <div className="mb-2 flex items-center gap-2 rounded-xl bg-surface border border-line px-2.5 py-2 anim-pop" role="status">
+            <span className="w-7 h-9 shrink-0 rounded-[5px] overflow-hidden border border-[#C6AE84]" style={{ background: '#F6EDDA' }}>
+              <TileFace index={tip.tile} size="sm" />
+            </span>
+            <p className="flex-1 text-[13px] leading-snug text-ink"><span className="font-semibold text-accent">Coach: </span>{tip.text}</p>
+            <button onClick={() => setDisplay('coach', false)} className="shrink-0 text-[12px] text-mute px-1.5 py-1 active:scale-95" aria-label="Turn the coach off">Hide</button>
+          </div>
+        )}
         <TileRow
           tiles={state.hands[hs]}
           onTileClick={isHumanTurn ? handleTileClick : undefined}

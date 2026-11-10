@@ -7,9 +7,11 @@ export interface DisplayConfig {
   tileMode: TileMode;
   /** Tap underlined terms (Tai, Shooter…) to see a plain-English definition. */
   tooltips: boolean;
+  /** Play vs AI: suggest a throw on your turn, with a one-line reason. */
+  coach: boolean;
 }
 
-const DEFAULT: DisplayConfig = { tileMode: 'beginner', tooltips: true };
+const DEFAULT: DisplayConfig = { tileMode: 'beginner', tooltips: true, coach: true };
 const KEY = 'mk_display';
 
 let cfg: DisplayConfig = load();
