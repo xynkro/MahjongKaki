@@ -6,6 +6,9 @@ import { UNIT_VIDEOS } from './VideoIntro';
 import { markDone, useProgress } from '../lib/progress';
 import { haptics } from '../lib/haptics';
 
+// Where each unit cover's subject sits, so the 16:7 crop keeps it in frame.
+const COVER_POS = ['50% 55%', '50% 22%', '50% 62%', '50% 40%', '50% 50%', '50% 62%'];
+
 export function LearnTab() {
   const { done } = useProgress();
   const [open, setOpen] = useState<{ unit: Unit; lesson: Lesson } | null>(null);
@@ -44,6 +47,13 @@ export function LearnTab() {
           const unitDone = unit.lessons.filter(l => done.includes(lessonKey(unit, l))).length;
           return (
             <li key={unit.id}>
+              <img
+                src={`${import.meta.env.BASE_URL}art/unit-${ui + 1}.webp`}
+                alt=""
+                loading="lazy"
+                style={{ objectPosition: COVER_POS[ui] ?? '50% 45%' }}
+                className="w-full h-28 object-cover rounded-2xl mb-3"
+              />
               <div className="flex items-baseline justify-between gap-3">
                 <h2 className="font-display text-xl text-ink">
                   <span className="text-mute mr-2 tabular-nums">{ui + 1}</span>{unit.title}
