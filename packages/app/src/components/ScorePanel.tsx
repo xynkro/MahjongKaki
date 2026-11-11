@@ -20,6 +20,8 @@ interface ScorePanelProps {
   incompleteMsg?: string | null;
   /** Send the computed tai + win-type over to the chip tracker (pre-fills a round). */
   onSendToChips?: () => void;
+  /** Show cents and dollars instead of points (Settings → Score in cents). */
+  money?: boolean;
 }
 
 export function ScorePanel({
@@ -28,8 +30,10 @@ export function ScorePanel({
   onWinnerChange, onShooterChange, onPlayerNameChange,
   handFull = true, incompleteMsg,
   onSendToChips,
+  money = false,
 }: ScorePanelProps) {
   const isCompleteWin = handFull && !!scoring?.isValid;
+  const fmt = money ? formatCurrency : (n: number) => `${n < 0 ? '−' : ''}${Math.abs(n)} ${Math.abs(n) === 1 ? 'point' : 'points'}`;
   return (
     <div className="space-y-4">
       {scoring && (
@@ -75,7 +79,7 @@ export function ScorePanel({
                 </div>
               ))}
               {scoring.elements.length === 0 && (
-                <div className="empty-state">No tai elements (chicken hand)</div>
+                <div className="empty-state">No tai in this hand (a “chicken hand”), so it can’t win at a 1-tai table</div>
               )}
             </div>
           )}
@@ -84,9 +88,9 @@ export function ScorePanel({
 
       {isCompleteWin && (
         <div className="card p-4 space-y-3">
-          <h3 className="section-title">Settlement</h3>
+          <h3 className="section-title">Who pays whom</h3>
 
-          <div>
+          {money && <div>
             <h3 className="section-title mb-1">Stake</h3>
             <div className="flex gap-1 flex-wrap">
               {STAKE_PRESETS.map((preset, i) => (
@@ -104,7 +108,7 @@ export function ScorePanel({
                 </button>
               ))}
             </div>
-          </div>
+          </div>}
 
           <div className="space-y-1.5">
             <h3 className="section-title">Players</h3>
@@ -147,20 +151,20 @@ export function ScorePanel({
                 <div key={i} className="flex justify-between text-xs">
                   <span className="text-slate-300">{p.name}</span>
                   <span className={p.amount < 0 ? 'text-red-400' : 'text-emerald-400'}>
-                    {formatCurrency(p.amount)}
+                    {fmt(p.amount)}
                   </span>
                 </div>
               ))}
               <div className="flex justify-between text-xs font-semibold pt-1">
                 <span className="text-emerald-300">{payout.winner} wins</span>
                 <span className="text-emerald-400">
-                  {formatCurrency(payout.netPerPlayer[payout.winner])}
+                  {fmt(payout.netPerPlayer[payout.winner])}
                 </span>
               </div>
 
               <div className="pt-2 border-t border-slate-700">
                 <h3 className="section-title mb-1">Transfers</h3>
-                {formatSettlement(payout.netPerPlayer).map((line, i) => (
+                {formatSettlement(payout.netPerPlayer, fmt).map((line, i) => (
                   <div key={i} className="text-xs text-slate-300">{line}</div>
                 ))}
               </div>

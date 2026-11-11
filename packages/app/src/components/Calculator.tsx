@@ -1,4 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useDisplay } from '../lib/display';
+import { POINTS_STAKE } from './game/match';
 import type {
   PlayTile, Meld, Hand, WinContext, Wind, ScoringResult, PayoutResult,
   FlowerTile, SeasonTile, AnimalTile,
@@ -23,6 +25,7 @@ interface CalculatorProps {
 }
 
 export function Calculator({ onSendToChips }: CalculatorProps = {}) {
+  const { money } = useDisplay();
   const [adding, setAdding] = useState(false);
   const [quickEntry, setQuickEntry] = useState(false);
   // The tiles behind a quick-entry hand. Kept so the best reading is re-picked if a
@@ -149,13 +152,13 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
     if (!scoring || !scoring.isValid) return null;
     return calculatePayout({
       scoring,
-      stake: STAKE_PRESETS[stakeIndex],
+      stake: money ? STAKE_PRESETS[stakeIndex] : POINTS_STAKE,
       winnerIndex,
       shooterIndex: winType === 'zimo' ? undefined : shooterIndex,
       playerNames,
       rules,
     });
-  }, [scoring, stakeIndex, winnerIndex, shooterIndex,
+  }, [scoring, stakeIndex, money, winnerIndex, shooterIndex,
       winType, playerNames, rules]);
 
   const hasEyes = melds.some(m => m.type === 'eyes');
@@ -276,6 +279,7 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
       />
 
       <ScorePanel
+        money={money}
         scoring={scoring}
         payout={payout}
         stakeIndex={stakeIndex}

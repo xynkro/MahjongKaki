@@ -80,7 +80,10 @@ export function formatCurrency(amount: number): string {
   return `${prefix}$${abs.toFixed(2)}`;
 }
 
-export function formatSettlement(netPerPlayer: Record<string, number>): string[] {
+export function formatSettlement(
+  netPerPlayer: Record<string, number>,
+  fmt: (amount: number) => string = formatCurrency,
+): string[] {
   const debts: { from: string; to: string; amount: number }[] = [];
 
   const balances = Object.entries(netPerPlayer)
@@ -106,6 +109,6 @@ export function formatSettlement(netPerPlayer: Record<string, number>): string[]
   }
 
   return debts.map(d =>
-    `${d.from} pays ${d.to} ${formatCurrency(d.amount)}`
+    `${d.from} pays ${d.to} ${fmt(d.amount)}`
   );
 }
