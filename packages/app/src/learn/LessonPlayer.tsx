@@ -91,8 +91,17 @@ function Feedback({ verdict, explain, onNext, onRetry }: { verdict: Verdict; exp
   const right = verdict === 'right';
   return (
     <div className={`mt-6 rounded-2xl p-4 anim-pop ${right ? 'bg-accent-soft' : 'bg-surface-2'}`}>
-      <div className={`font-semibold ${right ? 'text-accent' : 'text-ink'}`}>{right ? 'That’s it.' : 'Not quite.'}</div>
-      <p className="text-ink mt-1 leading-snug">{explain}</p>
+      <div className="flex gap-3 items-start">
+        <img
+          src={`${import.meta.env.BASE_URL}art/${right ? 'may-yes' : 'may-oops'}.webp`}
+          alt=""
+          className="w-12 h-12 rounded-full object-cover shrink-0"
+        />
+        <div className="min-w-0">
+          <div className={`font-semibold ${right ? 'text-accent' : 'text-ink'}`}>{right ? 'That’s it.' : 'Not quite.'}</div>
+          <p className="text-ink mt-1 leading-snug">{explain}</p>
+        </div>
+      </div>
       {right
         ? <button onClick={onNext} className="btn-primary w-full h-12 rounded-xl text-[16px] mt-4">Next</button>
         : <button onClick={onRetry} className="btn-ghost w-full h-12 rounded-xl text-[16px] mt-4">Try again</button>}
