@@ -17,7 +17,10 @@ const db = getFirestore();
 
 setGlobalOptions({ region: 'asia-southeast1', maxInstances: 10, memory: '256MiB', concurrency: 40 });
 
-const ORIGINS = ['https://xynkro.github.io', /^http:\/\/localhost:\d+$/, /^http:\/\/127\.0\.0\.1:\d+$/];
+const ORIGINS = [
+  'https://mahjongkaki.web.app',
+  'https://mahjongkaki.firebaseapp.com',
+  'https://xynkro.github.io', /^http:\/\/localhost:\d+$/, /^http:\/\/127\.0\.0\.1:\d+$/];
 const opts = { cors: ORIGINS };
 
 const ROOM_TTL_MS = 24 * 60 * 60 * 1000;

@@ -5,7 +5,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 // GitHub Pages serves this project site under /MahjongKaki/. Only apply that
 // base for production builds so the local dev server stays at root.
 export default defineConfig(({ command }) => ({
-  base: command === 'build' ? '/MahjongKaki/' : '/',
+  // BASE_PATH=/ for Firebase Hosting (mahjongkaki.web.app); GitHub Pages needs /MahjongKaki/.
+  base: command === 'build' ? (process.env.BASE_PATH ?? '/MahjongKaki/') : '/',
   plugins: [
     react(),
     VitePWA({

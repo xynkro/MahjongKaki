@@ -13,7 +13,8 @@
     "test:watch": "npm run test:watch -w @mahjongkaki/engine",
     "lint": "eslint packages/*/src --ext .ts,.tsx",
     "typecheck": "tsc -b",
-    "clean": "rm -rf packages/*/dist"
+    "clean": "rm -rf packages/*/dist",
+    "deploy:firebase": "npm test && BASE_PATH=/ npm run build -w @mahjongkaki/app && firebase deploy --only hosting --project mahjongkaki-online"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
