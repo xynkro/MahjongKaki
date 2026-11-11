@@ -2,7 +2,7 @@
 import { useRef, useState } from 'react';
 
 /** Clips that are in public/video. A unit whose clip isn't listed here simply has no intro. */
-export const UNIT_VIDEOS = new Set(['U1', 'U2', 'U3', 'U4', 'U5']);
+export const UNIT_VIDEOS = new Set(['U1', 'U2', 'U3', 'U4', 'U5', 'U6']);
 
 export function VideoIntro({ id, onDone }: { id: string; onDone: () => void }) {
   const ref = useRef<HTMLVideoElement>(null);
