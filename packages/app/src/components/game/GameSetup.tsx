@@ -34,7 +34,12 @@ export function GameSetup({ onStart, onOnline }: GameSetupProps) {
 
   return (
     <div className="max-w-lg mx-auto space-y-4 pb-2">
-      <div className="pt-2">
+      <img
+        src={`${import.meta.env.BASE_URL}art/may-ready.webp`}
+        alt="May at the table, ready to play"
+        className="w-full h-44 object-cover object-[50%_32%] rounded-2xl"
+      />
+      <div>
         <h1 className="font-display text-[28px] leading-tight text-ink">Play a game</h1>
         <p className="text-mute mt-1">
           You against three AI players, scored in {money ? 'cents' : 'points'}.
