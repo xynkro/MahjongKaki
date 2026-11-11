@@ -49,10 +49,12 @@ export function LessonPlayer({ lesson, onExit, onComplete, nextTitle, onNextLess
 
 function Finished({ title, onDone, nextTitle, onNextLesson }: { title: string; onDone: () => void; nextTitle?: string; onNextLesson?: () => void }) {
   return (
-    <div className="pt-16 text-center anim-pop">
-      <div className="mx-auto w-16 h-16 rounded-full bg-accent-soft grid place-items-center text-accent">
-        <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
-      </div>
+    <div className="pt-6 text-center anim-pop">
+      <img
+        src={`${import.meta.env.BASE_URL}art/may-yay.webp`}
+        alt="May cheering at the table"
+        className="mx-auto w-full max-w-[320px] aspect-[4/5] object-cover object-[50%_30%] rounded-2xl"
+      />
       <h2 className="font-display text-2xl text-ink mt-5">Lesson done</h2>
       <p className="text-mute mt-1">{title}</p>
       {onNextLesson && nextTitle ? (
