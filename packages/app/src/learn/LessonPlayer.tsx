@@ -5,9 +5,9 @@ import { haptics } from '../lib/haptics';
 import type { Lesson, Task } from './curriculum';
 import { VideoIntro } from './VideoIntro';
 
-interface Props { lesson: Lesson; onExit: () => void; onComplete: () => void; nextTitle?: string; onNextLesson?: () => void; intro?: string }
+interface Props { lesson: Lesson; onExit: () => void; onComplete: () => void; nextTitle?: string; onNextLesson?: () => void; intro?: string; unitTitle?: string }
 
-export function LessonPlayer({ lesson, onExit, onComplete, nextTitle, onNextLesson, intro }: Props) {
+export function LessonPlayer({ lesson, onExit, onComplete, nextTitle, onNextLesson, intro, unitTitle }: Props) {
   const [step, setStep] = useState(0);
   const [showIntro, setShowIntro] = useState(Boolean(intro));
   const [finished, setFinished] = useState(false);
@@ -37,7 +37,7 @@ export function LessonPlayer({ lesson, onExit, onComplete, nextTitle, onNextLess
           {showIntro && intro ? (
             <VideoIntro id={intro} onDone={() => setShowIntro(false)} />
           ) : finished ? (
-            <Finished title={lesson.title} onDone={onExit} nextTitle={nextTitle} onNextLesson={onNextLesson} />
+            <Finished title={lesson.title} onDone={onExit} nextTitle={nextTitle} onNextLesson={onNextLesson} unitTitle={unitTitle} />
           ) : (
             <TaskView key={step} task={task} onNext={next} />
           )}
@@ -47,16 +47,16 @@ export function LessonPlayer({ lesson, onExit, onComplete, nextTitle, onNextLess
   );
 }
 
-function Finished({ title, onDone, nextTitle, onNextLesson }: { title: string; onDone: () => void; nextTitle?: string; onNextLesson?: () => void }) {
+function Finished({ title, onDone, nextTitle, onNextLesson, unitTitle }: { title: string; onDone: () => void; nextTitle?: string; onNextLesson?: () => void; unitTitle?: string }) {
   return (
     <div className="pt-6 text-center anim-pop">
       <img
-        src={`${import.meta.env.BASE_URL}art/may-yay.webp`}
-        alt="May cheering at the table"
+        src={`${import.meta.env.BASE_URL}art/${unitTitle ? 'may-laugh' : 'may-yay'}.webp`}
+        alt={unitTitle ? 'May laughing at the table' : 'May cheering at the table'}
         className="mx-auto w-full max-w-[320px] aspect-[4/5] object-cover object-[50%_30%] rounded-2xl"
       />
-      <h2 className="font-display text-2xl text-ink mt-5">Lesson done</h2>
-      <p className="text-mute mt-1">{title}</p>
+      <h2 className="font-display text-2xl text-ink mt-5">{unitTitle ? 'Unit complete' : 'Lesson done'}</h2>
+      <p className="text-mute mt-1">{unitTitle ? `You’ve finished “${unitTitle}”.` : title}</p>
       {onNextLesson && nextTitle ? (
         <>
           <button onClick={onNextLesson} className="btn-primary w-full h-12 rounded-xl text-[16px] mt-10">Next: {nextTitle}</button>

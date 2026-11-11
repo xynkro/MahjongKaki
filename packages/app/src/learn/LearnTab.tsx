@@ -84,6 +84,7 @@ export function LearnTab() {
         <LessonPlayer
           key={lessonKey(open.unit, open.lesson)}
           lesson={open.lesson}
+          unitTitle={open.unit.lessons.every(l => l === open.lesson || done.includes(lessonKey(open.unit, l))) ? open.unit.title : undefined}
           intro={open.unit.video && open.unit.lessons[0] === open.lesson && UNIT_VIDEOS.has(open.unit.video) ? open.unit.video : undefined}
           nextTitle={after(open)?.lesson.title}
           onNextLesson={after(open) ? () => setOpen(after(open)!) : undefined}
