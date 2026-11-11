@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 /** Clips that are in public/video. A unit whose clip isn't listed here simply has no intro. */
 export const UNIT_VIDEOS = new Set(['U1', 'U2', 'U3', 'U4', 'U5', 'U6']);
 
-export function VideoIntro({ id, onDone }: { id: string; onDone: () => void }) {
+export function VideoIntro({ id, onDone, doneLabel }: { id: string; onDone: () => void; doneLabel?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const base = `${import.meta.env.BASE_URL}video/${id}`;
@@ -43,7 +43,7 @@ export function VideoIntro({ id, onDone }: { id: string; onDone: () => void }) {
         )}
       </div>
       <button onClick={onDone} className="btn-ghost w-full h-12 rounded-xl text-[16px] mt-6">
-        {playing ? 'Skip to the lesson' : 'Start the lesson'}
+        {doneLabel ?? (playing ? 'Skip to the lesson' : 'Start the lesson')}
       </button>
     </div>
   );

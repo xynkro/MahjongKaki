@@ -3,6 +3,7 @@ import { type AiProfile, ALL_PROFILES } from '@mahjongkaki/ai';
 import { STAKE_PRESETS } from '@mahjongkaki/engine';
 import { haptics } from '../../lib/haptics';
 import { useDisplay } from '../../lib/display';
+import { VideoIntro, UNIT_VIDEOS } from '../../learn/VideoIntro';
 
 export type SpeedSetting = 'slow' | 'normal' | 'fast' | 'instant';
 
@@ -25,6 +26,8 @@ export function GameSetup({ onStart, onOnline }: GameSetupProps) {
   const [humanSeat, setHumanSeat] = useState(0);
   const [stakeIndex, setStakeIndex] = useState(0);
   const [more, setMore] = useState(false);
+  const [intro, setIntro] = useState(false);
+  const hasIntro = UNIT_VIDEOS.has('U7');
 
   const seatLabels = ['East', 'South', 'West', 'North'];
   const pill = (active: boolean) => `seg min-h-[44px] text-sm ${active ? 'seg-on' : 'seg-off'}`;
@@ -38,6 +41,20 @@ export function GameSetup({ onStart, onOnline }: GameSetupProps) {
           {coach ? ' The coach suggests a throw on each turn; tap Hide to play on your own.' : ' The coach is off; turn it on in Settings.'}
         </p>
       </div>
+
+      {hasIntro && (
+        <button
+          type="button"
+          onClick={() => { haptics.tap(); setIntro(true); }}
+          className="card w-full p-3 flex items-center gap-3 text-left active:scale-[0.99]"
+        >
+          <img src={`${import.meta.env.BASE_URL}video/U7.webp`} alt="" className="w-12 h-16 rounded-lg object-cover shrink-0" />
+          <span className="min-w-0">
+            <span className="block text-base font-semibold text-ink">First game? Watch May’s intro</span>
+            <span className="block text-sm text-mute">Ten seconds, with sound.</span>
+          </span>
+        </button>
+      )}
 
       <section className="card p-4">
         <h3 className="section-title mb-3">How strong are the AI players?</h3>
@@ -106,6 +123,14 @@ export function GameSetup({ onStart, onOnline }: GameSetupProps) {
         className="btn-primary w-full h-14 text-[17px] rounded-xl">
         Start game
       </button>
+
+      {intro && (
+        <div className="app-full z-50 bg-bg flex flex-col px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}>
+          <div className="max-w-lg w-full mx-auto">
+            <VideoIntro id="U7" onDone={() => setIntro(false)} doneLabel="Back to the game setup" />
+          </div>
+        </div>
+      )}
 
       <button
         type="button"
