@@ -12,6 +12,8 @@ import { ALL_PROFILES, aiDecide } from '@mahjongkaki/ai';
 import { GameSetup, type SpeedSetting, type MatchConfig } from './GameSetup';
 import { GameBoard } from './GameBoard';
 import { ClaimOverlay } from './ClaimOverlay';
+import { coachClaim } from '../../lib/coach';
+import { useDisplay } from '../../lib/display';
 import { RoundResult } from './RoundResult';
 import { Scoreboard, points } from './Scoreboard';
 import { type MatchState, newMatch, advanceMatch, handDeltas } from './match';
@@ -33,6 +35,7 @@ function startHand(match: MatchState): GameState {
 }
 
 export function PlayTab() {
+  const { coach } = useDisplay();
   const [linkedRoom] = useState(peekLinkedRoom);
   const [linkOpen, setLinkOpen] = useState(true);
   useEffect(consumeLinkedRoom, []);
@@ -325,6 +328,7 @@ export function PlayTab() {
           lastDiscardTile={gameState.lastDiscard!.tile}
           onClaim={handleClaim}
           onSkip={handleSkipClaim}
+          tip={coach ? coachClaim(gameState.hands[gameState.humanSeat], gameState.melds[gameState.humanSeat], humanClaims) : null}
         />
       )}
       {confirmEnd && (

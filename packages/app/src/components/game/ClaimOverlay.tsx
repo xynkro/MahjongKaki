@@ -7,35 +7,38 @@ interface ClaimOverlayProps {
   lastDiscardTile: number;
   onClaim: (claim: Claim) => void;
   onSkip: () => void;
+  /** Coach advice for this decision (Play vs AI only). pick = index into claims, or null for Skip. */
+  tip?: { pick: number | null; text: string } | null;
 }
 
-const CLAIM_COLORS: Record<string, string> = {
-  win: 'bg-red-600 active:bg-red-500',
-  kong: 'bg-amber-600 active:bg-amber-500',
-  pung: 'bg-emerald-600 active:bg-emerald-500',
-  chow: 'bg-blue-600 active:bg-blue-500',
-};
+const LABEL: Record<string, string> = { win: 'Hu! (win)', kong: 'Kong', pung: 'Pung', chow: 'Chow' };
 
-export function ClaimOverlay({ claims, lastDiscardTile, onClaim, onSkip }: ClaimOverlayProps) {
+export function ClaimOverlay({ claims, lastDiscardTile, onClaim, onSkip, tip }: ClaimOverlayProps) {
+  const ring = 'ring-2 ring-offset-2 ring-offset-[color:var(--surface)] ring-accent';
   return (
-    <div className="anim-pop bg-slate-900/95 border-t border-amber-400/20 p-4 pb-safe backdrop-blur">
+    <div className="anim-pop bg-surface border-t border-line p-4 pb-safe">
       <div className="flex items-center justify-center gap-2 mb-3">
-        <span className="text-slate-400 text-xs">Claim this tile?</span>
+        <span className="text-mute text-sm">Take this tile?</span>
         <TileRow tiles={[lastDiscardTile]} size="sm" sortTiles={false} animateEntrance={false} />
       </div>
-      <div className="flex gap-2 justify-center">
+      {tip && (
+        <p className="text-[13px] leading-snug text-ink text-center mb-3 max-w-sm mx-auto" role="status">
+          <span className="font-semibold text-accent">Coach: </span>{tip.text}
+        </p>
+      )}
+      <div className="flex gap-2 justify-center flex-wrap">
         {claims.map((claim, i) => (
           <button
             key={`${claim.claimType}-${i}`}
             onClick={() => { haptics.select(); onClaim(claim); }}
-            className={`px-5 py-2.5 text-white rounded-lg font-semibold text-sm active:scale-95 ${CLAIM_COLORS[claim.claimType]}`}
+            className={`min-h-[44px] px-5 rounded-xl font-semibold text-[15px] active:scale-95 btn-primary ${tip?.pick === i ? ring : ''}`}
           >
-            {claim.claimType === 'win' ? 'Hu!' : claim.claimType.charAt(0).toUpperCase() + claim.claimType.slice(1)}
+            {LABEL[claim.claimType] ?? claim.claimType}
           </button>
         ))}
         <button
           onClick={() => { haptics.tap(); onSkip(); }}
-          className="px-5 py-2.5 btn-ghost rounded-lg text-sm active:scale-95"
+          className={`min-h-[44px] px-5 btn-ghost rounded-xl text-[15px] active:scale-95 ${tip && tip.pick === null ? ring : ''}`}
         >
           Skip
         </button>
