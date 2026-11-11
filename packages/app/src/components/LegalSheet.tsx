@@ -72,22 +72,22 @@ export function LegalSheet({ open, onClose }: { open: boolean; onClose: () => vo
         <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
           <Section title="What this app is">
             <p>
-              MahjongKaki is a companion for Singapore-style mahjong: a tai (fan) calculator, a chip-settlement
-              tracker, table utilities, an offline practice game against AI, and a strategy trainer.
+              MahjongKaki teaches Singapore-style mahjong: short lessons, practice games against AI with a coach, and
+              a calculator that explains what a hand is worth.
             </p>
           </Section>
 
           <Section title="Not a gambling app">
             <p>
               MahjongKaki does <strong className="text-amber-400">not</strong> accept bets, hold funds, move money, or
-              facilitate any wager. Chip amounts you enter are a manual record only — players settle directly with each
-              other, outside the app. It is a scorekeeping tool, not a gambling product.
+              facilitate any wager. Games are scored in points. An optional setting shows scores in cents for people who
+              keep score that way at home; it is a display only, and nothing is ever paid through the app.
             </p>
           </Section>
 
           <Section title="Your data &amp; privacy">
             <p>
-              Your sessions, scores, solo games, and training stats are stored
+              Your lesson progress, settings and practice games are stored
               <strong className="text-amber-400"> only on this device</strong>, in your browser's local storage. There
               is no account, no sign-in, and no analytics or tracking. Player names you type stay on your device.
             </p>
