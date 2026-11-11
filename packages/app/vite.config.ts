@@ -27,9 +27,22 @@ export default defineConfig(({ command }) => ({
         ],
       },
       workbox: {
-        // jpg + mp4 so the generated felt photo, hero poster and cinematic
-        // loop are precached for full offline use (all small: <600KB total).
-        globPatterns: ['**/*.{js,css,html,svg,png,jpg,woff2,mp4}'],
+        // Small art (webp/jpg/png) is precached for offline use. The unit intro clips
+        // (~6 MB together) are not: each is cached the first time it is played.
+        globPatterns: ['**/*.{js,css,html,svg,png,jpg,webp,woff2}'],
+        globIgnores: ['**/video/*.mp4', 'app-icon.png'],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.includes('/video/') && url.pathname.endsWith('.mp4'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'mk-intro-video',
+              rangeRequests: true,
+              cacheableResponse: { statuses: [0, 200] },
+              expiration: { maxEntries: 12 },
+            },
+          },
+        ],
       },
     }),
   ],
