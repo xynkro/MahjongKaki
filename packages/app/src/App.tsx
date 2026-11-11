@@ -99,7 +99,12 @@ export function App() {
 function HandTab() {
   return (
     <div className="max-w-lg mx-auto">
-      <h1 className="font-display text-[28px] leading-tight text-ink pt-2">Explain my hand</h1>
+      <img
+        src={`${import.meta.env.BASE_URL}art/may-tea.webp`}
+        alt="May relaxing with a cup of tea at the table"
+        className="w-full h-40 object-cover object-[50%_45%] rounded-2xl mb-4"
+      />
+      <h1 className="font-display text-[28px] leading-tight text-ink">Explain my hand</h1>
       <p className="text-mute mt-1 mb-4">Tap in a winning hand and see what it’s worth, and why.</p>
       <Calculator />
     </div>
