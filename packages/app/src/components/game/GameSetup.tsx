@@ -3,7 +3,7 @@ import { type AiProfile, ALL_PROFILES } from '@mahjongkaki/ai';
 import { STAKE_PRESETS } from '@mahjongkaki/engine';
 import { haptics } from '../../lib/haptics';
 import { useDisplay } from '../../lib/display';
-import { VideoIntro, UNIT_VIDEOS } from '../../learn/VideoIntro';
+import { VideoIntro, CLIPS } from '../../learn/VideoIntro';
 
 export type SpeedSetting = 'slow' | 'normal' | 'fast' | 'instant';
 
@@ -27,7 +27,7 @@ export function GameSetup({ onStart, onOnline }: GameSetupProps) {
   const [stakeIndex, setStakeIndex] = useState(0);
   const [more, setMore] = useState(false);
   const [intro, setIntro] = useState(false);
-  const hasIntro = UNIT_VIDEOS.has('U7');
+  const hasIntro = CLIPS.has('U7');
 
   const seatLabels = ['East', 'South', 'West', 'North'];
   const pill = (active: boolean) => `seg min-h-[44px] text-sm ${active ? 'seg-on' : 'seg-off'}`;

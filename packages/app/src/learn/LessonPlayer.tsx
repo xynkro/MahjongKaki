@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { TileRow } from '../components/game/TileRow';
 import { haptics } from '../lib/haptics';
 import type { Lesson, Task } from './curriculum';
-import { VideoIntro } from './VideoIntro';
+import { Clip, CLIPS, VideoIntro } from './VideoIntro';
 
 interface Props { lesson: Lesson; onExit: () => void; onComplete: () => void; nextTitle?: string; onNextLesson?: () => void; intro?: string; unitTitle?: string }
 
@@ -47,14 +47,21 @@ export function LessonPlayer({ lesson, onExit, onComplete, nextTitle, onNextLess
   );
 }
 
+/** May claps: "You see that? Nice one!" */
+const UNIT_DONE_CLIP = 'C1';
+
 function Finished({ title, onDone, nextTitle, onNextLesson, unitTitle }: { title: string; onDone: () => void; nextTitle?: string; onNextLesson?: () => void; unitTitle?: string }) {
   return (
     <div className="pt-6 text-center anim-pop">
-      <img
-        src={`${import.meta.env.BASE_URL}art/${unitTitle ? 'may-laugh' : 'may-yay'}.webp`}
-        alt={unitTitle ? 'May laughing at the table' : 'May cheering at the table'}
-        className="mx-auto w-full max-w-[320px] aspect-[4/5] object-cover object-[50%_30%] rounded-2xl"
-      />
+      {unitTitle && CLIPS.has(UNIT_DONE_CLIP) ? (
+        <Clip id={UNIT_DONE_CLIP} label="Play May’s cheer" autoPlay className="max-w-[240px]" />
+      ) : (
+        <img
+          src={`${import.meta.env.BASE_URL}art/${unitTitle ? 'may-laugh' : 'may-yay'}.webp`}
+          alt={unitTitle ? 'May laughing at the table' : 'May cheering at the table'}
+          className="mx-auto w-full max-w-[320px] aspect-[4/5] object-cover object-[50%_30%] rounded-2xl"
+        />
+      )}
       <h2 className="font-display text-2xl text-ink mt-5">{unitTitle ? 'Unit complete' : 'Lesson done'}</h2>
       <p className="text-mute mt-1">{unitTitle ? `You’ve finished “${unitTitle}”.` : title}</p>
       {onNextLesson && nextTitle ? (
