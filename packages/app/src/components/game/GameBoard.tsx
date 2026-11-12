@@ -6,8 +6,10 @@ import { tileToIndex, type Meld, type Wind, type BonusTile, WINDS } from '@mahjo
 import { TileRow } from './TileRow';
 import { TileFace } from './TileFace';
 import { haptics, sound } from '../../lib/haptics';
+import { WallRing, useDealIntro, DiceFace, rollDice, dealtCount, breakSeat, wallUsage, totalTiles } from './Wall';
 
 const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西', north: '北' };
+const WIND_EN: Record<Wind, string> = { east: 'East', south: 'South', west: 'West', north: 'North' };
 const IVORY = 'linear-gradient(to bottom, #FBF4E4 0%, #F1E7D2 55%, #E4D2AC 100%)';
 
 const BONUS_CHARS: Record<string, string> = {
@@ -36,6 +38,9 @@ interface GameBoardProps {
   statusText?: string;
   /** Online games with friends pass false: the coach is for practice against the AI only. */
   allowCoach?: boolean;
+  /** Play the wall-building, dice and deal intro; the game waits until onDealDone. */
+  dealIntro?: boolean;
+  onDealDone?: () => void;
 }
 
 function seatWind(seat: number, dealerSeat: number): Wind {
@@ -68,23 +73,25 @@ function TileBack({ count }: { count: number }) {
 }
 
 function Seat({
-  state, seat, label, showBacks,
-}: { state: GameState; seat: number; label: string; showBacks?: boolean }) {
+  state, seat, label, showBacks, count,
+}: { state: GameState; seat: number; label: string; showBacks?: boolean; count?: number }) {
   const w = seatWind(seat, state.dealerSeat);
+  const tiles = count ?? state.hands[seat].length;
   const isCurrent = state.currentPlayer === seat;
   return (
     <div
       className={`rounded-xl border bg-slate-900/40 px-2 py-1.5 text-center backdrop-blur-sm transition-all duration-300
         ${isCurrent ? 'glow-seat border-emerald-500/50' : 'border-slate-700/40'}`}
     >
-      <div className="flex items-center justify-center gap-1.5">
+      <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0">
         <span className={`text-base font-bold ${isCurrent ? 'text-emerald-400' : 'text-slate-300'}`}>{WIND_CHARS[w]}</span>
-        <span className="text-[12px] text-slate-500">{state.hands[seat].length}</span>
+        <span className={`text-[11px] font-semibold ${isCurrent ? 'text-emerald-300' : 'text-slate-400'}`}>{WIND_EN[w]}</span>
+        <span className="text-[12px] text-slate-500">{tiles}</span>
         {state.flowers[seat].length > 0 && (
           <span className="text-[12px] text-amber-400">✿{state.flowers[seat].length}</span>
         )}
       </div>
-      {showBacks && <div className="mt-1"><TileBack count={state.hands[seat].length} /></div>}
+      {showBacks && <div className="mt-1"><TileBack count={tiles} /></div>}
       {state.melds[seat].length > 0 && (
         <div className="mt-1 flex justify-center">
           <TileRow tiles={state.melds[seat].flatMap(meldToIndices)} size="sm" sortTiles={false} animateEntrance={false} />
@@ -109,19 +116,33 @@ function BigTile({ tile, cls }: { tile: number; cls: string }) {
 
 export function GameBoard({
   state, availableActions, onDiscard, onDeclareKong, onTsumo, onQuit, animateDiscards = true, seatNames, statusText, allowCoach = true,
+  dealIntro = false, onDealDone,
 }: GameBoardProps) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [selectedTileValue, setSelectedTileValue] = useState<number | null>(null);
 
   const hs = state.humanSeat;
   const isHumanTurn = state.currentPlayer === hs && state.phase === 'discard';
-  const { coach } = useDisplay();
+  const { coach, drawYourself } = useDisplay();
+  const [dice] = useState(rollDice);
+
+  // Draw it yourself: the engine has already drawn your tile; hold it back until you tap the wall.
+  const [awaiting, setAwaiting] = useState<{ tile: number; fromBack: boolean } | null>(null);
+  const kongs = state.melds[hs].filter(m => m.type === 'kong').length;
+  const prevKongs = useRef(kongs);
+  useEffect(() => { if (!isHumanTurn && awaiting) setAwaiting(null); }, [isHumanTurn, awaiting]);
+  const canAct = isHumanTurn && !awaiting && !dealIntro;
+
   const tip = useMemo(
-    () => (allowCoach && coach && isHumanTurn ? coachDiscard(state.hands[hs], state.melds[hs], state.discardLog) : null),
+    () => (allowCoach && coach && canAct ? coachDiscard(state.hands[hs], state.melds[hs], state.discardLog) : null),
     // Recompute once per turn, not on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allowCoach, coach, isHumanTurn, state.turnCount, state.hands[hs].length],
+    [allowCoach, coach, canAct, state.turnCount, state.hands[hs].length],
   );
+
+  const hasFlowers = state.flowers.some(f => f.length > 0);
+  const intro = useDealIntro(dealIntro, state, hasFlowers);
+  const usage = wallUsage(state);
 
   useEffect(() => {
     setSelectedIdx(null);
@@ -153,15 +174,32 @@ export function GameBoard({
   useEffect(() => {
     const ld = state.lastDraw;
     if (ld && ld !== prevDraw.current && ld.player === hs) {
-      drawNonce.current += 1;
-      setDrawFlash({ tile: ld.tile, nonce: drawNonce.current });
-      sound.draw();
       prevDraw.current = ld;
-      const id = setTimeout(() => setDrawFlash(null), 820);
-      return () => clearTimeout(id);
+      // A kong replacement comes from the back of the wall; a normal draw from the front.
+      const fromBack = kongs > prevKongs.current;
+      prevKongs.current = kongs;
+      if (allowCoach && drawYourself) { setAwaiting({ tile: ld.tile, fromBack }); return; }
+      return showDraw(ld.tile);
     }
     prevDraw.current = ld;
-  }, [state.lastDraw, hs]);
+    prevKongs.current = kongs;
+  }, [state.lastDraw, hs]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function showDraw(tile: number) {
+    drawNonce.current += 1;
+    setDrawFlash({ tile, nonce: drawNonce.current });
+    sound.draw();
+    const id = setTimeout(() => setDrawFlash(null), 820);
+    return () => clearTimeout(id);
+  }
+
+  function takeFromWall() {
+    if (!awaiting) return;
+    haptics.tap();
+    const tile = awaiting.tile;
+    setAwaiting(null);
+    showDraw(tile);
+  }
 
   // Discard flash: big centre reveal of any thrown tile before it shrinks to the pool.
   const discNonce = useRef(0);
@@ -187,13 +225,23 @@ export function GameBoard({
 
   const kongActions = availableActions.filter(a => a.type === 'declare_kong');
   const canTsumo = availableActions.some(a => a.type === 'claim' && a.claimType === 'win');
-  const showActions = isHumanTurn && (selectedTileValue !== null || kongActions.length > 0 || canTsumo);
+  const showActions = canAct && (selectedTileValue !== null || kongActions.length > 0 || canTsumo);
 
   const lastIdx = state.discardLog.length - 1;
-  const drawnTile = isHumanTurn && state.lastDraw?.player === hs ? state.lastDraw.tile : undefined;
+  const drawnTile = canAct && state.lastDraw?.player === hs ? state.lastDraw.tile : undefined;
+
+  // What your hand shows: during the deal, only the tiles dealt so far; while your draw is
+  // waiting in the wall, everything except that tile.
+  let myTiles = state.hands[hs];
+  if (dealIntro) myTiles = myTiles.slice(0, dealtCount(intro.dealt, hs, state.dealerSeat));
+  else if (awaiting) {
+    const at = myTiles.lastIndexOf(awaiting.tile);
+    myTiles = at < 0 ? myTiles : [...myTiles.slice(0, at), ...myTiles.slice(at + 1)];
+  }
+  const seatCount = (seat: number) => (dealIntro ? dealtCount(intro.dealt, seat, state.dealerSeat) : undefined);
 
   function handleTileClick(tile: number, idx: number) {
-    if (!isHumanTurn) return;
+    if (!canAct) return;
     if (selectedIdx === idx) {
       haptics.select();
       onDiscard(tile);
@@ -208,7 +256,7 @@ export function GameBoard({
 
   // Drag a hand tile up and release to throw (discard) it.
   function handleThrow(tile: number) {
-    if (!isHumanTurn) return;
+    if (!canAct) return;
     haptics.select();
     onDiscard(tile);
     setSelectedIdx(null);
@@ -226,9 +274,9 @@ export function GameBoard({
         >
           ✕
         </button>
-        <span className="round-badge">{WIND_CHARS[state.prevailingWind]} {state.roundNumber}</span>
+        <span className="round-badge">{WIND_CHARS[state.prevailingWind]} {WIND_EN[state.prevailingWind]} round</span>
         <span className={isHumanTurn ? 'text-emerald-300 font-bold' : 'text-amber-100/70'}>
-          {statusText ?? (isHumanTurn ? 'Your turn' : `${WIND_CHARS[seatWind(state.currentPlayer, state.dealerSeat)]} playing…`)}
+          {statusText ?? (dealIntro ? 'Dealing' : isHumanTurn ? (awaiting ? 'Your turn: draw a tile' : 'Your turn') : `${WIND_EN[seatWind(state.currentPlayer, state.dealerSeat)]} is playing…`)}
         </span>
       </div>
 
@@ -240,19 +288,39 @@ export function GameBoard({
        <div className="relative isolate h-full felt rounded-[0.85rem] overflow-hidden flex flex-col p-2 gap-2">
         <div className="felt-medallion -z-10" />
         <div className="flex justify-center">
-          <div className="w-44"><Seat state={state} seat={acrossSeat} label={seatNames?.[acrossSeat] ?? 'across'} showBacks /></div>
+          <div className="w-44"><Seat state={state} seat={acrossSeat} label={seatNames?.[acrossSeat] ?? 'across'} showBacks count={seatCount(acrossSeat)} /></div>
         </div>
 
         <div className="flex-1 flex items-stretch gap-2 min-h-0">
-          <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={leftSeat} label={seatNames?.[leftSeat] ?? 'left'} /></div></div>
+          <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={leftSeat} label={seatNames?.[leftSeat] ?? 'left'} count={seatCount(leftSeat)} /></div></div>
 
           {/* Centre discard pool — born-home tiles, latest leans in from its seat */}
-          <div className="flex-1 relative rounded-xl border border-emerald-950/25 bg-emerald-950/10 p-2 overflow-y-auto">
-            <div className="absolute top-1.5 right-2 text-[12px] text-slate-500 bg-slate-900/50 rounded-full px-2 py-0.5 z-10">
-              wall {state.wall.length}
+          <div
+            className={`flex-1 relative rounded-xl ${awaiting ? 'cursor-pointer' : ''}`}
+            onClick={awaiting ? takeFromWall : undefined}
+            role={awaiting ? 'button' : undefined}
+            aria-label={awaiting ? 'Draw a tile from the wall' : undefined}
+          >
+           <WallRing
+             state={state}
+             dice={dice}
+             built={dealIntro ? intro.built : undefined}
+             showBreak={!dealIntro || intro.step !== 'build'}
+             front={dealIntro ? (intro.step === 'flowers' ? usage.front : intro.dealt) : awaiting && !awaiting.fromBack ? Math.max(0, usage.front - 1) : undefined}
+             back={dealIntro ? (intro.step === 'flowers' ? usage.back : 0) : awaiting?.fromBack ? Math.max(0, usage.back - 1) : undefined}
+             glowNext={Boolean(awaiting)}
+           />
+           <div className="absolute inset-3.5 rounded-lg bg-emerald-950/10 p-1.5 overflow-y-auto">
+            <div className="absolute top-1 right-1.5 text-[11px] text-slate-400 bg-slate-900/60 rounded-full px-2 py-0.5 z-10">
+              {state.wall.length + (awaiting ? 1 : 0)} left in the wall
             </div>
-            {state.discardLog.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-[13px] text-slate-600">discards land here</div>
+            {dealIntro && intro.step !== 'build' ? (
+              <div className="h-full flex flex-col items-center justify-center gap-1">
+                <div className="flex gap-2"><DiceFace value={dice.a} /><DiceFace value={dice.b} /></div>
+                <div className="text-[13px] font-semibold text-amber-100/90">{dice.a} + {dice.b} = {dice.a + dice.b}</div>
+              </div>
+            ) : state.discardLog.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-[13px] text-slate-500">thrown tiles land here</div>
             ) : (
               <div className="flex flex-wrap gap-1 justify-center content-start pt-5">
                 {state.discardLog.map((d, i) => {
@@ -271,9 +339,17 @@ export function GameBoard({
                 })}
               </div>
             )}
+           </div>
+           {awaiting && (
+             <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center z-20">
+               <div className="rounded-full bg-black/70 px-3 py-1 text-[12px] font-semibold text-amber-100 shadow-lg whitespace-nowrap anim-pop">
+                 Tap to draw from the glowing stack
+               </div>
+             </div>
+           )}
           </div>
 
-          <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={rightSeat} label={seatNames?.[rightSeat] ?? 'right'} /></div></div>
+          <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={rightSeat} label={seatNames?.[rightSeat] ?? 'right'} count={seatCount(rightSeat)} /></div></div>
         </div>
        </div>
       </div>
@@ -281,7 +357,7 @@ export function GameBoard({
       {/* Player area */}
       <div className={`border-t border-slate-700/50 bg-slate-900/50 px-2 pt-2 pb-2 backdrop-blur transition-shadow duration-500 ${isHumanTurn ? 'glow-turn' : ''}`}>
         <div className="flex items-center gap-2 mb-1.5 min-h-[20px]">
-          <span className="text-xs font-bold text-emerald-400">{WIND_CHARS[seatWind(hs, state.dealerSeat)]} You</span>
+          <span className="text-xs font-bold text-emerald-400">{WIND_CHARS[seatWind(hs, state.dealerSeat)]} You, {WIND_EN[seatWind(hs, state.dealerSeat)]}</span>
           {flowerCount > 0 && (
             <span key={flowerPop?.nonce ?? 'f'} className={`text-[12px] text-amber-400 inline-block ${flowerPop ? 'anim-badge' : ''}`}>
               ✿ {flowerCount}
@@ -294,6 +370,26 @@ export function GameBoard({
           )}
         </div>
 
+        {dealIntro && (
+          <DealCard
+            step={intro.step}
+            state={state}
+            dice={dice}
+            ready={intro.ready}
+            last={intro.last}
+            onNext={() => { haptics.tap(); if (intro.last) onDealDone?.(); else intro.next(); }}
+            onSkip={() => onDealDone?.()}
+          />
+        )}
+        {awaiting && (
+          <div className="mb-2 flex items-center gap-2 rounded-xl bg-surface border border-line px-2.5 py-2 anim-pop" role="status">
+            <p className="flex-1 text-[13px] leading-snug text-ink">
+              <span className="font-semibold text-accent">Your turn. </span>
+              Take the next tile from the wall, then throw one.
+            </p>
+            <button onClick={takeFromWall} className="shrink-0 btn-primary h-10 px-3 rounded-lg text-[13px] font-semibold active:scale-95">Draw</button>
+          </div>
+        )}
         {tip && (
           <div className="mb-2 flex items-center gap-2 rounded-xl bg-surface border border-line px-2.5 py-2 anim-pop" role="status">
             <span className="w-7 h-9 shrink-0 rounded-[5px] overflow-hidden border border-[#C6AE84]" style={{ background: '#F6EDDA' }}>
@@ -304,10 +400,10 @@ export function GameBoard({
           </div>
         )}
         <TileRow
-          tiles={state.hands[hs]}
-          onTileClick={isHumanTurn ? handleTileClick : undefined}
-          onThrow={isHumanTurn ? handleThrow : undefined}
-          selectedTiles={isHumanTurn && selectedIdx !== null ? new Set([selectedIdx]) : undefined}
+          tiles={myTiles}
+          onTileClick={canAct ? handleTileClick : undefined}
+          onThrow={canAct ? handleThrow : undefined}
+          selectedTiles={canAct && selectedIdx !== null ? new Set([selectedIdx]) : undefined}
           highlightTiles={drawnTile !== undefined ? new Set([drawnTile]) : undefined}
           drawnTile={drawnTile}
         />
@@ -384,6 +480,57 @@ export function GameBoard({
           <BigTile tile={discardFlash.tile} cls="anim-discardbig" />
         </div>
       )}
+    </div>
+  );
+}
+
+function DealCard({ step, state, dice, ready, last, onNext, onSkip }: {
+  step: ReturnType<typeof useDealIntro>['step'];
+  state: GameState;
+  dice: { a: number; b: number };
+  ready: boolean;
+  last: boolean;
+  onNext: () => void;
+  onSkip: () => void;
+}) {
+  const hs = state.humanSeat;
+  const d = dice.a + dice.b;
+  const bs = breakSeat(dice, state.dealerSeat);
+  const where = bs === hs ? 'your wall' : bs === (hs + 1) % 4 ? 'the wall on your right' : bs === (hs + 2) % 4 ? 'the wall opposite you' : 'the wall on your left';
+  const dealerIsYou = state.dealerSeat === hs;
+  const copy: Record<typeof step, { title: string; body: string }> = {
+    build: {
+      title: 'Building the wall',
+      body: totalTiles(state) === 148
+        ? 'Each player stacks tiles two high in a wall in front of them. East and West build 19 stacks, South and North build 18. Yours is the one nearest you.'
+        : 'Each player stacks tiles two high in a wall of 18 stacks in front of them. Yours is the one nearest you.',
+    },
+    dice: {
+      title: 'Rolling the dice',
+      body: `${dealerIsYou ? 'You are the dealer and roll' : 'The dealer rolls'} ${dice.a} and ${dice.b}, so ${d}. Count ${d} players round the table, starting with the dealer as 1. That picks ${where}. Count ${d} stacks in from its right-hand end and split the wall there.`,
+    },
+    deal: {
+      title: 'Dealing',
+      body: `From the split, each player takes 4 tiles at a time, three times round, then 1 more each. The dealer takes one extra and starts with 14, so the dealer throws first. ${dealerIsYou ? 'That’s you.' : ''}`.trim(),
+    },
+    flowers: {
+      title: 'Flowers and animals',
+      body: 'Bonus tiles never stay in your hand. Each one goes face up beside you, and you take a replacement from the other end of the wall, behind the split.',
+    },
+  };
+  return (
+    <div className="mb-2 rounded-xl bg-surface border border-line px-3 py-2 anim-pop" role="status" aria-live="polite">
+      <p className="text-[12.5px] leading-snug text-ink"><span className="font-semibold text-accent">{copy[step].title}. </span>{copy[step].body}</p>
+      <div className="mt-1.5 flex gap-2">
+        <button onClick={onSkip} className="h-9 px-3 rounded-lg text-[13px] text-mute active:scale-95">Skip</button>
+        <button
+          onClick={onNext}
+          disabled={!ready}
+          className="flex-1 h-9 btn-primary rounded-lg text-[13px] font-semibold active:scale-[0.98] disabled:opacity-40"
+        >
+          {last ? 'Start playing' : 'Next'}
+        </button>
+      </div>
     </div>
   );
 }

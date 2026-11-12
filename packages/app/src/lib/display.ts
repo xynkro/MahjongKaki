@@ -11,9 +11,13 @@ export interface DisplayConfig {
   coach: boolean;
   /** Show AI-game scores in cents/dollars instead of points. Off by default; never used online. */
   money: boolean;
+  /** Play vs AI: on your turn, tap the wall to take your tile instead of it arriving by itself. */
+  drawYourself: boolean;
+  /** Play vs AI: show the wall being built, the dice and the deal at the start of each hand. */
+  showDeal: boolean;
 }
 
-const DEFAULT: DisplayConfig = { tileMode: 'beginner', tooltips: true, coach: true, money: false };
+const DEFAULT: DisplayConfig = { tileMode: 'beginner', tooltips: true, coach: true, money: false, drawYourself: true, showDeal: true };
 const KEY = 'mk_display';
 
 let cfg: DisplayConfig = load();

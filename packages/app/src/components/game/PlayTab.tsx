@@ -35,7 +35,7 @@ function startHand(match: MatchState): GameState {
 }
 
 export function PlayTab() {
-  const { coach } = useDisplay();
+  const { coach, showDeal } = useDisplay();
   const [linkedRoom] = useState(peekLinkedRoom);
   const [linkOpen, setLinkOpen] = useState(true);
   useEffect(consumeLinkedRoom, []);
@@ -45,6 +45,8 @@ export function PlayTab() {
   const [deltas, setDeltas] = useState<number[] | null>(null);
   const [resumeChecked, setResumeChecked] = useState(false);
   const [confirmEnd, setConfirmEnd] = useState(false);
+  // The deal intro is playing: hold the AI until it finishes.
+  const [dealing, setDealing] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const profile = match
@@ -142,13 +144,14 @@ export function PlayTab() {
     setMatch(m);
     setGameState(gs);
     setDeltas(null);
+    setDealing(showDeal);
     setView('playing');
     void persistSave(gs, m);
   }
 
   // Game loop + end-of-hand handling.
   useEffect(() => {
-    if (!gameState || !match || view !== 'playing' || confirmEnd) return; // paused behind the confirm
+    if (!gameState || !match || view !== 'playing' || confirmEnd || dealing) return; // paused behind the confirm or the deal
     if (timerRef.current) clearTimeout(timerRef.current);
 
     if (gameState.phase === 'finished') {
@@ -183,7 +186,7 @@ export function PlayTab() {
         return () => { if (timerRef.current) clearTimeout(timerRef.current); };
       }
     }
-  }, [gameState, match, view, confirmEnd]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [gameState, match, view, confirmEnd, dealing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function resolveAiClaims() {
     setGameState(prev => {
@@ -227,6 +230,7 @@ export function PlayTab() {
     const gs = startHand(match);
     setGameState(gs);
     setDeltas(null);
+    setDealing(showDeal);
     setView('playing');
     void persistSave(gs, match);
   }
@@ -320,6 +324,8 @@ export function PlayTab() {
           onTsumo={handleTsumo}
           onQuit={() => setConfirmEnd(true)}
           animateDiscards={speedMs >= 1000}
+          dealIntro={dealing}
+          onDealDone={() => setDealing(false)}
         />
       </div>
       {showClaimOverlay && (

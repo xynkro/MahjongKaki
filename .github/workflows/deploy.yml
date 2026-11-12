@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: GitHub Pages redirect to Firebase
 
 on:
   push:
@@ -19,16 +19,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run build -w @mahjongkaki/app
+      # The app itself is hosted on Firebase (https://mahjongkaki.web.app, `npm run deploy:firebase`).
+      # github.io only serves a redirect, plus a service worker that removes the old cached app.
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: packages/app/dist
+          path: redirect
 
   deploy:
     needs: build

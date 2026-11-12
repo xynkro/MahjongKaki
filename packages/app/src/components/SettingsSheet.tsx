@@ -157,11 +157,17 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
                 onChange={v => setTheme(v)}
               />
             </Row>
-            <Row label="Beginner tile labels" desc="Adds readable tags to every tile — 1–9, E/S/W/N, Rd/Gn/Wt — for non-Chinese readers.">
+            <Row label="Beginner tile labels" desc="Numbers on the suit tiles, and English names with pinyin (East, dōng) on the winds and dragons.">
               <Toggle value={display.tileMode === 'beginner'} onChange={v => setDisplay('tileMode', v ? 'beginner' : 'classic')} />
             </Row>
             <Row label="Coach in games" desc="On your turn against the AI, suggests a tile to throw and says why.">
               <Toggle value={display.coach} onChange={v => setDisplay('coach', v)} />
+            </Row>
+            <Row label="Draw tiles yourself" desc="On your turn against the AI, tap the wall to take your tile, as you would at a real table.">
+              <Toggle value={display.drawYourself} onChange={v => setDisplay('drawYourself', v)} />
+            </Row>
+            <Row label="Show the deal" desc="At the start of each hand against the AI: the wall being built, the dice roll, and the tiles dealt out.">
+              <Toggle value={display.showDeal} onChange={v => setDisplay('showDeal', v)} />
             </Row>
             <Row label="Score in cents" desc="Off: games against the AI keep score in points. On: amounts show as cents and dollars, for home games that settle that way.">
               <Toggle value={display.money} onChange={v => setDisplay('money', v)} />

@@ -49,7 +49,24 @@ export function TileFace({ index, size = 'md' }: FaceProps) {
 
   if (tileMode !== 'beginner') return <>{face}</>;
 
-  // Beginner mode: a small readable corner tag so non-Chinese readers know each tile.
+  // Beginner mode, winds and dragons: the English name on top and the pinyin underneath,
+  // so a new player can both read the tile and say it. Small tiles only fit the English.
+  const honour = honourName(t);
+  if (honour) {
+    return (
+      <div className="relative w-full h-full flex flex-col items-center justify-between leading-none" style={{ color: honour.color }}>
+        <span className={`font-extrabold ${size === 'sm' ? 'text-[7.5px] mt-[2px]' : 'text-[9px] mt-[3px]'}`}>{honour.en}</span>
+        <div className="flex-1 min-h-0 w-full flex items-center justify-center">
+          {honour.char
+            ? <span className={`font-bold ${size === 'sm' ? 'text-base' : 'text-2xl'}`} style={{ textShadow: '0 1px 0.5px rgba(255,255,255,0.55)' }}>{honour.char}</span>
+            : <div className="w-3/4 h-full"><WhiteDragonFace /></div>}
+        </div>
+        {size !== 'sm' && <span className="text-[9px] italic font-semibold mb-[3px] opacity-80">{honour.pinyin}</span>}
+      </div>
+    );
+  }
+
+  // Suits: a small readable corner number so non-Chinese readers know each tile.
   const tag = beginnerTag(t);
   return (
     <div className="relative w-full h-full">
@@ -62,6 +79,24 @@ export function TileFace({ index, size = 'md' }: FaceProps) {
       </span>
     </div>
   );
+}
+
+const WIND_NAMES = {
+  east: { en: 'East', pinyin: 'dōng', char: '東' },
+  south: { en: 'South', pinyin: 'nán', char: '南' },
+  west: { en: 'West', pinyin: 'xī', char: '西' },
+  north: { en: 'North', pinyin: 'běi', char: '北' },
+} as const;
+
+/** English name and Mandarin pinyin for winds and dragons; null for suit tiles. */
+export function honourName(t: ReturnType<typeof indexToTile>): { en: string; pinyin: string; char: string; color: string } | null {
+  if (t.kind === 'wind') return { ...WIND_NAMES[t.wind], color: '#2c2820' };
+  if (t.kind === 'dragon') {
+    if (t.dragon === 'red') return { en: 'Red', pinyin: 'zhōng', char: '中', color: '#b5392a' };
+    if (t.dragon === 'green') return { en: 'Green', pinyin: 'fā', char: '發', color: '#1d6b46' };
+    return { en: 'White', pinyin: 'bái', char: '', color: '#36468a' };
+  }
+  return null;
 }
 
 function beginnerTag(t: ReturnType<typeof indexToTile>): { label: string; color: string } {

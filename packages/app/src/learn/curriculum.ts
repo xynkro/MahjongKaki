@@ -24,11 +24,16 @@ export type Task =
   | { kind: 'choose'; prompt: string; tiles?: number[]; options: string[]; answer: number; explain: string };
 
 export interface Lesson { id: string; title: string; minutes: number; tasks: Task[] }
-export interface Unit { id: string; title: string; blurb: string; video?: string; lessons: Lesson[] }
+export interface Unit {
+  id: string; title: string; blurb: string; video?: string;
+  /** Cover photo in public/art, and where to centre it in the card. */
+  cover: string; coverPos: string;
+  lessons: Lesson[];
+}
 
 export const CURRICULUM: Unit[] = [
   {
-    id: 'tiles', title: 'Meet the tiles', blurb: 'Suits, winds, dragons and bonus tiles.', video: 'U1',
+    id: 'tiles', title: 'Meet the tiles', blurb: 'Suits, winds, dragons and bonus tiles.', video: 'U1', cover: 'unit-1.webp', coverPos: '50% 55%',
     lessons: [
       {
         id: 'suits', title: 'The three suits', minutes: 2,
@@ -42,8 +47,8 @@ export const CURRICULUM: Unit[] = [
       {
         id: 'honours', title: 'Winds and dragons', minutes: 2,
         tasks: [
-          { kind: 'info', title: 'Honour tiles have no numbers', body: 'There are four winds (East, South, West, North) and three dragons (red, green and white). They can only be matched, never put in a row.', tiles: [E, S, W, N] },
-          { kind: 'info', title: 'The three dragons', body: 'Red shows 中, green shows 發, and the white dragon is an empty frame.', tiles: [RED, GREEN, WHITE] },
+          { kind: 'info', title: 'Honour tiles have no numbers', body: 'There are four winds and three dragons. They can only be matched, never put in a row. The winds are East 東 (dōng), South 南 (nán), West 西 (xī) and North 北 (běi). With beginner labels on, every wind tile shows its English name and how to say it.', tiles: [E, S, W, N] },
+          { kind: 'info', title: 'The three dragons', body: 'The red dragon shows 中 (zhōng), the green dragon shows 發 (fā), and the white dragon 白 (bái) is an empty frame.', tiles: [RED, GREEN, WHITE] },
           { kind: 'pick', prompt: 'Tap the three dragons.', tiles: [E, RED, d(5), GREEN, N, WHITE], correct: [1, 3, 5], explain: 'Red 中, green 發 and the blank white frame.' },
           { kind: 'choose', prompt: 'Which wind is this?', tiles: [S], options: ['East', 'South', 'West', 'North'], answer: 1, explain: 'This is South. Beginner labels show E, S, W or N in the corner.' },
         ],
@@ -59,7 +64,7 @@ export const CURRICULUM: Unit[] = [
     ],
   },
   {
-    id: 'sets', title: 'Sets', blurb: 'Three of a kind, three in a row, and the pair.', video: 'U2',
+    id: 'sets', title: 'Sets', blurb: 'Three of a kind, three in a row, and the pair.', video: 'U2', cover: 'unit-2.webp', coverPos: '50% 22%',
     lessons: [
       {
         id: 'pung', title: 'Three of a kind', minutes: 2,
@@ -89,7 +94,46 @@ export const CURRICULUM: Unit[] = [
     ],
   },
   {
-    id: 'turn', title: 'A turn', blurb: 'Draw one, throw one, and what to do with a kong.', video: 'U3',
+    id: 'setup', title: 'Setting up the table', blurb: 'Build the wall, roll the dice, deal the tiles.', cover: 'unit-setup.webp', coverPos: '50% 70%',
+    lessons: [
+      {
+        id: 'wall', title: 'Building the wall', minutes: 2,
+        tasks: [
+          { kind: 'info', title: 'Four walls, two tiles high', body: 'All 148 tiles go face down and get mixed. Then each player builds a wall in front of them, stacking tiles two high. The four walls are pushed together into a square in the middle of the table.' },
+          { kind: 'info', title: '19, 18, 19, 18', body: 'East, the dealer, and West, the player opposite, each build 19 stacks. South and North each build 18. 148 tiles make 74 stacks, and 74 does not split into four equal walls, so two walls are one stack longer.', tiles: [E, S, W, N] },
+          { kind: 'choose', prompt: 'You sit South. How many stacks long is your wall?', tiles: [S], options: ['17', '18', '19'], answer: 1, explain: 'South and North build 18 stacks. East and West build 19.' },
+          { kind: 'choose', prompt: 'Who builds the longer walls?', options: ['East and West', 'South and North', 'Whoever deals'], answer: 0, explain: 'The dealer (East) and the player opposite (West) build 19 stacks each.' },
+        ],
+      },
+      {
+        id: 'dice', title: 'Dice and the split', minutes: 2,
+        tasks: [
+          { kind: 'info', title: 'The dealer rolls two dice', body: 'Add the dice. Count that many players round the table in turn order, with the dealer as 1. That player\'s wall gets split. Then count the same number of stacks in from the right-hand end of that wall and split it there.' },
+          { kind: 'choose', prompt: 'The dealer rolls 2 and 3, so 5. Whose wall is split?', options: ['The dealer\'s own wall', 'South\'s wall', 'North\'s wall'], answer: 0, explain: 'Count East 1, South 2, West 3, North 4, East 5. Five lands back on the dealer.' },
+          { kind: 'choose', prompt: 'The dealer rolls 4 and 2, so 6. Whose wall is split?', options: ['East\'s', 'South\'s', 'West\'s'], answer: 1, explain: 'East 1, South 2, West 3, North 4, East 5, South 6.' },
+          { kind: 'choose', prompt: 'You know whose wall it is. Where do you split it?', options: ['Count the dice total in from the right-hand end', 'Always in the middle', 'At the left-hand end'], answer: 0, explain: 'Count the same number of stacks in from the right-hand end, as that player sees it.' },
+        ],
+      },
+      {
+        id: 'deal', title: 'The deal', minutes: 2,
+        tasks: [
+          { kind: 'info', title: 'Four at a time', body: 'From the split, the dealer takes 4 tiles (two stacks), then South, West and North do the same. That goes round three times, so everyone has 12. Then each player takes 1 more, and the dealer takes one extra.' },
+          { kind: 'choose', prompt: 'How many tiles does the dealer start with?', options: ['13', '14', '16'], answer: 1, explain: 'Everyone gets 13 and the dealer takes one more, so 14.' },
+          { kind: 'choose', prompt: 'The dealer starts with 14 tiles. What does the dealer do first?', options: ['Throw a tile', 'Draw a tile', 'Wait for South'], answer: 0, explain: 'The dealer already has 14, so play starts with the dealer throwing one.' },
+        ],
+      },
+      {
+        id: 'drawing', title: 'Drawing from the wall', minutes: 2,
+        tasks: [
+          { kind: 'info', title: 'Two ends of the wall', body: 'Normal draws carry on from where the deal stopped, stack by stack round the table. Replacement tiles for flowers, animals and kongs come from the other end, behind the split. In Play, the glowing stack is the one you draw from next.' },
+          { kind: 'choose', prompt: 'You draw a flower. Where does your replacement tile come from?', options: ['The next tile at the front', 'The other end of the wall, behind the split', 'The thrown tiles in the middle'], answer: 1, explain: 'Replacements always come from the far end of the wall.' },
+          { kind: 'choose', prompt: 'The wall runs out and nobody has won. What happens?', options: ['The hand is a draw and the dealer stays on', 'The last player to throw loses', 'Everyone keeps drawing from the thrown tiles'], answer: 0, explain: 'Nobody wins that hand. It is a draw, and the dealer deals again.' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'turn', title: 'A turn', blurb: 'Draw one, throw one, and what to do with a kong.', video: 'U3', cover: 'unit-3.webp', coverPos: '50% 62%',
     lessons: [
       {
         id: 'draw-throw', title: 'Draw and throw', minutes: 2,
@@ -109,7 +153,7 @@ export const CURRICULUM: Unit[] = [
     ],
   },
   {
-    id: 'claiming', title: 'Claiming', blurb: 'Taking a tile someone else threw.', video: 'U4',
+    id: 'claiming', title: 'Claiming', blurb: 'Taking a tile someone else threw.', video: 'U4', cover: 'unit-4.webp', coverPos: '50% 40%',
     lessons: [
       {
         id: 'pung-claim', title: 'Calling pung', minutes: 2,
@@ -136,7 +180,7 @@ export const CURRICULUM: Unit[] = [
     ],
   },
   {
-    id: 'winds', title: 'Seats and winds', blurb: 'Who goes first, and why your seat matters.', video: 'U5',
+    id: 'winds', title: 'Seats and winds', blurb: 'Who goes first, and why your seat matters.', video: 'U5', cover: 'unit-5.webp', coverPos: '50% 50%',
     lessons: [
       {
         id: 'seats', title: 'Your seat wind', minutes: 2,
@@ -156,7 +200,7 @@ export const CURRICULUM: Unit[] = [
     ],
   },
   {
-    id: 'scoring', title: 'Scoring', blurb: 'Tai, and why bigger hands pay more.', video: 'U6',
+    id: 'scoring', title: 'Scoring', blurb: 'Tai, and why bigger hands pay more.', video: 'U6', cover: 'unit-6.webp', coverPos: '50% 62%',
     lessons: [
       {
         id: 'tai', title: 'What tai means', minutes: 2,
@@ -171,6 +215,26 @@ export const CURRICULUM: Unit[] = [
         tasks: [
           { kind: 'info', title: 'Small steps, big jumps', body: 'Each extra tai doubles what you win. A 3 tai hand is worth twice a 2 tai hand, and four times a 1 tai hand.' },
           { kind: 'choose', prompt: 'A 2 tai win pays 4 points. What does a 3 tai win pay?', options: ['5 points', '6 points', '8 points'], answer: 2, explain: 'One more tai doubles it: 4 becomes 8.' },
+        ],
+      },
+      {
+        id: 'who-pays', title: 'Who pays', minutes: 2,
+        tasks: [
+          { kind: 'info', title: 'The thrower pays double', body: 'If you win with a tile someone threw, that player is the shooter. The shooter pays you double, and the other two pay single.' },
+          { kind: 'info', title: 'Self-drawn pays more', body: 'If you draw your winning tile from the wall yourself, all three players pay you double. That is why a self-drawn win is worth waiting for.' },
+          { kind: 'choose', prompt: 'West throws the tile you win with. Who pays you the most?', options: ['West', 'Everyone pays the same', 'The dealer'], answer: 0, explain: 'West threw it, so West is the shooter and pays double.' },
+          { kind: 'choose', prompt: 'You draw your winning tile yourself. Who pays?', options: ['Nobody', 'All three players, double each', 'Only the player before you'], answer: 1, explain: 'A self-drawn win gets double from each of the other three.' },
+          { kind: 'choose', prompt: 'A 1 tai win is worth 2 points. You win on South\'s throw. What does South pay?', options: ['2 points', '4 points', '8 points'], answer: 1, explain: 'The shooter pays double: 2 becomes 4. The other two pay 2 each.' },
+        ],
+      },
+      {
+        id: 'common-tai', title: 'Tai worth knowing', minutes: 3,
+        tasks: [
+          { kind: 'info', title: '1 tai each', body: 'A pung of any dragon. A pung of your seat wind, or of the round wind. Every flower or animal you collect. A hand of only chows.', tiles: [GREEN, GREEN, GREEN] },
+          { kind: 'info', title: 'Bigger hands', body: 'All pungs and no chows: 2 tai. One suit plus winds or dragons (half flush): 2 tai. One suit and nothing else (full flush): 4 tai. Most tables stop counting at 5.', tiles: [d(1), d(2), d(3), d(4), d(4), d(4), d(6), d(7), d(8), d(9), d(9), d(9), d(5), d(5)] },
+          { kind: 'choose', prompt: 'Every tile in this hand is a dot. What is it called?', tiles: [d(1), d(2), d(3), d(4), d(4), d(4), d(6), d(7), d(8), d(9), d(9), d(9), d(5), d(5)], options: ['Full flush, 4 tai', 'Half flush, 2 tai', 'All pungs, 2 tai'], answer: 0, explain: 'One suit and nothing else is a full flush, worth 4 tai.' },
+          { kind: 'choose', prompt: 'You sit East. Which pung scores a tai for your seat?', options: ['A pung of East winds', 'A pung of North winds', 'A pung of 5 dots'], answer: 0, explain: 'A pung of your own seat wind is 1 tai.' },
+          { kind: 'info', title: 'Check any hand', body: 'You do not need to remember all of this. The Hand tab adds up the tai for any hand, and after every win in Play you see each tai listed.' },
         ],
       },
     ],

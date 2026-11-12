@@ -36,6 +36,26 @@ function winningTile(state: GameState, seat: number): number {
   return hand[hand.length - 1] ?? 0;
 }
 
+const WIND_EN: Record<Wind, string> = { east: 'East', south: 'South', west: 'West', north: 'North' };
+
+/** One plain sentence on who paid and why, so the payout is never a mystery. */
+function whoPaid(state: GameState, names?: string[]): string {
+  const hs = state.humanSeat;
+  const who = (seat: number) => (seat === hs ? 'You' : names?.[seat] ?? WIND_EN[seatWind(seat, state.dealerSeat)]);
+  const w = state.winner!;
+  if (state.winType === 'zimo') {
+    return w === hs
+      ? 'You drew the winning tile yourself, so all three players pay you double.'
+      : `${who(w)} drew the winning tile from the wall, so the other three each pay double.`;
+  }
+  const shooter = state.lastDiscard?.player;
+  if (shooter === undefined) return '';
+  const thrower = who(shooter);
+  if (state.rules.shooterMode === 'shooterPaysAll') return `${thrower} threw the winning tile, so ${shooter === hs ? 'you pay' : 'they pay'} for the whole table.`;
+  if (state.rules.shooterMode === 'halfShooter') return `${thrower} threw the winning tile, so ${shooter === hs ? 'you pay' : 'they pay'} the most and the other two pay half.`;
+  return `${thrower} threw the winning tile, so ${shooter === hs ? 'you pay' : 'they pay'} double and the other two pay single.`;
+}
+
 const delay = (ms: number) => ({ animationDelay: `${ms}ms` });
 
 export function RoundResult({ state, match, deltas, onNextHand, onEndMatch, amount, names, waitingNote, endLabel = 'End match' }: RoundResultProps) {
@@ -88,6 +108,7 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch, amou
                 <span className="text-xl font-semibold gold-foil"> <TermTip term="tai">tai</TermTip></span>
               </div>
             )}
+            {scoring && <p className="text-slate-300 text-[13px] leading-snug mt-3 max-w-xs mx-auto">{whoPaid(state, names)}</p>}
           </>
         )}
       </section>

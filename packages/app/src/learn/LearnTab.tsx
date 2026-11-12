@@ -7,7 +7,6 @@ import { markDone, useProgress } from '../lib/progress';
 import { haptics } from '../lib/haptics';
 
 // Where each unit cover's subject sits, so the 16:7 crop keeps it in frame.
-const COVER_POS = ['50% 55%', '50% 22%', '50% 62%', '50% 40%', '50% 50%', '50% 62%'];
 
 export function LearnTab() {
   const { done } = useProgress();
@@ -48,10 +47,10 @@ export function LearnTab() {
           return (
             <li key={unit.id}>
               <img
-                src={`${import.meta.env.BASE_URL}art/unit-${ui + 1}.webp`}
+                src={`${import.meta.env.BASE_URL}art/${unit.cover}`}
                 alt=""
                 loading="lazy"
-                style={{ objectPosition: COVER_POS[ui] ?? '50% 45%' }}
+                style={{ objectPosition: unit.coverPos }}
                 className="w-full h-28 object-cover rounded-2xl mb-3"
               />
               <div className="flex items-baseline justify-between gap-3">

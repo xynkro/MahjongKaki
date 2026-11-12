@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MahjongKaki has moved</title>
+<link rel="canonical" href="https://mahjongkaki.web.app/">
+<script>
+  // Keep whatever came after /MahjongKaki/ (a room link, a page) when sending people on.
+  (function () {
+    var rest = location.pathname.replace(/^\/MahjongKaki\/?/, '');
+    if (rest === 'index.html' || rest === '404.html') rest = '';
+    location.replace('https://mahjongkaki.web.app/' + rest + location.search + location.hash);
+  })();
+</script>
+<meta http-equiv="refresh" content="1; url=https://mahjongkaki.web.app/">
+<style>body{font:17px/1.5 system-ui,sans-serif;background:#0f1d17;color:#efe6d2;display:grid;place-items:center;min-height:100vh;margin:0;padding:0 16px;text-align:center}a{color:#e2b866}</style>
+</head>
+<body>
+<p>MahjongKaki now lives at <a href="https://mahjongkaki.web.app/">mahjongkaki.web.app</a>.</p>
+</body>
+</html>

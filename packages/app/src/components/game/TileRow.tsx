@@ -30,7 +30,7 @@ export function TileRow({
   drawnTile,
 }: TileRowProps) {
   const displayTiles = sortTiles ? [...tiles].sort((a, b) => a - b) : tiles;
-  const sizeClass = size === 'sm' ? 'w-9 h-12' : 'w-12 h-16';
+  const sizeClass = size === 'sm' ? 'w-9 h-12' : 'w-[46px] h-16'; // 46px: 7 a row on a 375px phone
 
   const start = useRef<{ idx: number; x: number; y: number; moved: boolean; dy: number } | null>(null);
   const [drag, setDrag] = useState<{ idx: number; dx: number; dy: number } | null>(null);
