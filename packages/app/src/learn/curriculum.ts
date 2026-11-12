@@ -68,7 +68,7 @@ export const CURRICULUM: Unit[] = [
     id: 'sets', title: 'Sets', blurb: 'Three of a kind, three in a row, and the pair.', video: 'U2', cover: 'unit-2.webp', coverPos: '50% 22%',
     lessons: [
       {
-        id: 'pung', title: 'Three of a kind', minutes: 2,
+        id: 'pung', title: 'Three of a kind', minutes: 2, video: 'X-pung',
         tasks: [
           { kind: 'info', title: 'A pung', body: 'Three identical tiles make a set called a pung. Any tile can make a pung, including winds and dragons.', tiles: [b(3), b(3), b(3)] },
           { kind: 'pick', prompt: 'Tap the three that make a pung.', tiles: [c(5), b(3), c(2), b(3), d(4), b(3)], correct: [1, 3, 5], explain: 'Three 3s of bamboo: an exact match.' },
@@ -76,7 +76,7 @@ export const CURRICULUM: Unit[] = [
         ],
       },
       {
-        id: 'chow', title: 'Three in a row', minutes: 2,
+        id: 'chow', title: 'Three in a row', minutes: 2, video: 'X-chow',
         tasks: [
           { kind: 'info', title: 'A chow', body: 'Three numbers in a row in the same suit make a set called a chow. Winds and dragons can never make a chow.', tiles: [d(4), d(5), d(6)] },
           { kind: 'pick', prompt: 'Tap the three that make a chow.', tiles: [c(2), d(7), c(3), b(3), c(4), E], correct: [0, 2, 4], explain: '2, 3 and 4 of characters, all one suit.' },
@@ -85,7 +85,7 @@ export const CURRICULUM: Unit[] = [
         ],
       },
       {
-        id: 'pair', title: 'The pair and a winning hand', minutes: 3,
+        id: 'pair', title: 'The pair and a winning hand', minutes: 3, video: 'X-pair',
         tasks: [
           { kind: 'info', title: 'Four sets and a pair', body: 'A winning hand is four sets plus one pair, 14 tiles in all. The pair is just two identical tiles.', tiles: [c(1), c(2), c(3), d(6), d(6), d(6), b(4), b(5), b(6), W, W, W, GREEN, GREEN] },
           { kind: 'choose', prompt: 'How many tiles are in a winning hand?', options: ['13', '14', '16'], answer: 1, explain: 'Four sets of three, plus a pair: 12 + 2 = 14.' },
@@ -148,7 +148,7 @@ export const CURRICULUM: Unit[] = [
     id: 'turn', title: 'A turn', blurb: 'Draw one, throw one, and what to do with a kong.', video: 'U3', cover: 'unit-3.webp', coverPos: '50% 62%',
     lessons: [
       {
-        id: 'draw-throw', title: 'Draw and throw', minutes: 2,
+        id: 'draw-throw', title: 'Draw and throw', minutes: 2, video: 'X-draw-throw',
         tasks: [
           { kind: 'info', title: 'Every turn is the same', body: 'You hold 13 tiles. On your turn you take one from the wall, so you have 14, then throw one face up into the middle, back to 13. Then the next player goes.' },
           { kind: 'choose', prompt: 'You have just drawn. How many tiles are you holding?', options: ['13', '14', '15'], answer: 1, explain: 'You draw up to 14, then throw one away.' },
@@ -156,7 +156,7 @@ export const CURRICULUM: Unit[] = [
         ],
       },
       {
-        id: 'kong', title: 'Four of a kind', minutes: 2,
+        id: 'kong', title: 'Four of a kind', minutes: 2, video: 'X-kong',
         tasks: [
           { kind: 'info', title: 'A kong', body: 'Four identical tiles make a kong. It counts as one set, so you lay it out and draw one extra tile to keep your hand the right size.', tiles: [d(8), d(8), d(8), d(8)] },
           { kind: 'choose', prompt: 'You lay out a kong. What happens next?', options: ['You draw one extra tile', 'You throw two tiles', 'Your turn ends at once'], answer: 0, explain: 'A kong uses four tiles for one set, so you draw a replacement.' },
@@ -168,14 +168,14 @@ export const CURRICULUM: Unit[] = [
     id: 'claiming', title: 'Claiming', blurb: 'Taking a tile someone else threw.', video: 'U4', cover: 'unit-4.webp', coverPos: '50% 40%',
     lessons: [
       {
-        id: 'pung-claim', title: 'Calling pung', minutes: 2,
+        id: 'pung-claim', title: 'Calling pung', minutes: 2, video: 'X-pung-claim',
         tasks: [
           { kind: 'info', title: 'Take it from anyone', body: 'If anyone throws a tile and you already hold two of it, call "pung", take it, and lay the three out face up. Then you throw a tile, and play carries on from you.' },
           { kind: 'choose', prompt: 'Someone throws the red dragon. You hold two red dragons. Can you call pung?', tiles: [RED, RED], options: ['Yes', 'No'], answer: 0, explain: 'Yes. You can pung a tile from any player.' },
         ],
       },
       {
-        id: 'chow-claim', title: 'Calling chow', minutes: 2,
+        id: 'chow-claim', title: 'Calling chow', minutes: 2, video: 'X-chow-claim',
         tasks: [
           { kind: 'info', title: 'Only from the player before you', body: 'You can only call "chow" on a tile thrown by the player whose turn was just before yours. From anyone else, you have to let it go.' },
           { kind: 'choose', prompt: 'The player across from you throws the 5 of dots. You hold 4 and 6 of dots. Can you chow?', tiles: [d(4), d(6)], options: ['Yes', 'No'], answer: 1, explain: 'No. Chow only works on a throw from the player just before you.' },
@@ -183,7 +183,7 @@ export const CURRICULUM: Unit[] = [
         ],
       },
       {
-        id: 'winning', title: 'Winning', minutes: 2,
+        id: 'winning', title: 'Winning', minutes: 2, video: 'X-winning',
         tasks: [
           { kind: 'info', title: 'Two ways to win', body: 'If someone throws the last tile you need, call "hu" and take it. If you draw it yourself from the wall, that is a self-drawn win, and everyone pays you.' },
           { kind: 'choose', prompt: 'Who pays more when you win on someone else\'s throw?', options: ['The player who threw it', 'Everyone pays the same', 'Nobody pays'], answer: 0, explain: 'The player who threw your winning tile pays double. The others pay the normal amount.' },

@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import type { Lesson, Unit } from './curriculum';
 
 /** Clips that are in public/video. A clip named in the curriculum but missing here is simply skipped. */
-export const CLIPS = new Set(['U1', 'U2', 'U3', 'U4', 'U5', 'U6', 'U7', 'X-east', 'X-wall', 'X-dice', 'X-deal', 'X-drawing']);
+export const CLIPS = new Set(['U1', 'U2', 'U3', 'U4', 'U5', 'U6', 'U7', 'X-east', 'X-wall', 'X-dice', 'X-deal', 'X-drawing', 'X-pung', 'X-chow', 'X-pair',
+  'X-draw-throw', 'X-kong', 'X-pung-claim', 'X-chow-claim', 'X-winning']);
 
-/** The clip before a lesson: the unit's clip opens its first lesson, otherwise the lesson's own clip. */
+/** The clip before a lesson: its own explainer if it has one, else the unit's intro clip on the unit's first lesson. */
 export function introFor(unit: Unit, lesson: Lesson): string | undefined {
-  const id = unit.lessons[0] === lesson && unit.video ? unit.video : lesson.video;
+  const id = lesson.video && CLIPS.has(lesson.video) ? lesson.video : unit.lessons[0] === lesson ? unit.video : undefined;
   return id && CLIPS.has(id) ? id : undefined;
 }
 

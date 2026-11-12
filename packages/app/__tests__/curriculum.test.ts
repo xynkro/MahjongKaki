@@ -31,5 +31,7 @@ describe('curriculum', () => {
     const tiles = CURRICULUM.find(u => u.id === 'tiles')!;
     expect(introFor(tiles, tiles.lessons[0])).toBe('U1');
     expect(introFor(tiles, tiles.lessons[1])).toBeUndefined();
+    const sets = CURRICULUM.find(u => u.id === 'sets')!;
+    expect(introFor(sets, sets.lessons[0])).toBe('X-pung'); // the lesson's explainer beats the unit intro
   });
 });

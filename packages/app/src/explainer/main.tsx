@@ -15,6 +15,16 @@ import dice from './data/dice.json';
 import deal from './data/deal.json';
 import drawing from './data/drawing.json';
 import { DEAL_SCENES, DICE_SCENES, DRAWING_SCENES } from './setup';
+import pung from './data/pung.json';
+import chow from './data/chow.json';
+import pair from './data/pair.json';
+import { CHOW_SCENES, PAIR_SCENES, PUNG_SCENES } from './sets';
+import drawThrow from './data/draw-throw.json';
+import kong from './data/kong.json';
+import pungClaim from './data/pung-claim.json';
+import chowClaim from './data/chow-claim.json';
+import winning from './data/winning.json';
+import { CHOW_CLAIM_SCENES, DRAW_THROW_SCENES, KONG_SCENES, PUNG_CLAIM_SCENES, WINNING_SCENES } from './play';
 
 const EXPLAINERS: Record<string, { data: ExplainerData; scenes: typeof WALL_SCENES }> = {
   wall: { data: wall as ExplainerData, scenes: WALL_SCENES },
@@ -22,6 +32,14 @@ const EXPLAINERS: Record<string, { data: ExplainerData; scenes: typeof WALL_SCEN
   dice: { data: dice as ExplainerData, scenes: DICE_SCENES },
   deal: { data: deal as ExplainerData, scenes: DEAL_SCENES },
   drawing: { data: drawing as ExplainerData, scenes: DRAWING_SCENES },
+  pung: { data: pung as ExplainerData, scenes: PUNG_SCENES },
+  chow: { data: chow as ExplainerData, scenes: CHOW_SCENES },
+  pair: { data: pair as ExplainerData, scenes: PAIR_SCENES },
+  'draw-throw': { data: drawThrow as ExplainerData, scenes: DRAW_THROW_SCENES },
+  kong: { data: kong as ExplainerData, scenes: KONG_SCENES },
+  'pung-claim': { data: pungClaim as ExplainerData, scenes: PUNG_CLAIM_SCENES },
+  'chow-claim': { data: chowClaim as ExplainerData, scenes: CHOW_CLAIM_SCENES },
+  winning: { data: winning as ExplainerData, scenes: WINNING_SCENES },
 };
 
 const params = new URLSearchParams(location.search);
