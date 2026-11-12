@@ -1,6 +1,6 @@
 import type { Meld, FlowerTile, SeasonTile, AnimalTile } from '@mahjongkaki/engine';
-import { tileLabel, tileColor, meldLabel, FLOWER_LABELS, SEASON_LABELS } from '../lib/tile-labels';
-import { AnimalArt } from './BonusArt';
+import { tileLabel, tileColor, meldLabel } from '../lib/tile-labels';
+import { AnimalArt, FlowerArt } from './BonusArt';
 
 interface HandDisplayProps {
   melds: Meld[];
@@ -57,13 +57,15 @@ export function HandDisplay({ melds, flowers, seasons, animals, onRemoveMeld }: 
       {(flowers.length > 0 || seasons.length > 0 || animals.length > 0) && (
         <div className="flex flex-wrap gap-1">
           {flowers.map((f) => (
-            <span key={f.flower} className="text-xs bg-pink-900/40 text-pink-300 px-2 py-0.5 rounded">
-              {FLOWER_LABELS[f.flower]}
+            <span key={f.flower} className="inline-flex items-center gap-1 text-xs bg-blue-900/40 text-blue-200 pl-0.5 pr-2 py-0.5 rounded">
+              <span className="w-4 h-[22px] rounded-[3px] bg-[#FBF4E4]"><FlowerArt tile={{ kind: 'flower', name: f.flower }} /></span>
+              {f.flower === 'bamboo_flower' ? 'bamboo' : f.flower}
             </span>
           ))}
           {seasons.map((s) => (
-            <span key={s.season} className="text-xs bg-cyan-900/40 text-cyan-300 px-2 py-0.5 rounded">
-              {SEASON_LABELS[s.season]}
+            <span key={s.season} className="inline-flex items-center gap-1 text-xs bg-red-900/40 text-red-200 pl-0.5 pr-2 py-0.5 rounded">
+              <span className="w-4 h-[22px] rounded-[3px] bg-[#FBF4E4]"><FlowerArt tile={{ kind: 'season', name: s.season }} /></span>
+              {s.season}
             </span>
           ))}
           {animals.map((a) => (

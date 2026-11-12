@@ -6,8 +6,8 @@ import { Abs, Label } from './wall';
 import { Group } from './sets';
 import { Follow, Round, Seat, Table, WindBadges } from './east';
 import { Checklist, Fly, Hand, HAND_Y, Note, POND, SeatTag, WallStrip, handX } from './play';
-import { AnimalArt } from '../components/BonusArt';
-import type { AnimalName } from '@mahjongkaki/engine';
+import { AnimalArt, FlowerArt } from '../components/BonusArt';
+import type { AnimalName, FlowerName, SeasonName } from '@mahjongkaki/engine';
 
 type V = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 const b = (v: V) => tileToIndex(suit('bamboo', v));
@@ -25,16 +25,19 @@ const BONUS = {
 } as const;
 
 const ANIMAL_OF: Record<string, AnimalName> = { '猫': 'cat', '鼠': 'rat', '雞': 'rooster', '蜈': 'centipede' };
+const FLOWER_OF: Record<string, FlowerName> = { '梅': 'plum', '蘭': 'orchid', '菊': 'chrysanthemum', '竹': 'bamboo_flower' };
+const SEASON_OF: Record<string, SeasonName> = { '春': 'spring', '夏': 'summer', '秋': 'autumn', '冬': 'winter' };
 
-/** A bonus tile as the board draws it: a flower's character, or an animal's picture, on ivory, with its English name under it. */
+/** A bonus tile as the board draws it: the flower or animal picture, on ivory, with its English name under it. */
 function BonusTile({ ch, en, w = 56, showName = true }: { ch: string; en: string; w?: number; showName?: boolean }) {
-  const animal = ANIMAL_OF[ch];
+  const animal = ANIMAL_OF[ch], flower = FLOWER_OF[ch], season = SEASON_OF[ch];
   return (
     <div className="flex flex-col items-center gap-1">
       <div className="rounded-[8px] grid place-items-center border border-[#C6AE84]"
         style={{ width: w, height: w * 1.39, backgroundImage: 'linear-gradient(to bottom, #FBF4E4 0%, #F1E7D2 55%, #E4D2AC 100%)', boxShadow: '0 3px 0 #C6AE84, 0 6px 14px rgba(0,0,0,0.35)' }}>
-        {animal
-          ? <AnimalArt animal={animal} className="w-[88%] h-[88%]" />
+        {animal ? <AnimalArt animal={animal} className="w-[88%] h-[88%]" />
+          : flower ? <FlowerArt tile={{ kind: 'flower', name: flower }} className="w-[92%] h-[92%]" />
+          : season ? <FlowerArt tile={{ kind: 'season', name: season }} className="w-[92%] h-[92%]" />
           : <span className="font-bold text-[#b45309] leading-none" style={{ fontSize: w * 0.55 }}>{ch}</span>}
       </div>
       {showName && <span className="text-[16px] font-semibold text-[#f2f0ea]/85 whitespace-nowrap">{en}</span>}

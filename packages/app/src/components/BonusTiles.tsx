@@ -2,7 +2,9 @@ import type { FlowerTile, SeasonTile, AnimalTile, FlowerName, SeasonName, Animal
 import { flower, season, animal } from '@mahjongkaki/engine';
 import { FLOWER_LABELS, SEASON_LABELS, ANIMAL_LABELS } from '../lib/tile-labels';
 import { haptics } from '../lib/haptics';
-import { AnimalArt } from './BonusArt';
+import { AnimalArt, FlowerArt } from './BonusArt';
+
+const mini = (art: React.ReactNode) => <span className="block w-[26px] h-[34px] rounded-[4px] bg-[#FBF4E4] border border-[#C6AE84]">{art}</span>;
 
 interface BonusTilesProps {
   flowers: FlowerTile[];
@@ -32,6 +34,7 @@ export function BonusTiles({
               <ToggleChip
                 key={f}
                 label={FLOWER_LABELS[f]}
+                art={mini(<FlowerArt tile={{ kind: 'flower', name: f }} />)}
                 sublabel={f === 'bamboo_flower' ? 'bamboo' : f === 'chrysanthemum' ? 'chrysanth.' : f} // full word can't fit a 4-up chip at 320-375px
                 ariaLabel={f === 'chrysanthemum' ? 'chrysanthemum' : undefined}
                 active={active}
@@ -48,6 +51,7 @@ export function BonusTiles({
               <ToggleChip
                 key={s}
                 label={SEASON_LABELS[s]}
+                art={mini(<FlowerArt tile={{ kind: 'season', name: s }} />)}
                 sublabel={s}
                 active={active}
                 color="emerald"
@@ -63,7 +67,7 @@ export function BonusTiles({
               <ToggleChip
                 key={a}
                 label={ANIMAL_LABELS[a]}
-                art={<span className="block w-[26px] h-[34px] rounded-[4px] bg-[#FBF4E4] border border-[#C6AE84]"><AnimalArt animal={a} /></span>}
+                art={mini(<AnimalArt animal={a} />)}
                 sublabel={a}
                 active={active}
                 color="yellow"

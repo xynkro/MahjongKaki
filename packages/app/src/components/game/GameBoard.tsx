@@ -3,7 +3,7 @@ import { coachDiscard } from '../../lib/coach';
 import { useDisplay, setDisplay } from '../../lib/display';
 import { type GameState, type GameAction } from '@mahjongkaki/game';
 import { tileToIndex, type Meld, type Wind, type BonusTile, WINDS } from '@mahjongkaki/engine';
-import { AnimalArt } from '../BonusArt';
+import { AnimalArt, FlowerArt } from '../BonusArt';
 import { TileRow } from './TileRow';
 import { TileFace } from './TileFace';
 import { haptics, sound } from '../../lib/haptics';
@@ -13,15 +13,10 @@ const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西
 const WIND_EN: Record<Wind, string> = { east: 'East', south: 'South', west: 'West', north: 'North' };
 const IVORY = 'linear-gradient(to bottom, #FBF4E4 0%, #F1E7D2 55%, #E4D2AC 100%)';
 
-const BONUS_CHARS: Record<string, string> = {
-  plum: '梅', orchid: '蘭', chrysanthemum: '菊', bamboo_flower: '竹',
-  spring: '春', summer: '夏', autumn: '秋', winter: '冬',
-  cat: '猫', rat: '鼠', rooster: '雞', centipede: '蜈',
-};
-function bonusChar(b: BonusTile): string {
-  if (b.kind === 'flower') return BONUS_CHARS[b.flower];
-  if (b.kind === 'season') return BONUS_CHARS[b.season];
-  return BONUS_CHARS[b.animal];
+function bonusName(b: BonusTile): string {
+  if (b.kind === 'flower') return b.flower === 'bamboo_flower' ? 'bamboo' : b.flower === 'chrysanthemum' ? 'chrysanth.' : b.flower;
+  if (b.kind === 'season') return b.season;
+  return b.animal;
 }
 
 interface GameBoardProps {
@@ -458,10 +453,10 @@ export function GameBoard({
                   className="anim-flower relative overflow-hidden tile-sheen w-14 h-[72px] rounded-lg border-2 border-amber-400 shadow-tile-up flex flex-col items-center justify-center"
                   style={{ backgroundImage: IVORY, animationDelay: `${i * 90}ms` }}
                 >
-                  {b.kind === 'animal'
-                    ? <AnimalArt animal={b.animal} className="w-full h-[52px]" />
-                    : <span className="text-3xl font-bold text-amber-700 leading-none">{bonusChar(b)}</span>}
-                  <span className="text-[10px] text-amber-700/70 mt-0.5">{b.kind === 'animal' ? b.animal : 'bonus'}</span>
+                  {b.kind === 'animal' ? <AnimalArt animal={b.animal} className="w-full h-[52px]" />
+                    : b.kind === 'flower' ? <FlowerArt tile={{ kind: 'flower', name: b.flower }} className="w-full h-[52px]" />
+                    : <FlowerArt tile={{ kind: 'season', name: b.season }} className="w-full h-[52px]" />}
+                  <span className="text-[10px] text-amber-700/70 mt-0.5">{bonusName(b)}</span>
                 </div>
               ))}
             </div>
