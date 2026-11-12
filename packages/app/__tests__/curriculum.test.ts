@@ -29,8 +29,11 @@ describe('curriculum', () => {
   });
   it('a unit clip opens its first lesson, and lessons can have their own', () => {
     const tiles = CURRICULUM.find(u => u.id === 'tiles')!;
-    expect(introFor(tiles, tiles.lessons[0])).toBe('U1');
-    expect(introFor(tiles, tiles.lessons[1])).toBeUndefined();
+    expect(introFor(tiles, tiles.lessons[0])).toBe('X-suits');
+    // Without its own explainer, the first lesson opens with the unit clip and later lessons get none.
+    const bare = { ...tiles, lessons: tiles.lessons.map(l => ({ ...l, video: undefined })) };
+    expect(introFor(bare, bare.lessons[0])).toBe('U1');
+    expect(introFor(bare, bare.lessons[1])).toBeUndefined();
     const sets = CURRICULUM.find(u => u.id === 'sets')!;
     expect(introFor(sets, sets.lessons[0])).toBe('X-pung'); // the lesson's explainer beats the unit intro
   });

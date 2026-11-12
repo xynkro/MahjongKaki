@@ -2,6 +2,7 @@ import type { FlowerTile, SeasonTile, AnimalTile, FlowerName, SeasonName, Animal
 import { flower, season, animal } from '@mahjongkaki/engine';
 import { FLOWER_LABELS, SEASON_LABELS, ANIMAL_LABELS } from '../lib/tile-labels';
 import { haptics } from '../lib/haptics';
+import { AnimalArt } from './BonusArt';
 
 interface BonusTilesProps {
   flowers: FlowerTile[];
@@ -62,6 +63,7 @@ export function BonusTiles({
               <ToggleChip
                 key={a}
                 label={ANIMAL_LABELS[a]}
+                art={<span className="block w-[26px] h-[34px] rounded-[4px] bg-[#FBF4E4] border border-[#C6AE84]"><AnimalArt animal={a} /></span>}
                 sublabel={a}
                 active={active}
                 color="yellow"
@@ -85,9 +87,9 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 function ToggleChip({
-  label, sublabel, ariaLabel, active, color, onClick,
+  label, art, sublabel, ariaLabel, active, color, onClick,
 }: {
-  label: string; sublabel: string; ariaLabel?: string; active: boolean; color: 'amber' | 'emerald' | 'yellow'; onClick: () => void;
+  label: string; art?: React.ReactNode; sublabel: string; ariaLabel?: string; active: boolean; color: 'amber' | 'emerald' | 'yellow'; onClick: () => void;
 }) {
   // Theme tokens, so the chips read in Jade Night and Daylight alike. Active = the accent colour.
   void color;
@@ -100,7 +102,7 @@ function ToggleChip({
       aria-label={ariaLabel}
       className={`flex flex-col items-center justify-center min-h-[44px] min-w-0 px-1 py-1.5 rounded-md border text-xs transition-all ${cls}`}
     >
-      <span className="font-bold text-base leading-none">{label}</span>
+      {art ?? <span className="font-bold text-base leading-none">{label}</span>}
       <span className="text-[11px] leading-tight opacity-75 mt-0.5">{sublabel}</span>
     </button>
   );

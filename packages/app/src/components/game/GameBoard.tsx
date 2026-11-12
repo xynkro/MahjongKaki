@@ -3,6 +3,7 @@ import { coachDiscard } from '../../lib/coach';
 import { useDisplay, setDisplay } from '../../lib/display';
 import { type GameState, type GameAction } from '@mahjongkaki/game';
 import { tileToIndex, type Meld, type Wind, type BonusTile, WINDS } from '@mahjongkaki/engine';
+import { AnimalArt } from '../BonusArt';
 import { TileRow } from './TileRow';
 import { TileFace } from './TileFace';
 import { haptics, sound } from '../../lib/haptics';
@@ -457,8 +458,10 @@ export function GameBoard({
                   className="anim-flower relative overflow-hidden tile-sheen w-14 h-[72px] rounded-lg border-2 border-amber-400 shadow-tile-up flex flex-col items-center justify-center"
                   style={{ backgroundImage: IVORY, animationDelay: `${i * 90}ms` }}
                 >
-                  <span className="text-3xl font-bold text-amber-700 leading-none">{bonusChar(b)}</span>
-                  <span className="text-[10px] text-amber-700/70 mt-0.5">bonus</span>
+                  {b.kind === 'animal'
+                    ? <AnimalArt animal={b.animal} className="w-full h-[52px]" />
+                    : <span className="text-3xl font-bold text-amber-700 leading-none">{bonusChar(b)}</span>}
+                  <span className="text-[10px] text-amber-700/70 mt-0.5">{b.kind === 'animal' ? b.animal : 'bonus'}</span>
                 </div>
               ))}
             </div>

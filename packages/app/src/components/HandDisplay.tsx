@@ -1,5 +1,6 @@
 import type { Meld, FlowerTile, SeasonTile, AnimalTile } from '@mahjongkaki/engine';
-import { tileLabel, tileColor, meldLabel, FLOWER_LABELS, SEASON_LABELS, ANIMAL_LABELS } from '../lib/tile-labels';
+import { tileLabel, tileColor, meldLabel, FLOWER_LABELS, SEASON_LABELS } from '../lib/tile-labels';
+import { AnimalArt } from './BonusArt';
 
 interface HandDisplayProps {
   melds: Meld[];
@@ -66,8 +67,9 @@ export function HandDisplay({ melds, flowers, seasons, animals, onRemoveMeld }: 
             </span>
           ))}
           {animals.map((a) => (
-            <span key={a.animal} className="text-xs bg-yellow-900/40 text-yellow-300 px-2 py-0.5 rounded">
-              {ANIMAL_LABELS[a.animal]}
+            <span key={a.animal} className="inline-flex items-center gap-1 text-xs bg-yellow-900/40 text-yellow-300 pl-0.5 pr-2 py-0.5 rounded">
+              <span className="w-4 h-[22px] rounded-[3px] bg-[#FBF4E4]"><AnimalArt animal={a.animal} /></span>
+              {a.animal}
             </span>
           ))}
         </div>
