@@ -4,7 +4,8 @@ import type { Lesson, Unit } from './curriculum';
 
 /** Clips that are in public/video. A clip named in the curriculum but missing here is simply skipped. */
 export const CLIPS = new Set(['U1', 'U2', 'U3', 'U4', 'U5', 'U6', 'U7', 'X-east', 'X-wall', 'X-dice', 'X-deal', 'X-drawing', 'X-pung', 'X-chow', 'X-pair',
-  'X-draw-throw', 'X-kong', 'X-pung-claim', 'X-chow-claim', 'X-winning']);
+  'X-draw-throw', 'X-kong', 'X-pung-claim', 'X-chow-claim', 'X-winning',
+  'X-suits', 'X-honours', 'X-bonus', 'X-seats', 'X-round', 'X-tai', 'X-doubling', 'X-who-pays', 'X-common-tai']);
 
 /** The clip before a lesson: its own explainer if it has one, else the unit's intro clip on the unit's first lesson. */
 export function introFor(unit: Unit, lesson: Lesson): string | undefined {

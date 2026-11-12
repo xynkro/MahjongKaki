@@ -28,7 +28,7 @@ function Label({ children, size = 44, color = '#f2f0ea' }: { children: ReactNode
   return <div className="font-display font-bold text-center whitespace-nowrap" style={{ fontSize: size, color, textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}>{children}</div>;
 }
 
-function Seat({ i, glow = 0, children }: { i: number; glow?: number; children?: ReactNode }) {
+export function Seat({ i, glow = 0, children }: { i: number; glow?: number; children?: ReactNode }) {
   const s = SEATS[i];
   return (
     <Abs x={s.x} y={s.y}>
@@ -45,12 +45,12 @@ function Seat({ i, glow = 0, children }: { i: number; glow?: number; children?: 
   );
 }
 
-function Table() {
+export function Table() {
   return <div className="absolute rounded-2xl" style={{ left: CX - 150, top: CY - 150, width: 300, height: 300, background: 'rgba(0,0,0,0.12)', boxShadow: 'inset 0 0 0 2px rgba(234,219,185,0.25)' }} />;
 }
 
 /** Wind badges by seat. `eastAt` = seat index holding East; others follow to the right. */
-function WindBadges({ eastAt, show = 1, k = 1 }: { eastAt: number; show?: number; k?: number }) {
+export function WindBadges({ eastAt, show = 1, k = 1 }: { eastAt: number; show?: number; k?: number }) {
   return (
     <>
       {ORDER.slice(0, show).map((w, n) => {
@@ -165,7 +165,7 @@ function WindDraw({ s, t }: { s: SceneData; t: number }) {
 }
 
 /* ---------- 4: the winds follow to the right ---------- */
-function Follow({ s, t }: { s: SceneData; t: number }) {
+export function Follow({ s, t }: { s: SceneData; t: number }) {
   const times = [0, at(s, 'south'), at(s, 'west'), at(s, 'north')];
   const shown = times.filter(x => t >= x).length;
   const arrow = ease(t, at(s, 'right'), 1.2);
@@ -226,7 +226,7 @@ function Moves({ s, t }: { s: SceneData; t: number }) {
 }
 
 /* ---------- 6: round wind changes ---------- */
-function Round({ s, t }: { s: SceneData; t: number }) {
+export function Round({ s, t }: { s: SceneData; t: number }) {
   const tAll = at(s, 'all');
   const tSouth = at(s, 'south');
   // East travels B → C → D → back to A on a circle through the badge spots while she says "all the way round".

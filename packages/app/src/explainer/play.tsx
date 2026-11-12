@@ -12,8 +12,8 @@ const N = tileToIndex(wind('north'));
 const RED = tileToIndex(dragon('red'));
 
 const CX = 328;
-const POND = { x: CX, y: 300 };
-const HAND_Y = 600;
+export const POND = { x: CX, y: 300 };
+export const HAND_Y = 600;
 const TW = 40; // hand tile width
 
 /** Players round the table, as seen from your seat (bottom). Turns go to the right. */
@@ -25,7 +25,7 @@ const SEAT = {
 } as const;
 type SeatKey = keyof typeof SEAT;
 
-function SeatTag({ k, glow = 0, note }: { k: SeatKey; glow?: number; note?: ReactNode }) {
+export function SeatTag({ k, glow = 0, note }: { k: SeatKey; glow?: number; note?: ReactNode }) {
   const p = SEAT[k];
   if (k === 'you') return null;
   return (
@@ -42,7 +42,7 @@ function SeatTag({ k, glow = 0, note }: { k: SeatKey; glow?: number; note?: Reac
 }
 
 /** Your hand along the bottom; `glow` lists positions to ring. */
-function Hand({ tiles, glow = [], hide = [], y = HAND_Y, w = TW }: { tiles: number[]; glow?: number[]; hide?: number[]; y?: number; w?: number }) {
+export function Hand({ tiles, glow = [], hide = [], y = HAND_Y, w = TW }: { tiles: number[]; glow?: number[]; hide?: number[]; y?: number; w?: number }) {
   return (
     <div className="absolute inset-x-0 flex justify-center gap-1" style={{ top: y }}>
       {tiles.map((t, i) => (
@@ -53,10 +53,10 @@ function Hand({ tiles, glow = [], hide = [], y = HAND_Y, w = TW }: { tiles: numb
     </div>
   );
 }
-const handX = (n: number, i: number, w = TW) => CX - ((n * (w + 4)) - 4) / 2 + i * (w + 4) + w / 2;
+export const handX = (n: number, i: number, w = TW) => CX - ((n * (w + 4)) - 4) / 2 + i * (w + 4) + w / 2;
 
 /** A tile flying from a to b over [from, from + len]. */
-function Fly({ tile, a, b: to, t, from, len = 0.6, w = TW, back = false }: { tile: number; a: { x: number; y: number }; b: { x: number; y: number }; t: number; from: number; len?: number; w?: number; back?: boolean }) {
+export function Fly({ tile, a, b: to, t, from, len = 0.6, w = TW, back = false }: { tile: number; a: { x: number; y: number }; b: { x: number; y: number }; t: number; from: number; len?: number; w?: number; back?: boolean }) {
   if (t < from) return null;
   const k = ease(t, from, len);
   return (
@@ -66,7 +66,7 @@ function Fly({ tile, a, b: to, t, from, len = 0.6, w = TW, back = false }: { til
   );
 }
 
-function Call({ t, from, text }: { t: number; from: number; text: string }) {
+export function Call({ t, from, text }: { t: number; from: number; text: string }) {
   const k = ease(t, from, 0.25);
   if (k <= 0) return null;
   return (
@@ -76,11 +76,11 @@ function Call({ t, from, text }: { t: number; from: number; text: string }) {
   );
 }
 
-function Note({ t, from, children, y = 40, color }: { t: number; from: number; children: ReactNode; y?: number; color?: string }) {
+export function Note({ t, from, children, y = 40, color }: { t: number; from: number; children: ReactNode; y?: number; color?: string }) {
   return <Abs x={CX} y={y} z={8}><Pop t={t} from={from}><Label size={32} color={color}>{children}</Label></Pop></Abs>;
 }
 
-function WallStrip({ n = 9, glowLast = false, y = 120 }: { n?: number; glowLast?: boolean; y?: number }) {
+export function WallStrip({ n = 9, glowLast = false, y = 120 }: { n?: number; glowLast?: boolean; y?: number }) {
   return (
     <Abs x={CX} y={y}>
       <div className="flex gap-1">
@@ -92,7 +92,7 @@ function WallStrip({ n = 9, glowLast = false, y = 120 }: { n?: number; glowLast?
   );
 }
 
-function Checklist({ t, items }: { t: number; items: { from: number; text: string }[] }) {
+export function Checklist({ t, items }: { t: number; items: { from: number; text: string }[] }) {
   return (
     <div className="absolute left-[60px] top-[150px] flex flex-col gap-9">
       {items.map((it, i) => (

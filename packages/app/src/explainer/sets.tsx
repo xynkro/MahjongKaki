@@ -12,7 +12,7 @@ const E = tileToIndex(wind('east')), S = tileToIndex(wind('south')), W = tileToI
 const RED = tileToIndex(dragon('red')), GREEN = tileToIndex(dragon('green')), WHITE = tileToIndex(dragon('white'));
 
 /** Tiles that drop in one after another from `from`. */
-function Group({ tiles, from, t, w = 62, label, mark }: {
+export function Group({ tiles, from, t, w = 62, label, mark }: {
   tiles: number[]; from: number; t: number; w?: number; label?: ReactNode;
   /** Tick or cross shown over the group at that time. */
   mark?: { ok: boolean; at: number };

@@ -37,7 +37,7 @@ export const CURRICULUM: Unit[] = [
     id: 'tiles', title: 'Meet the tiles', blurb: 'Suits, winds, dragons and bonus tiles.', video: 'U1', cover: 'unit-1.webp', coverPos: '50% 55%',
     lessons: [
       {
-        id: 'suits', title: 'The three suits', minutes: 2,
+        id: 'suits', title: 'The three suits', minutes: 2, video: 'X-suits',
         tasks: [
           { kind: 'info', title: 'Three suits, numbered 1 to 9', body: 'Most tiles belong to a suit. Bamboo tiles show green sticks, character tiles show a red Chinese number over the word 萬, and dot tiles show circles. The small number in the corner tells you the value, so you never need to read Chinese.', tiles: [b(3), c(3), d(3)] },
           { kind: 'pick', prompt: 'Tap every bamboo tile.', tiles: [b(2), c(5), b(7), d(4), b(9), d(1)], correct: [0, 2, 4], explain: 'Bamboo tiles are the green sticks.' },
@@ -46,7 +46,7 @@ export const CURRICULUM: Unit[] = [
         ],
       },
       {
-        id: 'honours', title: 'Winds and dragons', minutes: 2,
+        id: 'honours', title: 'Winds and dragons', minutes: 2, video: 'X-honours',
         tasks: [
           { kind: 'info', title: 'Honour tiles have no numbers', body: 'There are four winds and three dragons. They can only be matched, never put in a row. The winds are East 東 (dōng), South 南 (nán), West 西 (xī) and North 北 (běi). With beginner labels on, every wind tile shows its English name and how to say it.', tiles: [E, S, W, N] },
           { kind: 'info', title: 'The three dragons', body: 'The red dragon shows 中 (zhōng), the green dragon shows 發 (fā), and the white dragon 白 (bái) is an empty frame.', tiles: [RED, GREEN, WHITE] },
@@ -55,7 +55,7 @@ export const CURRICULUM: Unit[] = [
         ],
       },
       {
-        id: 'bonus', title: 'Flowers and animals', minutes: 2,
+        id: 'bonus', title: 'Flowers and animals', minutes: 2, video: 'X-bonus',
         tasks: [
           { kind: 'info', title: 'Bonus tiles', body: 'Singapore mahjong adds flowers, seasons and animals. They never stay in your hand. When you draw one, put it face up beside you and draw another tile. Bonus tiles can add to your score at the end.' },
           { kind: 'choose', prompt: 'You draw a flower. What do you do?', options: ['Keep it in your hand', 'Put it aside and draw again', 'Throw it to the middle'], answer: 1, explain: 'Bonus tiles go face up beside you, and you draw a replacement straight away.' },
@@ -195,7 +195,7 @@ export const CURRICULUM: Unit[] = [
     id: 'winds', title: 'Seats and winds', blurb: 'Who goes first, and why your seat matters.', video: 'U5', cover: 'unit-5.webp', coverPos: '50% 50%',
     lessons: [
       {
-        id: 'seats', title: 'Your seat wind', minutes: 2,
+        id: 'seats', title: 'Your seat wind', minutes: 2, video: 'X-seats',
         tasks: [
           { kind: 'info', title: 'The dealer is East', body: 'One player is the dealer and sits as East. Turns go round the table to the dealer\'s right: East, then South, West and North. Each player\'s seat has that wind.', tiles: [E, S, W, N] },
           { kind: 'choose', prompt: 'Who plays first in each hand?', options: ['East, the dealer', 'North', 'Whoever has the most flowers'], answer: 0, explain: 'The dealer, East, always starts.' },
@@ -203,7 +203,7 @@ export const CURRICULUM: Unit[] = [
         ],
       },
       {
-        id: 'round', title: 'The round wind', minutes: 2,
+        id: 'round', title: 'The round wind', minutes: 2, video: 'X-round',
         tasks: [
           { kind: 'info', title: 'The whole table shares a round wind', body: 'A game starts in the East round. When the dealer has moved all the way round the table, the round wind moves on to South. A pung of the round wind also scores extra, for everyone.' },
           { kind: 'choose', prompt: 'When does the dealer change?', options: ['When someone other than the dealer wins', 'Every single hand', 'Never'], answer: 0, explain: 'The dealer stays on after winning or a drawn hand, and passes on when someone else wins.' },
@@ -215,7 +215,7 @@ export const CURRICULUM: Unit[] = [
     id: 'scoring', title: 'Scoring', blurb: 'Tai, and why bigger hands pay more.', video: 'U6', cover: 'unit-6.webp', coverPos: '50% 62%',
     lessons: [
       {
-        id: 'tai', title: 'What tai means', minutes: 2,
+        id: 'tai', title: 'What tai means', minutes: 2, video: 'X-tai',
         tasks: [
           { kind: 'info', title: 'Tai are points for your hand', body: 'When you win, you count tai: points for what is in your hand. A pung of dragons, bonus tiles and special hand shapes all add tai. You need at least 1 tai to win, and most tables stop counting at 5.' },
           { kind: 'choose', prompt: 'Can you win with 0 tai?', options: ['Yes', 'No'], answer: 1, explain: 'No. A hand needs at least 1 tai to count as a win.' },
@@ -223,14 +223,14 @@ export const CURRICULUM: Unit[] = [
         ],
       },
       {
-        id: 'doubling', title: 'Each tai doubles', minutes: 2,
+        id: 'doubling', title: 'Each tai doubles', minutes: 2, video: 'X-doubling',
         tasks: [
           { kind: 'info', title: 'Small steps, big jumps', body: 'Each extra tai doubles what you win. A 3 tai hand is worth twice a 2 tai hand, and four times a 1 tai hand.' },
           { kind: 'choose', prompt: 'A 2 tai win pays 4 points. What does a 3 tai win pay?', options: ['5 points', '6 points', '8 points'], answer: 2, explain: 'One more tai doubles it: 4 becomes 8.' },
         ],
       },
       {
-        id: 'who-pays', title: 'Who pays', minutes: 2, video: 'P1',
+        id: 'who-pays', title: 'Who pays', minutes: 2, video: 'X-who-pays',
         tasks: [
           { kind: 'info', title: 'The thrower pays double', body: 'If you win with a tile someone threw, that player is the shooter. The shooter pays you double, and the other two pay single.' },
           { kind: 'info', title: 'Self-drawn pays more', body: 'If you draw your winning tile from the wall yourself, all three players pay you double. That is why a self-drawn win is worth waiting for.' },
@@ -240,7 +240,7 @@ export const CURRICULUM: Unit[] = [
         ],
       },
       {
-        id: 'common-tai', title: 'Tai worth knowing', minutes: 3,
+        id: 'common-tai', title: 'Tai worth knowing', minutes: 3, video: 'X-common-tai',
         tasks: [
           { kind: 'info', title: '1 tai each', body: 'A pung of any dragon. A pung of your seat wind, or of the round wind. Every flower or animal you collect. A hand of only chows.', tiles: [GREEN, GREEN, GREEN] },
           { kind: 'info', title: 'Bigger hands', body: 'All pungs and no chows: 2 tai. One suit plus winds or dragons (half flush): 2 tai. One suit and nothing else (full flush): 4 tai. Most tables stop counting at 5.', tiles: [d(1), d(2), d(3), d(4), d(4), d(4), d(6), d(7), d(8), d(9), d(9), d(9), d(5), d(5)] },

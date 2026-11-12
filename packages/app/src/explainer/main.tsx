@@ -24,6 +24,16 @@ import kong from './data/kong.json';
 import pungClaim from './data/pung-claim.json';
 import chowClaim from './data/chow-claim.json';
 import winning from './data/winning.json';
+import d_suits from './data/suits.json';
+import d_honours from './data/honours.json';
+import d_bonus from './data/bonus.json';
+import d_seats from './data/seats.json';
+import d_round from './data/round.json';
+import d_tai from './data/tai.json';
+import d_doubling from './data/doubling.json';
+import d_who_pays from './data/who-pays.json';
+import d_common_tai from './data/common-tai.json';
+import { SUITS_SCENES, HONOURS_SCENES, BONUS_SCENES, SEATS_SCENES, ROUND_SCENES, TAI_SCENES, DOUBLING_SCENES, WHO_PAYS_SCENES, COMMON_TAI_SCENES } from './basics';
 import { CHOW_CLAIM_SCENES, DRAW_THROW_SCENES, KONG_SCENES, PUNG_CLAIM_SCENES, WINNING_SCENES } from './play';
 
 const EXPLAINERS: Record<string, { data: ExplainerData; scenes: typeof WALL_SCENES }> = {
@@ -40,6 +50,15 @@ const EXPLAINERS: Record<string, { data: ExplainerData; scenes: typeof WALL_SCEN
   'pung-claim': { data: pungClaim as ExplainerData, scenes: PUNG_CLAIM_SCENES },
   'chow-claim': { data: chowClaim as ExplainerData, scenes: CHOW_CLAIM_SCENES },
   winning: { data: winning as ExplainerData, scenes: WINNING_SCENES },
+  'suits': { data: d_suits as ExplainerData, scenes: SUITS_SCENES },
+  'honours': { data: d_honours as ExplainerData, scenes: HONOURS_SCENES },
+  'bonus': { data: d_bonus as ExplainerData, scenes: BONUS_SCENES },
+  'seats': { data: d_seats as ExplainerData, scenes: SEATS_SCENES },
+  'round': { data: d_round as ExplainerData, scenes: ROUND_SCENES },
+  'tai': { data: d_tai as ExplainerData, scenes: TAI_SCENES },
+  'doubling': { data: d_doubling as ExplainerData, scenes: DOUBLING_SCENES },
+  'who-pays': { data: d_who_pays as ExplainerData, scenes: WHO_PAYS_SCENES },
+  'common-tai': { data: d_common_tai as ExplainerData, scenes: COMMON_TAI_SCENES },
 };
 
 const params = new URLSearchParams(location.search);
