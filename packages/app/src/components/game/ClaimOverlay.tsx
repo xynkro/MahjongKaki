@@ -18,8 +18,8 @@ export function ClaimOverlay({ claims, lastDiscardTile, onClaim, onSkip, tip }: 
   return (
     <div className="anim-pop bg-surface border-t border-line p-4 pb-safe">
       <div className="flex items-center justify-center gap-2 mb-3">
-        <span className="text-mute text-sm">Take this tile?</span>
-        <TileRow tiles={[lastDiscardTile]} size="sm" sortTiles={false} animateEntrance={false} />
+        <span className="text-ink text-[15px] font-semibold">Take this tile?</span>
+        <TileRow tiles={[lastDiscardTile]} size="lg" sortTiles={false} animateEntrance={false} />
       </div>
       {tip && (
         <p className="text-[13px] leading-snug text-ink text-center mb-3 max-w-sm mx-auto" role="status">

@@ -53,7 +53,7 @@ export function Tile({ index, w = 64, style }: { index: number; w?: number; styl
       className="relative rounded-[9px] flex items-center justify-center overflow-hidden border border-[#C6AE84]"
       style={{ width: w, height: w * 1.39, backgroundImage: IVORY, boxShadow: '0 3px 0 #C6AE84, 0 6px 14px rgba(0,0,0,0.35)', ...style }}
     >
-      <TileFace index={index} size="md" />
+      <TileFace index={index} size={w < 50 ? 'sm' : w >= 84 ? 'lg' : 'md'} />
     </div>
   );
 }

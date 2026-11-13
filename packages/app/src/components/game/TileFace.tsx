@@ -31,7 +31,7 @@ const LAYOUTS: Record<number, [number, number][]> = {
 
 interface FaceProps {
   index: number;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export function TileFace({ index, size = 'md' }: FaceProps) {
@@ -55,13 +55,13 @@ export function TileFace({ index, size = 'md' }: FaceProps) {
   if (honour) {
     return (
       <div className="relative w-full h-full flex flex-col items-center justify-between leading-none" style={{ color: honour.color }}>
-        <span className={`font-extrabold ${size === 'sm' ? 'text-[7.5px] mt-[2px]' : 'text-[9px] mt-[3px]'}`}>{honour.en}</span>
+        <span className={`font-extrabold ${size === 'sm' ? 'text-[8.5px] mt-[2px]' : size === 'lg' ? 'text-[12px] mt-[4px]' : 'text-[10px] mt-[3px]'}`}>{honour.en}</span>
         <div className="flex-1 min-h-0 w-full flex items-center justify-center">
           {honour.char
-            ? <span className={`font-bold ${size === 'sm' ? 'text-base' : 'text-2xl'}`} style={{ textShadow: '0 1px 0.5px rgba(255,255,255,0.55)' }}>{honour.char}</span>
+            ? <span className={`font-bold ${size === 'sm' ? 'text-lg' : size === 'lg' ? 'text-[38px]' : 'text-[28px]'}`} style={{ textShadow: '0 1px 0.5px rgba(255,255,255,0.55)' }}>{honour.char}</span>
             : <div className="w-3/4 h-full"><WhiteDragonFace /></div>}
         </div>
-        {size !== 'sm' && <span className="text-[9px] italic font-semibold mb-[3px] opacity-80">{honour.pinyin}</span>}
+        {size !== 'sm' && <span className={`italic font-semibold opacity-80 ${size === 'lg' ? 'text-[12px] mb-[4px]' : 'text-[10px] mb-[3px]'}`}>{honour.pinyin}</span>}
       </div>
     );
   }
@@ -72,7 +72,7 @@ export function TileFace({ index, size = 'md' }: FaceProps) {
     <div className="relative w-full h-full">
       {face}
       <span
-        className={`absolute top-0 left-0 rounded-br-[3px] bg-[#FBF4E4]/85 px-[2px] font-extrabold leading-none ${size === 'sm' ? 'text-[8px]' : 'text-[10px]'}`}
+        className={`absolute top-0 left-0 rounded-br-[3px] bg-[#FBF4E4]/85 px-[2px] font-extrabold leading-none ${size === 'sm' ? 'text-[9px]' : size === 'lg' ? 'text-[13px]' : 'text-[11px]'}`}
         style={{ color: tag.color }}
       >
         {tag.label}
@@ -150,23 +150,23 @@ function BambooFace({ value }: { value: number }) {
   );
 }
 
-function CharacterFace({ value, size }: { value: number; size: 'sm' | 'md' }) {
+function CharacterFace({ value, size }: { value: number; size: 'sm' | 'md' | 'lg' }) {
   return (
     <div className="flex flex-col items-center justify-center leading-none" style={{ color: INK.character, textShadow: '0 1px 0.5px rgba(255,255,255,0.55)' }}>
-      <span className={size === 'sm' ? 'text-sm' : 'text-xl'} style={{ fontWeight: 700 }}>
+      <span className={size === 'sm' ? 'text-base' : size === 'lg' ? 'text-[34px]' : 'text-2xl'} style={{ fontWeight: 700 }}>
         {CN_NUM[value]}
       </span>
-      <span className={size === 'sm' ? 'text-[12px]' : 'text-sm'} style={{ fontWeight: 700, marginTop: 1 }}>
+      <span className={size === 'sm' ? 'text-[12px]' : size === 'lg' ? 'text-xl' : 'text-base'} style={{ fontWeight: 700, marginTop: 1 }}>
         萬
       </span>
     </div>
   );
 }
 
-function HonorFace({ char, color, size }: { char: string; color: string; size: 'sm' | 'md' }) {
+function HonorFace({ char, color, size }: { char: string; color: string; size: 'sm' | 'md' | 'lg' }) {
   return (
     <div
-      className={`flex items-center justify-center leading-none font-bold ${size === 'sm' ? 'text-lg' : 'text-3xl'}`}
+      className={`flex items-center justify-center leading-none font-bold ${size === 'sm' ? 'text-xl' : size === 'lg' ? 'text-[44px]' : 'text-[34px]'}`}
       style={{ color, textShadow: '0 1px 0.5px rgba(255,255,255,0.55)' }}
     >
       {char}

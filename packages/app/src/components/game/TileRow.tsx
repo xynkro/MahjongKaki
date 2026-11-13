@@ -8,7 +8,7 @@ interface TileRowProps {
   onThrow?: (tile: number, index: number) => void;
   selectedTiles?: Set<number>;
   highlightTiles?: Set<number>;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
   sortTiles?: boolean;
   /** Stagger the entrance like a deal. Default true. */
   animateEntrance?: boolean;
@@ -30,7 +30,7 @@ export function TileRow({
   drawnTile,
 }: TileRowProps) {
   const displayTiles = sortTiles ? [...tiles].sort((a, b) => a - b) : tiles;
-  const sizeClass = size === 'sm' ? 'w-9 h-12' : 'w-[46px] h-16'; // 46px: 7 a row on a 375px phone
+  const sizeClass = size === 'sm' ? 'w-9 h-12' : size === 'lg' ? 'w-14 h-[78px]' : 'w-[46px] h-[68px]'; // 46px: 7 a row on a 375px phone
 
   const start = useRef<{ idx: number; x: number; y: number; moved: boolean; dy: number } | null>(null);
   const [drag, setDrag] = useState<{ idx: number; dx: number; dy: number } | null>(null);

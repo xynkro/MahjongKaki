@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { coachDiscard } from '../../lib/coach';
+import { coachDiscard, tileName } from '../../lib/coach';
 import { useDisplay, setDisplay } from '../../lib/display';
 import { type GameState, type GameAction } from '@mahjongkaki/game';
 import { tileToIndex, type Meld, type Wind, type BonusTile, WINDS } from '@mahjongkaki/engine';
@@ -54,47 +54,83 @@ function discDir(player: number, hs: number): string {
   return 'disc-left';
 }
 
-function TileBack({ count }: { count: number }) {
+const ivoryTile = 'relative rounded-[6px] flex items-center justify-center overflow-hidden border border-[#C6AE84] shadow-tile';
+
+function sentenceCase(t: string) { return t.charAt(0).toUpperCase() + t.slice(1); }
+
+/** The most recent throw, large, with who threw it in words. */
+function LastThrown({ last, takenBy, who, wind, wallLeft, animCls }: {
+  last: { tile: number; player: number } | null; takenBy: string | null; who: string; wind: string; wallLeft: number; animCls: string;
+}) {
   return (
-    <div className="flex gap-0.5 flex-wrap justify-center">
-      {Array.from({ length: count }).map((_, i) => (
-        <div
-          key={i}
-          className="w-4 h-6 rounded-[3px] border border-emerald-950/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-          style={{ backgroundImage: 'radial-gradient(circle 3px at 50% 45%, rgba(212,178,98,0.6), rgba(212,178,98,0.12) 65%, transparent 72%), linear-gradient(to bottom, #284a37 0%, #16291e 100%)' }}
-        />
-      ))}
+    <div className="shrink-0 flex items-center gap-3 rounded-lg bg-black/30 px-2.5 py-1 min-h-[80px]">
+      {last ? (
+        <>
+          <div key={`${last.player}:${last.tile}:${wallLeft}`} className={animCls}>
+            <div style={{ backgroundImage: IVORY }} className={`${ivoryTile} w-[52px] h-[72px] ring-[3px] ring-amber-400`}>
+              <TileFace index={last.tile} size="lg" />
+            </div>
+          </div>
+          <div className="min-w-0 leading-tight">
+            <div className="text-[13px] text-amber-100/70">Just thrown by</div>
+            <div className="text-[17px] font-bold text-amber-50 truncate">{wind} {who}</div>
+            <div className="text-[15px] font-semibold text-amber-200">{sentenceCase(tileName(last.tile))}</div>
+          </div>
+        </>
+      ) : takenBy ? (
+        <div className="text-[16px] font-semibold text-amber-50 leading-snug">The last tile was taken by<br />{takenBy}</div>
+      ) : (
+        <div className="text-[15px] text-amber-100/70">Thrown tiles show up here</div>
+      )}
+      <div className="ml-auto self-start text-right text-[12px] leading-tight text-amber-100/70 shrink-0">
+        <span className="block text-[17px] font-bold text-amber-50">{wallLeft}</span>left in<br />the wall
+      </div>
     </div>
   );
 }
 
-function Seat({
-  state, seat, label, showBacks, count,
-}: { state: GameState; seat: number; label: string; showBacks?: boolean; count?: number }) {
+/** One player's row: name, tiles in hand, flowers, their melds (outlined), then everything they have thrown. */
+function PlayerRow({ state, seat, title, short, count, lastIdx }: {
+  state: GameState; seat: number; title: string; short: string; count?: number; lastIdx: number;
+}) {
   const w = seatWind(seat, state.dealerSeat);
   const tiles = count ?? state.hands[seat].length;
   const isCurrent = state.currentPlayer === seat;
+  const thrown = state.discardLog.map((d, i) => ({ ...d, i })).filter(d => d.player === seat);
+  const melds = state.melds[seat];
   return (
-    <div
-      className={`rounded-xl border bg-slate-900/40 px-2 py-1.5 text-center backdrop-blur-sm transition-all duration-300
-        ${isCurrent ? 'glow-seat border-emerald-500/50' : 'border-slate-700/40'}`}
+    <section
+      data-seat={seat}
+      className={`rounded-lg px-1.5 py-1 transition-colors duration-300 ${isCurrent ? 'bg-emerald-400/15 ring-2 ring-emerald-400/70' : 'bg-black/20'}`}
+      aria-label={`${title}: ${thrown.length} thrown`}
     >
-      <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0">
-        <span className={`text-base font-bold ${isCurrent ? 'text-emerald-400' : 'text-slate-300'}`}>{WIND_CHARS[w]}</span>
-        <span className={`text-[11px] font-semibold ${isCurrent ? 'text-emerald-300' : 'text-slate-400'}`}>{WIND_EN[w]}</span>
-        <span className="text-[12px] text-slate-500">{tiles}</span>
-        {state.flowers[seat].length > 0 && (
-          <span className="text-[12px] text-amber-400">✿{state.flowers[seat].length}</span>
-        )}
-      </div>
-      {showBacks && <div className="mt-1"><TileBack count={tiles} /></div>}
-      {state.melds[seat].length > 0 && (
-        <div className="mt-1 flex justify-center">
-          <TileRow tiles={state.melds[seat].flatMap(meldToIndices)} size="sm" sortTiles={false} animateEntrance={false} />
+      <div className="flex flex-wrap gap-[3px] items-center">
+        {/* Name chip, the same height as a tile, so a short row stays one line tall. */}
+        <div className="h-[42px] min-w-[64px] max-w-[96px] mr-1 flex flex-col justify-center leading-none">
+          <div className="flex items-baseline gap-1 min-w-0">
+            <span className={`text-[17px] font-bold ${isCurrent ? 'text-emerald-300' : 'text-amber-50'}`}>{WIND_CHARS[w]}</span>
+            <span className={`text-[13px] font-semibold truncate ${isCurrent ? 'text-emerald-200' : 'text-amber-50/90'}`}>{short}</span>
+          </div>
+          <div className="mt-1 text-[11.5px] text-amber-100/65 whitespace-nowrap">
+            {isCurrent ? <span className="font-semibold text-emerald-300">playing · </span> : null}{tiles} tiles
+            {state.flowers[seat].length > 0 && <span className="text-amber-400"> ✿{state.flowers[seat].length}</span>}
+          </div>
         </div>
-      )}
-      <div className="text-[11px] text-slate-500 mt-0.5 truncate">{label}</div>
-    </div>
+        {melds.map((m, mi) => (
+          <div key={`m${mi}`} className="flex gap-px rounded-md ring-2 ring-sky-300/80 p-px mr-1" title={`${m.type} shown`}>
+            {meldToIndices(m).map((t, k) => (
+              <div key={k} style={{ backgroundImage: IVORY }} className={`${ivoryTile} w-[30px] h-[42px]`}><TileFace index={t} size="sm" /></div>
+            ))}
+          </div>
+        ))}
+        {thrown.map(d => (
+          <div key={d.i} style={{ backgroundImage: IVORY }} className={`${ivoryTile} w-[30px] h-[42px] ${d.i === lastIdx ? 'ring-[3px] ring-amber-400' : ''}`}>
+            <TileFace index={d.tile} size="sm" />
+          </div>
+        ))}
+        {melds.length === 0 && thrown.length === 0 && <span className="text-[12px] text-amber-100/50">nothing thrown yet</span>}
+      </div>
+    </section>
   );
 }
 
@@ -201,9 +237,13 @@ export function GameBoard({
   const discNonce = useRef(0);
   const prevDiscLen = useRef(state.discardLog.length);
   const [discardFlash, setDiscardFlash] = useState<{ tile: number; nonce: number } | null>(null);
+  // Set when the latest throw is claimed (it leaves the pool); cleared by the next throw.
+  const [lastTaken, setLastTaken] = useState(false);
   useEffect(() => {
     const len = state.discardLog.length;
+    if (len < prevDiscLen.current) setLastTaken(true);
     if (len > prevDiscLen.current) {
+      setLastTaken(false);
       const last = state.discardLog[len - 1];
       discNonce.current += 1;
       setDiscardFlash({ tile: last.tile, nonce: discNonce.current });
@@ -224,6 +264,30 @@ export function GameBoard({
   const showActions = canAct && (selectedTileValue !== null || kongActions.length > 0 || canTsumo);
 
   const lastIdx = state.discardLog.length - 1;
+  // The latest throw. Skipped claims leave it in the pool; a claimed one leaves it, and then the
+  // strip says who took it instead of showing an older tile as if it were new.
+  const lastEntry = state.discardLog[lastIdx];
+  const liveLast = lastEntry && !lastTaken ? lastEntry : null;
+  // When the rows overflow, keep the row of whoever just threw in view.
+  const rowsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!lastEntry) return;
+    const box = rowsRef.current;
+    const row = box?.querySelector<HTMLElement>(`[data-seat="${lastEntry.player}"]`);
+    if (!box || !row) return;
+    const top = row.offsetTop - box.offsetTop;
+    if (top < box.scrollTop || top + row.offsetHeight > box.scrollTop + box.clientHeight) {
+      const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      box.scrollTo({ top: Math.max(0, top + row.offsetHeight - box.clientHeight), behavior: reduce ? 'auto' : 'smooth' });
+    }
+  }, [state.discardLog.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  const seatTitle = (seat: number) => {
+    const wind = WIND_EN[seatWind(seat, state.dealerSeat)];
+    if (seat === hs) return `You (${wind})`;
+    const name = seatNames?.[seat];
+    const where = seat === rightSeat ? 'right' : seat === leftSeat ? 'left' : 'across';
+    return name ? `${name} (${wind})` : `${wind} (${where})`;
+  };
   const drawnTile = canAct && state.lastDraw?.player === hs ? state.lastDraw.tile : undefined;
 
   // What your hand shows: during the deal, only the tiles dealt so far; while your draw is
@@ -276,26 +340,14 @@ export function GameBoard({
         </span>
       </div>
 
-      {/* The table — ornate framed felt, tilted back in 3D perspective (hand stays flat) */}
-      <div
-        className="flex-1 min-h-0 mx-2 mt-1 mb-3 table-frame"
-        style={{ transform: 'perspective(1300px) rotateX(16deg)', transformOrigin: '50% 90%' }}
-      >
-       <div className="relative isolate h-full felt rounded-[0.85rem] overflow-hidden flex flex-col p-2 gap-2">
+      {/* The table: flat felt (no 3D tilt, so tiles aren't foreshortened). A "just thrown" strip on top,
+          then each player's melds and throws in their own labelled row, so who threw what reads at a glance. */}
+      <div className="flex-1 min-h-0 mx-2 mt-1 mb-2 table-frame">
+       <div className="relative isolate h-full felt rounded-[0.85rem] overflow-hidden p-1.5">
         <div className="felt-medallion -z-10" />
-        <div className="flex justify-center">
-          <div className="w-44"><Seat state={state} seat={acrossSeat} label={seatNames?.[acrossSeat] ?? 'across'} showBacks count={seatCount(acrossSeat)} /></div>
-        </div>
-
-        <div className="flex-1 flex items-stretch gap-2 min-h-0">
-          <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={leftSeat} label={seatNames?.[leftSeat] ?? 'left'} count={seatCount(leftSeat)} /></div></div>
-
-          {/* Centre discard pool — born-home tiles, latest leans in from its seat */}
           <div
-            className={`flex-1 relative rounded-xl ${awaiting ? 'cursor-pointer' : ''}`}
+            className={`relative h-full rounded-xl ${awaiting ? 'cursor-pointer' : ''}`}
             onClick={awaiting ? takeFromWall : undefined}
-            role={awaiting ? 'button' : undefined}
-            aria-label={awaiting ? 'Draw a tile from the wall' : undefined}
           >
            <WallRing
              state={state}
@@ -306,47 +358,46 @@ export function GameBoard({
              back={dealIntro ? (intro.step === 'flowers' ? usage.back : 0) : awaiting?.fromBack ? Math.max(0, usage.back - 1) : undefined}
              glowNext={Boolean(awaiting)}
            />
-           <div className="absolute inset-3.5 rounded-lg bg-emerald-950/10 p-1.5 overflow-y-auto">
-            <div className="absolute top-1 right-1.5 text-[11px] text-slate-400 bg-slate-900/60 rounded-full px-2 py-0.5 z-10">
-              {state.wall.length + (awaiting ? 1 : 0)} left in the wall
-            </div>
+           <div className="absolute inset-3.5 rounded-lg flex flex-col gap-1.5 min-h-0">
             {dealIntro && intro.step !== 'build' ? (
               <div className="h-full flex flex-col items-center justify-center gap-1">
                 <div className="flex gap-2"><DiceFace value={dice.a} /><DiceFace value={dice.b} /></div>
-                <div className="text-[13px] font-semibold text-amber-100/90">{dice.a} + {dice.b} = {dice.a + dice.b}</div>
+                <div className="text-[15px] font-semibold text-amber-100/90">{dice.a} + {dice.b} = {dice.a + dice.b}</div>
               </div>
-            ) : state.discardLog.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-[13px] text-slate-500">thrown tiles land here</div>
             ) : (
-              <div className="flex flex-wrap gap-1 justify-center content-start pt-5">
-                {state.discardLog.map((d, i) => {
-                  const isLast = i === lastIdx;
-                  return (
-                    <div key={i} className={isLast && animateDiscards ? discDir(d.player, hs) : ''}>
-                      <div
-                        style={{ backgroundImage: IVORY }}
-                        className={`w-7 h-10 relative rounded-[6px] flex items-center justify-center overflow-hidden border border-[#C6AE84] shadow-tile
-                          ${isLast ? 'ring-2 ring-amber-400' : ''}`}
-                      >
-                        <TileFace index={d.tile} size="sm" />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <>
+                <LastThrown
+                  last={liveLast}
+                  takenBy={lastTaken ? seatTitle(state.currentPlayer) : null}
+                  who={liveLast ? seatTitle(liveLast.player) : ''}
+                  wind={liveLast ? WIND_CHARS[seatWind(liveLast.player, state.dealerSeat)] : ''}
+                  wallLeft={state.wall.length + (awaiting ? 1 : 0)}
+                  animCls={liveLast && animateDiscards ? discDir(liveLast.player, hs) : ''}
+                />
+                <div ref={rowsRef} className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1 pb-1">
+                  {[rightSeat, acrossSeat, leftSeat, hs].map(seat => (
+                    <PlayerRow
+                      key={seat}
+                      state={state}
+                      seat={seat}
+                      title={seatTitle(seat)}
+                      short={seat === hs ? 'You' : (seatNames?.[seat] ?? WIND_EN[seatWind(seat, state.dealerSeat)])}
+                      count={seatCount(seat)}
+                      lastIdx={lastIdx}
+                    />
+                  ))}
+                </div>
+              </>
             )}
            </div>
            {awaiting && (
              <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center z-20">
-               <div className="rounded-full bg-black/70 px-3 py-1 text-[12px] font-semibold text-amber-100 shadow-lg whitespace-nowrap anim-pop">
+               <div className="rounded-full bg-black/75 px-3 py-1.5 text-[14px] font-semibold text-amber-100 shadow-lg whitespace-nowrap anim-pop">
                  Tap to draw from the glowing stack
                </div>
              </div>
            )}
           </div>
-
-          <div className="w-16 flex items-center"><div className="w-full"><Seat state={state} seat={rightSeat} label={seatNames?.[rightSeat] ?? 'right'} count={seatCount(rightSeat)} /></div></div>
-        </div>
        </div>
       </div>
 
