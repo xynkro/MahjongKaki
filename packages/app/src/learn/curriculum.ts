@@ -20,8 +20,9 @@ const WHITE = tileToIndex(dragon('white'));
 export type Task =
   | { kind: 'info'; title: string; body: string; tiles?: number[] }
   /** Tap exactly the tiles at `correct` (positions in `tiles`), in any order. */
-  | { kind: 'pick'; prompt: string; tiles: number[]; correct: number[]; explain: string }
-  | { kind: 'choose'; prompt: string; tiles?: number[]; options: string[]; answer: number; explain: string };
+  | { kind: 'pick'; prompt: string; tiles: number[]; correct: number[]; explain: string; plain?: boolean }
+  | { kind: 'choose'; prompt: string; tiles?: number[]; options: string[]; answer: number; explain: string; plain?: boolean };
+// `plain`: hide the beginner corner numbers, so the player reads the tile itself.
 
 /** `video`: a clip in public/video played before this lesson (the unit's own clip opens its first lesson). */
 export interface Lesson { id: string; title: string; minutes: number; tasks: Task[]; video?: string }
@@ -39,10 +40,28 @@ export const CURRICULUM: Unit[] = [
       {
         id: 'suits', title: 'The three suits', minutes: 2, video: 'X-suits',
         tasks: [
-          { kind: 'info', title: 'Three suits, numbered 1 to 9', body: 'Most tiles belong to a suit. Bamboo tiles show green sticks, character tiles show a red Chinese number over the word 萬, and dot tiles show circles. The small number in the corner tells you the value, so you never need to read Chinese.', tiles: [b(3), c(3), d(3)] },
+          { kind: 'info', title: 'Three suits, numbered 1 to 9', body: 'Most tiles belong to a suit. Bamboo tiles show green sticks, character tiles show a red Chinese number over the word 萬, and dot tiles show circles. With beginner labels on, a small number in the corner tells you the value. The next lesson teaches you to read the Chinese numbers yourself.', tiles: [b(3), c(3), d(3)] },
           { kind: 'pick', prompt: 'Tap every bamboo tile.', tiles: [b(2), c(5), b(7), d(4), b(9), d(1)], correct: [0, 2, 4], explain: 'Bamboo tiles are the green sticks.' },
           { kind: 'choose', prompt: 'Which suit is this tile?', tiles: [c(5)], options: ['Bamboo', 'Characters', 'Dots'], answer: 1, explain: 'A red Chinese number above 萬 means characters. This is the 5 of characters.' },
           { kind: 'pick', prompt: 'Tap the 7 of dots.', tiles: [d(4), c(7), d(7), b(7)], correct: [2], explain: 'Count the circles, or read the 7 in the corner.' },
+        ],
+      },
+      {
+        id: 'numbers', title: 'Chinese numbers 1 to 9', minutes: 3,
+        tasks: [
+          { kind: 'info', title: 'Reading a character tile', body: 'On a character tile, the top character is the number. The 萬 underneath only tells you it is a character tile. Learn these nine numbers and you can read any character tile, even on a real table with no labels.', tiles: [c(1), c(5), c(9)] },
+          { kind: 'info', title: '一 二 三: count the lines', body: 'One line is 1 (一). Two lines is 2 (二). Three lines is 3 (三). In Mandarin you say yī, èr, sān.', tiles: [c(1), c(2), c(3)] },
+          { kind: 'choose', plain: true, prompt: 'Which number is this?', tiles: [c(2)], options: ['1', '2', '3'], answer: 1, explain: 'Two lines, so it is the 2 of characters.' },
+          { kind: 'pick', plain: true, prompt: 'Tap the 3 of characters.', tiles: [c(2), c(3), c(1)], correct: [1], explain: 'Three lines is 3.' },
+          { kind: 'info', title: '四 五 六', body: '4 (四) is a box with two marks inside. 5 (五) has a flat line on top and at the bottom, joined by a bent stroke. 6 (六) has a dot and a line on top, with two legs below. In Mandarin: sì, wǔ, liù.', tiles: [c(4), c(5), c(6)] },
+          { kind: 'choose', plain: true, prompt: 'Which number is this?', tiles: [c(4)], options: ['4', '5', '6'], answer: 0, explain: 'A box with two marks inside is 4.' },
+          { kind: 'pick', plain: true, prompt: 'Tap the 6 of characters.', tiles: [c(5), c(6), c(4)], correct: [1], explain: 'A dot and a line on top, two legs below: that is 6.' },
+          { kind: 'info', title: '七 八 九', body: '7 (七) is a line crossed by a stroke that bends to the right at the bottom. 8 (八) is two strokes spreading apart. 9 (九) has a stroke sweeping down to the left, and an arm that bends down and curls to the right. In Mandarin: qī, bā, jiǔ.', tiles: [c(7), c(8), c(9)] },
+          { kind: 'choose', plain: true, prompt: 'Which number is this?', tiles: [c(8)], options: ['7', '8', '9'], answer: 1, explain: 'Two strokes spreading apart is 8.' },
+          { kind: 'info', title: 'Easy to mix up: 7 and 9', body: 'Both curl to the right at the bottom. Look at the left side: 9 (九) has a stroke sweeping away down to the left, like a leg. 7 (七) has none, just a straight line across.', tiles: [c(7), c(9)] },
+          { kind: 'pick', plain: true, prompt: 'Tap the 9 of characters.', tiles: [c(7), c(9), c(6), c(8)], correct: [1], explain: 'The stroke sweeping down to the left makes it 9.' },
+          { kind: 'choose', plain: true, prompt: 'Which number is this?', tiles: [c(5)], options: ['3', '5', '8'], answer: 1, explain: 'A flat top and bottom joined by a bent stroke is 5.' },
+          { kind: 'pick', plain: true, prompt: 'Tap the 7 of characters.', tiles: [c(1), c(4), c(7), c(9)], correct: [2], explain: 'A straight line across, crossed by a stroke that bends right: 7.' },
         ],
       },
       {

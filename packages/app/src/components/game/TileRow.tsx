@@ -14,6 +14,8 @@ interface TileRowProps {
   animateEntrance?: boolean;
   /** Tile value just drawn — plays a one-shot settle on matching tile(s). */
   drawnTile?: number;
+  /** Corner numbers on suit tiles: undefined follows the setting, false hides, true forces. */
+  tag?: boolean;
 }
 
 const THROW_DISTANCE = 52; // px dragged up to commit a discard
@@ -28,6 +30,7 @@ export function TileRow({
   sortTiles = true,
   animateEntrance = true,
   drawnTile,
+  tag,
 }: TileRowProps) {
   const displayTiles = sortTiles ? [...tiles].sort((a, b) => a - b) : tiles;
   const sizeClass = size === 'sm' ? 'w-9 h-12' : size === 'lg' ? 'w-14 h-[78px]' : 'w-[46px] h-[68px]'; // 46px: 7 a row on a 375px phone
@@ -98,7 +101,7 @@ export function TileRow({
               ${onThrow ? 'cursor-grab' : onTileClick ? 'cursor-pointer active:[transform:perspective(560px)_rotateX(24deg)_scale(0.94)]' : 'cursor-default'}
             `}
           >
-            <TileFace index={tile} size={size} />
+            <TileFace index={tile} size={size} tag={tag} />
           </button>
         );
       })}

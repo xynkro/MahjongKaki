@@ -81,7 +81,7 @@ function TaskView({ task, onNext }: { task: Task; onNext: () => void }) {
     return (
       <div className="pt-8 anim-pop">
         <h2 className="font-display text-2xl text-ink">{task.title}</h2>
-        {task.tiles && <div className="mt-6"><TileRow tiles={task.tiles} sortTiles={false} /></div>}
+        {task.tiles && <div className="mt-6"><TileRow tiles={task.tiles} sortTiles={false} size={lessonSize(task.tiles)} /></div>}
         <p className="text-ink text-[17px] leading-relaxed mt-6">{task.body}</p>
         <button onClick={() => { haptics.tap(); onNext(); }} className="btn-primary w-full h-12 rounded-xl text-[16px] mt-10">Got it</button>
       </div>
@@ -92,6 +92,18 @@ function TaskView({ task, onNext }: { task: Task; onNext: () => void }) {
 }
 
 type Verdict = null | 'right' | 'wrong';
+
+/** Large tiles when a step shows only a few (five large tiles fit one row on a 375px phone). */
+const lessonSize = (tiles: number[]) => (tiles.length <= 5 ? 'lg' : 'md');
+
+/** Reading quizzes hide the corner numbers; this brings them back, with no penalty. */
+function HintToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <button onClick={onToggle} className="mt-3 h-10 px-3 -ml-3 text-[15px] text-accent font-semibold active:scale-95">
+      {on ? 'Hide the numbers' : 'Show the numbers'}
+    </button>
+  );
+}
 
 function Feedback({ verdict, explain, onNext, onRetry }: { verdict: Verdict; explain: string; onNext: () => void; onRetry: () => void }) {
   if (!verdict) return null;
@@ -119,6 +131,7 @@ function Feedback({ verdict, explain, onNext, onRetry }: { verdict: Verdict; exp
 function PickTask({ task, onNext }: { task: Extract<Task, { kind: 'pick' }>; onNext: () => void }) {
   const [picked, setPicked] = useState<Set<number>>(new Set());
   const [verdict, setVerdict] = useState<Verdict>(null);
+  const [hint, setHint] = useState(false);
 
   const toggle = (_tile: number, i: number) => {
     if (verdict) return;
@@ -137,7 +150,8 @@ function PickTask({ task, onNext }: { task: Extract<Task, { kind: 'pick' }>; onN
   return (
     <div className="pt-8 anim-pop">
       <h2 className="font-display text-xl text-ink">{task.prompt}</h2>
-      <div className="mt-6"><TileRow tiles={task.tiles} sortTiles={false} selectedTiles={picked} onTileClick={toggle} /></div>
+      <div className="mt-6"><TileRow tiles={task.tiles} sortTiles={false} size={lessonSize(task.tiles)} selectedTiles={picked} onTileClick={toggle} tag={task.plain ? hint : undefined} /></div>
+      {task.plain && <HintToggle on={hint} onToggle={() => setHint(h => !h)} />}
       {!verdict && (
         <button onClick={check} disabled={picked.size === 0} className="btn-primary w-full h-12 rounded-xl text-[16px] mt-10 disabled:opacity-40">Check</button>
       )}
@@ -148,6 +162,7 @@ function PickTask({ task, onNext }: { task: Extract<Task, { kind: 'pick' }>; onN
 
 function ChooseTask({ task, onNext }: { task: Extract<Task, { kind: 'choose' }>; onNext: () => void }) {
   const [chosen, setChosen] = useState<number | null>(null);
+  const [hint, setHint] = useState(false);
   const verdict: Verdict = chosen === null ? null : chosen === task.answer ? 'right' : 'wrong';
 
   const choose = (i: number) => {
@@ -159,7 +174,8 @@ function ChooseTask({ task, onNext }: { task: Extract<Task, { kind: 'choose' }>;
   return (
     <div className="pt-8 anim-pop">
       <h2 className="font-display text-xl text-ink">{task.prompt}</h2>
-      {task.tiles && <div className="mt-6"><TileRow tiles={task.tiles} sortTiles={false} /></div>}
+      {task.tiles && <div className="mt-6"><TileRow tiles={task.tiles} sortTiles={false} size={lessonSize(task.tiles)} tag={task.plain ? hint : undefined} /></div>}
+      {task.tiles && task.plain && <HintToggle on={hint} onToggle={() => setHint(h => !h)} />}
       <div className="mt-6 flex flex-col gap-2">
         {task.options.map((o, i) => {
           const state = chosen === null ? 'border-line bg-surface' : i === chosen ? (i === task.answer ? 'border-accent bg-accent-soft' : 'border-line bg-surface-2') : 'border-line bg-surface opacity-50';

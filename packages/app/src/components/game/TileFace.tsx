@@ -32,9 +32,11 @@ const LAYOUTS: Record<number, [number, number][]> = {
 interface FaceProps {
   index: number;
   size?: 'sm' | 'md' | 'lg';
+  /** Corner number on suit tiles: undefined follows the beginner setting, false hides it, true forces it (reading quizzes). */
+  tag?: boolean;
 }
 
-export function TileFace({ index, size = 'md' }: FaceProps) {
+export function TileFace({ index, size = 'md', tag: tagOverride }: FaceProps) {
   const { tileMode } = useDisplay();
   const t = indexToTile(index);
 
@@ -47,7 +49,7 @@ export function TileFace({ index, size = 'md' }: FaceProps) {
   else if (t.dragon === 'green') face = <HonorFace char="發" color="#1d6b46" size={size} />;
   else face = <WhiteDragonFace />;
 
-  if (tileMode !== 'beginner') return <>{face}</>;
+  if (tileMode !== 'beginner' && tagOverride !== true) return <>{face}</>;
 
   // Beginner mode, winds and dragons: the English name on top and the pinyin underneath,
   // so a new player can both read the tile and say it. Small tiles only fit the English.
@@ -67,12 +69,18 @@ export function TileFace({ index, size = 'md' }: FaceProps) {
   }
 
   // Suits: a small readable corner number so non-Chinese readers know each tile.
+  if (tagOverride === false) return <>{face}</>;
   const tag = beginnerTag(t);
+  // Character numerals fill the top of the tile (二 and 三 run edge to edge), so their number sits
+  // bottom-right beside the narrower 萬 instead of covering a stroke.
+  const isChar = t.kind === 'suit' && t.suit === 'character';
   return (
     <div className="relative w-full h-full">
       {face}
       <span
-        className={`absolute top-0 left-0 rounded-br-[3px] bg-[#FBF4E4]/85 px-[2px] font-extrabold leading-none ${size === 'sm' ? 'text-[9px]' : size === 'lg' ? 'text-[13px]' : 'text-[11px]'}`}
+        className={`absolute bg-[#FBF4E4]/85 px-[2px] font-extrabold leading-none ${isChar
+          ? `bottom-0 right-0 rounded-tl-[3px] ${size === 'sm' ? 'text-[10px]' : size === 'lg' ? 'text-[15px]' : 'text-[13px]'}`
+          : `top-0 left-0 rounded-br-[3px] ${size === 'sm' ? 'text-[9px]' : size === 'lg' ? 'text-[13px]' : 'text-[11px]'}`}`}
         style={{ color: tag.color }}
       >
         {tag.label}

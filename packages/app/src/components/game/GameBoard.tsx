@@ -6,6 +6,7 @@ import { tileToIndex, type Meld, type Wind, type BonusTile, WINDS } from '@mahjo
 import { AnimalArt, FlowerArt } from '../BonusArt';
 import { TileRow } from './TileRow';
 import { TileFace } from './TileFace';
+import { NumbersCard } from './NumbersCard';
 import { haptics, sound } from '../../lib/haptics';
 import { WallRing, useDealIntro, DiceFace, rollDice, dealtCount, breakSeat, wallUsage, totalTiles } from './Wall';
 
@@ -151,6 +152,7 @@ export function GameBoard({
   dealIntro = false, onDealDone,
 }: GameBoardProps) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const [showNumbers, setShowNumbers] = useState(false);
   const [selectedTileValue, setSelectedTileValue] = useState<number | null>(null);
 
   const hs = state.humanSeat;
@@ -335,10 +337,19 @@ export function GameBoard({
           ✕
         </button>
         <span className="round-badge">{WIND_CHARS[state.prevailingWind]} {WIND_EN[state.prevailingWind]} round</span>
+        <button
+          onClick={() => setShowNumbers(true)}
+          aria-label="Chinese numbers 1 to 9"
+          className="h-8 px-2 rounded-md border border-amber-400/30 text-amber-100 text-[13px] font-semibold active:scale-95"
+        >
+          一 = 1
+        </button>
         <span className={isHumanTurn ? 'text-emerald-300 font-bold' : 'text-amber-100/70'}>
           {statusText ?? (dealIntro ? 'Dealing' : isHumanTurn ? (awaiting ? 'Your turn: draw a tile' : 'Your turn') : `${WIND_EN[seatWind(state.currentPlayer, state.dealerSeat)]} is playing…`)}
         </span>
       </div>
+
+      {showNumbers && <NumbersCard onClose={() => setShowNumbers(false)} />}
 
       {/* The table: flat felt (no 3D tilt, so tiles aren't foreshortened). A "just thrown" strip on top,
           then each player's melds and throws in their own labelled row, so who threw what reads at a glance. */}
