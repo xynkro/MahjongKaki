@@ -17,6 +17,19 @@ const RED = tileToIndex(dragon('red'));
 const GREEN = tileToIndex(dragon('green'));
 const WHITE = tileToIndex(dragon('white'));
 
+/** Worked hands in the Scoring unit. A test scores each with the real engine, so the lesson text
+ *  can never drift from what Play pays. */
+export const WORKED = {
+  // South seat, East round, plum flower (East's, so 0): red dragon pung = 1 tai.
+  oneTai: [RED, RED, RED, c(2), c(3), c(4), d(5), d(6), d(7), b(6), b(7), b(8), d(9), d(9)],
+  // East seat, East round, summer flower (South's, so 0): East pung = seat wind 1 + round wind 1.
+  twoTai: [E, E, E, c(1), c(2), c(3), c(5), c(6), c(7), d(2), d(3), d(4), b(5), b(5)],
+  // Any seat, one flower that is not yours: one suit only = full flush, 4 tai.
+  fourTai: [b(1), b(2), b(3), b(4), b(5), b(6), b(7), b(8), b(9), b(2), b(2), b(2), b(5), b(5)],
+  // No flowers or animals, won on the 4 of dots with 2-3 held: ping hu, 4 tai.
+  pingHu: [d(2), d(3), d(4), c(4), c(5), c(6), b(1), b(2), b(3), b(6), b(7), b(8), c(9), c(9)],
+};
+
 export type Task =
   | { kind: 'info'; title: string; body: string; tiles?: number[] }
   /** Tap exactly the tiles at `correct` (positions in `tiles`), in any order. */
@@ -261,11 +274,50 @@ export const CURRICULUM: Unit[] = [
       {
         id: 'common-tai', title: 'Tai worth knowing', minutes: 3, video: 'X-common-tai',
         tasks: [
-          { kind: 'info', title: '1 tai each', body: 'A pung of any dragon. A pung of your seat wind, or of the round wind. Every flower or animal you collect. A hand of only chows.', tiles: [GREEN, GREEN, GREEN] },
-          { kind: 'info', title: 'Bigger hands', body: 'All pungs and no chows: 2 tai. One suit plus winds or dragons (half flush): 2 tai. One suit and nothing else (full flush): 4 tai. Most tables stop counting at 5.', tiles: [d(1), d(2), d(3), d(4), d(4), d(4), d(6), d(7), d(8), d(9), d(9), d(9), d(5), d(5)] },
+          { kind: 'info', title: '1 tai each', body: 'A pung of any dragon. A pung of your seat wind, or of the round wind. Each of your own flowers: the red one and the blue one with your seat number (East 1, South 2, West 3, North 4). Every animal. Winning with no flowers or animals at all.', tiles: [GREEN, GREEN, GREEN] },
+          { kind: 'info', title: 'Bigger hands', body: 'All pungs and no chows: 2 tai. One suit plus winds or dragons (half flush): 2 tai. One suit and nothing else (full flush): 4 tai. A ping hu: 4 tai (it has its own lesson). Most tables stop counting at 5.', tiles: [d(1), d(2), d(3), d(4), d(4), d(4), d(6), d(7), d(8), d(9), d(9), d(9), d(5), d(5)] },
           { kind: 'choose', prompt: 'Every tile in this hand is a dot. What is it called?', tiles: [d(1), d(2), d(3), d(4), d(4), d(4), d(6), d(7), d(8), d(9), d(9), d(9), d(5), d(5)], options: ['Full flush, 4 tai', 'Half flush, 2 tai', 'All pungs, 2 tai'], answer: 0, explain: 'One suit and nothing else is a full flush, worth 4 tai.' },
           { kind: 'choose', prompt: 'You sit East. Which pung scores a tai for your seat?', options: ['A pung of East winds', 'A pung of North winds', 'A pung of 5 dots'], answer: 0, explain: 'A pung of your own seat wind is 1 tai.' },
           { kind: 'info', title: 'Check any hand', body: 'You do not need to remember all of this. The Hand tab adds up the tai for any hand, and after every win in Play you see each tai listed.' },
+        ],
+      },
+      {
+        id: 'count', title: 'Count a hand', minutes: 4,
+        tasks: [
+          { kind: 'info', title: 'Counting, step by step', body: 'Go through your winning hand and add up three things: the sets that score, your bonus tiles, and the shape of the whole hand. Then turn tai into points: 1 tai is 2 points, and each extra tai doubles it. 1 tai = 2, 2 tai = 4, 3 tai = 8, 4 tai = 16, 5 tai = 32.' },
+          { kind: 'info', title: 'A 1 tai hand', body: 'You sit South. Red dragon pung: 1 tai. The rest are chows and a pair, which score nothing. You drew the number 1 flower, but you are South (number 2), so it is not yours: 0. Total 1 tai, 2 points. You won on a throw, so the thrower pays you 4 and the other two pay 2 each.', tiles: WORKED.oneTai },
+          { kind: 'info', title: 'A 2 tai hand', body: 'You sit East in the East round. Your East pung scores twice: once for your seat and once for the round. You drew the number 2 flower, which is South\'s, so 0. Total 2 tai, 4 points. You drew the winning tile yourself, so all three pay double: 8 each.', tiles: WORKED.twoTai },
+          { kind: 'info', title: 'A 4 tai hand', body: 'Every tile is bamboo, with no winds or dragons: a full flush, 4 tai. Your one flower is not your number, so it adds nothing. Total 4 tai, 16 points.', tiles: WORKED.fourTai },
+          { kind: 'choose', prompt: 'You win with a green dragon pung, your own number flower and a cat. How many tai?', tiles: [GREEN, GREEN, GREEN], options: ['2 tai', '3 tai', '4 tai'], answer: 1, explain: 'Dragon pung 1, your own flower 1, the cat 1: 3 tai.' },
+          { kind: 'choose', prompt: 'That 3 tai hand, won on a throw. What does the thrower pay?', options: ['8 points', '16 points', '6 points'], answer: 1, explain: '3 tai is 8 points. The thrower pays double, 16. The other two pay 8 each.' },
+          { kind: 'choose', prompt: 'You are West in the East round. Is a pung of East winds worth a tai?', tiles: [E, E, E], options: ['Yes, it is the round wind', 'No, you are West'], answer: 0, explain: 'Yes. East is the round wind, so its pung scores 1 for everyone. It would score 2 only for the East player.' },
+          { kind: 'info', title: 'The cap', body: 'Most tables stop at 5 tai, which is 32 points. A bigger hand still pays as 5. After every win in Play, the result screen lists each tai, so you can check your count.' },
+        ],
+      },
+      {
+        id: 'pinghu', title: 'Ping hu', minutes: 3,
+        tasks: [
+          { kind: 'info', title: 'The plain hand', body: 'Ping hu (平胡, píng hú) means a plain hand: four chows and a pair, and nothing else. Getting it exactly right is hard, so it pays 4 tai.', tiles: WORKED.pingHu },
+          { kind: 'info', title: 'Four rules', body: '1. All four sets are chows. 2. The pair is not a dragon, not your seat wind and not the round wind. 3. You have no flowers or animals at all. 4. You win on a two-sided wait: you held two tiles in a row and could win on either end.' },
+          { kind: 'info', title: 'What two-sided means', body: 'Holding 2-3 of dots, you can win on the 1 or the 4: two-sided. Holding 1-2 you can only win on the 3, at the edge. Holding 4 and 6 you can only win on the 5, in the middle. Waiting on one tile to finish your pair does not count either.', tiles: [d(2), d(3)] },
+          { kind: 'info', title: 'Small ping hu', body: 'If you drew any flower or animal, the same hand is a small ping hu (小平胡): 1 tai, plus whatever your flowers and animals score.' },
+          { kind: 'choose', prompt: 'You held 2-3 of dots and won on the 4. Can it be ping hu?', tiles: [d(2), d(3), d(4)], options: ['Yes', 'No'], answer: 0, explain: 'Yes. 2-3 waits on the 1 or the 4, so it is two-sided.' },
+          { kind: 'choose', prompt: 'You held 8-9 of bamboo and won on the 7. Can it be ping hu?', tiles: [b(7), b(8), b(9)], options: ['Yes', 'No'], answer: 1, explain: 'No. 8-9 can only take the 7, an edge wait.' },
+          { kind: 'choose', prompt: 'Four chows, two-sided wait, no flowers, and a pair of red dragons. Ping hu?', tiles: [RED, RED], options: ['Yes', 'No'], answer: 1, explain: 'No. A dragon pair breaks ping hu: the pair must score nothing.' },
+          { kind: 'choose', prompt: 'A perfect ping hu, but you drew one flower. What is it worth?', options: ['Still 4 tai', 'Small ping hu: 1 tai, plus the flower if it is yours', 'Nothing'], answer: 1, explain: 'Any flower or animal turns it into small ping hu, 1 tai, and your own flower adds 1 more.' },
+        ],
+      },
+      {
+        id: 'instant', title: 'Paid on the spot', minutes: 3,
+        tasks: [
+          { kind: 'info', title: 'Paid straight away', body: 'Some things pay you the moment you collect them, even if you do not win the hand. Each of the other three players pays you.' },
+          { kind: 'info', title: 'Animals that catch each other', body: 'The cat catches the rat, and the rooster catches the centipede. Collect both of a pair and everyone pays you 2. Collect all four animals and they each pay 4 more on top.' },
+          { kind: 'info', title: 'Your own two flowers', body: 'Flowers come in a red set and a blue set, each numbered 1 to 4. Your number is your seat: East 1, South 2, West 3, North 4. Collect both your red and your blue number and everyone pays you 2. A whole set of four red, or four blue, pays 4.' },
+          { kind: 'info', title: 'Kongs', body: 'Lay out a kong and everyone pays you 2. A concealed kong, all four drawn by yourself, pays 4.' },
+          { kind: 'info', title: 'Agree the amounts first', body: 'These are the amounts the app uses, counted in your table\'s base stake. Tables set their own, so agree before you start. Some tables pay double for a pair you already held when the tiles were dealt. In Play, the result screen lists every payment made on the spot.' },
+          { kind: 'choose', prompt: 'You sit West. You draw a cat, and later a rat. What happens?', options: ['Nothing until someone wins', 'The other three pay you straight away', 'You pay the others'], answer: 1, explain: 'Cat catches rat: the other three each pay you 2, win or not.' },
+          { kind: 'choose', prompt: 'You sit South. Which two flowers pay you on the spot?', options: ['Red 2 and blue 2', 'Red 1 and blue 1', 'Any two flowers'], answer: 0, explain: 'South is number 2, so your own pair is red 2 and blue 2.' },
+          { kind: 'choose', prompt: 'You claim a throw to make a kong of 5 dots. What does each other player pay you?', options: ['2', '4', 'Nothing'], answer: 0, explain: 'A kong you lay out pays 2 from each player. Only a concealed kong pays 4.' },
         ],
       },
     ],

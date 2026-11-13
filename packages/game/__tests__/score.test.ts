@@ -32,7 +32,7 @@ describe('scoreWinningHand', () => {
     expect(res).not.toBeNull();
     expect(res!.isValid).toBe(true);
     expect(res!.elements.some(e => e.id === 'full_flush')).toBe(true);
-    expect(res!.cappedTai).toBe(5); // 4 (full flush) + 1 (concealed) + 1 (no flowers), capped at 5
+    expect(res!.cappedTai).toBe(5); // 4 (full flush) + 1 (no flowers); no concealed-hand tai in Singapore
   });
 
   it('returns null for tiles that do not form a standard winning shape', () => {
@@ -42,9 +42,9 @@ describe('scoreWinningHand', () => {
   });
 
   it('keeps the higher-scoring reading when a hand splits two ways', () => {
-    // Concealed, the chow reading earns Ping Wu; the pung reading (tried first) does not.
+    // The chow reading is a ping hu (won on b1 with 2-3 held: two-sided); the pung reading scores less.
     const res = scoreWinningHand(TWO_READINGS, [], [], 'east', 'east', 'zimo', 0);
-    expect(res!.elements.some(e => e.id === 'ping_wu')).toBe(true);
+    expect(res!.elements.some(e => e.id === 'ping_hu')).toBe(true);
   });
 });
 
@@ -66,7 +66,7 @@ describe('detectHandFromTiles', () => {
     const res = detectHandFromTiles(TWO_READINGS, { concealed: true, bonus: noBonus, ctx });
     expect(res!.readings).toBe(2);
     expect(res!.melds.filter(m => m.type === 'pung')).toHaveLength(0);
-    expect(res!.scoring.elements.some(e => e.id === 'ping_wu')).toBe(true);
+    expect(res!.scoring.elements.some(e => e.id === 'ping_hu')).toBe(true);
   });
 
   it('gives no concealed credit unless the player says the hand was concealed', () => {
@@ -74,15 +74,16 @@ describe('detectHandFromTiles', () => {
     expect(res!.melds.filter(m => m.type !== 'eyes').every(m => m.exposed)).toBe(true);
     const ids = res!.scoring.elements.map(e => e.id);
     expect(ids).not.toContain('concealed_hand');
-    expect(ids).not.toContain('ping_wu');
+    // Singapore ping hu allows exposed chows.
+    expect(ids).toContain('ping_hu');
   });
 
-  it('re-picks the reading when a flower removes Ping Wu', () => {
+  it('re-picks the reading when a flower removes ping hu', () => {
     const withFlower = {
       flowers: [{ kind: 'flower', flower: 'plum' }], seasons: [], animals: [],
     } as unknown as typeof noBonus;
     const res = detectHandFromTiles(TWO_READINGS, { concealed: true, bonus: withFlower, ctx });
-    expect(res!.scoring.elements.map(e => e.id)).not.toContain('ping_wu');
+    expect(res!.scoring.elements.map(e => e.id)).not.toContain('ping_hu');
   });
 
   it('returns null for anything but a complete 14-tile standard hand', () => {

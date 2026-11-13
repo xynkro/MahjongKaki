@@ -327,7 +327,7 @@ function openValueFloor(hand: number[], seatWind: Wind, prevailingWind: Wind): {
   if (pw !== sw && c[pw] >= 3) signals.push({ label: 'prevailing-wind pung', tai: TAI.honourPung });
   if (triplets >= 3) signals.push({ label: 'all pungs (对对胡)', tai: TAI.allPungs });
   if (sp.honours === 0 && triplets === 0 && connectedSuitTiles(c) >= 8) {
-    signals.push({ label: 'all chows (平胡)', tai: TAI.allChows });
+    signals.push({ label: 'all chows (ping hu 平胡)', tai: TAI.allChows });
   }
 
   const floor = signals.reduce((m, s) => Math.max(m, s.tai), 0);
@@ -604,7 +604,7 @@ function directionOptions(hand: number[]): DirectionOption[] {
     { key: 'full_flush', label: 'Full Flush (清一色)', tai: TAI.fullFlush, feasibility: feasFull, score: TAI.fullFlush * feasFull * feasFull },
     { key: 'half_flush', label: 'Half Flush (混一色)', tai: TAI.halfFlush, feasibility: feasHalf, score: TAI.halfFlush * feasHalf * feasHalf },
     { key: 'all_pungs', label: 'All Pungs (对对胡)', tai: TAI.allPungs, feasibility: feasPungs, score: TAI.allPungs * feasPungs },
-    { key: 'all_chows', label: 'All Chows (平胡)', tai: TAI.allChows, feasibility: feasChows, score: TAI.allChows * feasChows },
+    { key: 'all_chows', label: 'All chows (ping hu 平胡)', tai: TAI.allChows, feasibility: feasChows, score: TAI.allChows * feasChows },
     { key: 'flexible', label: 'Stay Flexible', tai: 1, feasibility: 0.5, score: 0.55 },
   ];
   return opts.sort((a, b) => b.score - a.score);

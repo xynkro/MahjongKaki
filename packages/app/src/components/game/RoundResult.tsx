@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { type GameState, type MatchProgress, scoreWinForSeat } from '@mahjongkaki/game';
-import { tileToIndex, type Wind, WINDS } from '@mahjongkaki/engine';
+import { type GameState, type MatchProgress, scoreWinForSeat, instantPayments } from '@mahjongkaki/game';
+import { tileToIndex, type Wind, WINDS, formatCurrency } from '@mahjongkaki/engine';
 import { TileRow } from './TileRow';
 import { Scoreboard, type Amount } from './Scoreboard';
 import { ChipFlight, FIRST_LAND_MS, chipCountForTai, countDurationMs, dealChips } from './ChipFlight';
@@ -22,6 +22,8 @@ interface RoundResultProps {
   /** Replaces the Next hand button once you're ready and waiting on the others. */
   waitingNote?: string;
   endLabel?: string;
+  /** Stake base for instant payments (units × base). 1 when scoring in points. */
+  stakeBase?: number;
 }
 
 function seatWind(seat: number, dealerSeat: number): Wind {
@@ -29,9 +31,10 @@ function seatWind(seat: number, dealerSeat: number): Wind {
 }
 
 // The tile that completed the hand. Same pick as scoreWinForSeat: the discard for
-// a discard win, otherwise the last tile of the winner's concealed hand (the draw).
+// a discard win, otherwise the tile the winner just drew.
 function winningTile(state: GameState, seat: number): number {
   if (state.winType === 'discard' && state.lastDiscard) return state.lastDiscard.tile;
+  if (state.lastDraw?.player === seat) return state.lastDraw.tile;
   const hand = state.hands[seat];
   return hand[hand.length - 1] ?? 0;
 }
@@ -58,7 +61,7 @@ function whoPaid(state: GameState, names?: string[]): string {
 
 const delay = (ms: number) => ({ animationDelay: `${ms}ms` });
 
-export function RoundResult({ state, match, deltas, onNextHand, onEndMatch, amount, names, waitingNote, endLabel = 'End match' }: RoundResultProps) {
+export function RoundResult({ state, match, deltas, onNextHand, onEndMatch, amount, names, waitingNote, endLabel = 'End match', stakeBase = 1 }: RoundResultProps) {
   const isDraw = state.winner === null;
   const isHumanWin = state.winner === state.humanSeat;
   const scoring = state.winner !== null ? scoreWinForSeat(state, state.winner) : null;
@@ -79,6 +82,9 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch, amou
   // seatWind here uses the dealer of the hand just played; match.dealerSeat has already
   // advanced, so derive the played hand's dealer from the gameState itself.
   const playedDealer = state.dealerSeat;
+  const instant = instantPayments(state);
+  const who = (seat: number) => (seat === state.humanSeat ? 'You' : names?.[seat] ?? WIND_EN[seatWind(seat, playedDealer)]);
+  const pay = (units: number) => (amount ? `${units * stakeBase} points` : formatCurrency(units * stakeBase));
 
   return (
     <div className="space-y-4 pb-4">
@@ -145,6 +151,21 @@ export function RoundResult({ state, match, deltas, onNextHand, onEndMatch, amou
               </span>
               <span className="text-amber-400">{scoring.cappedTai} tai</span>
             </div>
+          </div>
+        </section>
+      )}
+
+      {instant.length > 0 && (
+        <section className="anim-rise card p-4" style={delay(200)}>
+          <h3 className="section-title mb-1">Paid on the spot</h3>
+          <p className="text-slate-400 text-xs mb-2">Everyone else pays these straight away, win or not.</p>
+          <div className="space-y-1">
+            {instant.map((p, i) => (
+              <div key={i} className="flex justify-between gap-3 text-xs">
+                <span className="text-slate-300">{who(p.seat)}: {p.reason}</span>
+                <span className="text-amber-400 font-medium shrink-0">{pay(p.units)} from each</span>
+              </div>
+            ))}
           </div>
         </section>
       )}

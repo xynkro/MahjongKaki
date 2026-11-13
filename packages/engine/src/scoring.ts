@@ -83,6 +83,29 @@ function isThirteenWonders(hand: Hand): boolean {
     && new Set(tiles.map(tileKey)).size === 13;
 }
 
+/** Ping hu shape: four chows, a pair that scores nothing, and the winning tile taken on the open
+ *  end of a concealed chow (two-sided wait), not an edge, middle or pair wait. */
+function isPingHuShape(hand: Hand, ctx: WinContext): boolean {
+  const sets = hand.melds.filter(m => m.type !== 'eyes');
+  const pair = hand.melds.find(m => m.type === 'eyes');
+  if (sets.length !== 4 || !pair || !sets.every(m => m.type === 'chow')) return false;
+  const p = pair.tiles[0];
+  if (p.kind === 'dragon') return false;
+  if (p.kind === 'wind' && (p.wind === ctx.seatWind || p.wind === ctx.prevailingWind)) return false;
+  const w = ctx.winTile;
+  if (w.kind !== 'suit') return false;
+  // The winning tile lands in a concealed chow; with four exposed chows it finished the pair instead.
+  // (The Hand tab marks the set it treats as the winning one as concealed before scoring.)
+  return sets.some(m => {
+    if (m.exposed) return false;
+    const lo = m.tiles.reduce((a, t) => (t.kind === 'suit' ? Math.min(a, t.value) : a), 9);
+    const first = m.tiles[0];
+    if (first.kind !== 'suit' || first.suit !== w.suit) return false;
+    // Low end: held lo+1, lo+2, also waiting on lo+3. High end: held lo, lo+1, also waiting on lo-1.
+    return (w.value === lo && lo <= 6) || (w.value === lo + 2 && lo >= 2);
+  });
+}
+
 function pushWinCircumstances(
   elements: TaiElement[],
   ctx: WinContext,
@@ -303,16 +326,7 @@ export function scoreTaiElements(
   const hasHonours = hasHonourTiles(hand);
   const nonEyeMelds = hand.melds.filter(m => m.type !== 'eyes');
 
-  // All Chows (Ping Hu)
-  if (allMeldsAreChows(hand)) {
-    elements.push({
-      id: 'all_chows',
-      name: 'All Chows',
-      nameZh: '平胡',
-      tai: 1,
-      description: 'All sets are sequences (chows)',
-    });
-  }
+  // Ping hu (平胡) is scored further down, once the bonus tiles and pair are known.
 
   // All Pungs
   if (allMeldsArePungs(hand)) {
@@ -358,25 +372,37 @@ export function scoreTaiElements(
     });
   }
 
-  // Ping Wu: all chow + concealed + no bonus tiles
-  if (allMeldsAreChows(hand) && isConcealedHand(hand) && totalBonusTiles === 0) {
-    // Remove the all_chows element since Ping Wu supersedes it
-    const idx = elements.findIndex(e => e.id === 'all_chows');
-    if (idx !== -1) elements.splice(idx, 1);
-    elements.push({
-      id: 'ping_wu',
-      name: 'Ping Wu',
-      nameZh: '平湖',
-      tai: rules.pingWuTai,
-      description: 'All chows, concealed, no bonus tiles',
-    });
+  // Ping hu (平胡), Singapore style: four chows (exposed ones allowed), a pair that scores nothing
+  // (not a dragon, seat wind or round wind), and a two-sided wait on the winning tile.
+  // With no bonus tiles it is worth pingWuTai (4) and replaces the no-flower tai; with bonus
+  // tiles it is "small ping hu" (小平胡), 1 tai. Any other all-chow hand scores nothing for shape.
+  if (isPingHuShape(hand, ctx)) {
+    if (totalBonusTiles === 0) {
+      const nf = elements.findIndex(e => e.id === 'no_flowers');
+      if (nf !== -1) elements.splice(nf, 1);
+      elements.push({
+        id: 'ping_hu',
+        name: 'Ping Hu',
+        nameZh: '平胡',
+        tai: rules.pingWuTai,
+        description: 'Four chows, a non-scoring pair, a two-sided wait and no bonus tiles',
+      });
+    } else {
+      elements.push({
+        id: 'small_ping_hu',
+        name: 'Small Ping Hu',
+        nameZh: '小平胡',
+        tai: 1,
+        description: 'A ping hu hand, but with bonus tiles drawn',
+      });
+    }
   }
 
   // Concealed hand bonus (separate from Ping Wu)
   if (isConcealedHand(hand) && rules.concealedHandTai > 0) {
-    // Don't double-count if Ping Wu already awarded
-    const hasPingWu = elements.some(e => e.id === 'ping_wu');
-    if (!hasPingWu) {
+    // Don't double-count if ping hu already awarded
+    const hasPingHu = elements.some(e => e.id === 'ping_hu');
+    if (!hasPingHu) {
       elements.push({
         id: 'concealed_hand',
         name: 'Concealed Hand',

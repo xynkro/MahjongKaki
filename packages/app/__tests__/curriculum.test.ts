@@ -38,3 +38,25 @@ describe('curriculum', () => {
     expect(introFor(sets, sets.lessons[0])).toBe('X-pung'); // the lesson's explainer beats the unit intro
   });
 });
+
+describe('worked hands in the Scoring unit match the engine', () => {
+  // Imported here so the main suite above stays independent of the game package.
+  it('scores each worked hand exactly as the lesson says', async () => {
+    const { WORKED } = await import('../src/learn/curriculum');
+    const { scoreWinningHand } = await import('@mahjongkaki/game');
+    const { tileToIndex, suit, flower, season, DEFAULT_RULES } = await import('@mahjongkaki/engine');
+    const score = (tiles: number[], bonus: Parameters<typeof scoreWinningHand>[2], seat: 'east' | 'south', win: number) =>
+      scoreWinningHand(tiles, [], bonus, seat, 'east', 'discard', win, DEFAULT_RULES)!;
+
+    const one = score(WORKED.oneTai, [flower('plum')], 'south', WORKED.oneTai[13]);
+    expect(one.cappedTai).toBe(1);
+    const two = score(WORKED.twoTai, [season('summer')], 'east', WORKED.twoTai[13]);
+    expect(two.cappedTai).toBe(2);
+    const four = score(WORKED.fourTai, [flower('orchid')], 'east', WORKED.fourTai[13]);
+    expect(four.cappedTai).toBe(4);
+    expect(four.elements.map(e => e.id)).toContain('full_flush');
+    const ping = score(WORKED.pingHu, [], 'east', tileToIndex(suit('dot', 4)));
+    expect(ping.elements.map(e => e.id)).toContain('ping_hu');
+    expect(ping.cappedTai).toBe(4);
+  });
+});

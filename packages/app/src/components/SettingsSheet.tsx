@@ -100,7 +100,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
                 onChange={v => set('taiCap', v)}
               />
             </Row>
-            <Row label="Concealed hand (門清)" desc="Bonus tai for a fully concealed win.">
+            <Row label="Concealed hand (門清)" desc="Bonus tai for a fully concealed win. Not a Singapore rule, so 0 by default.">
               <Stepper value={rules.concealedHandTai} min={0} max={2} onChange={v => set('concealedHandTai', v)} />
             </Row>
             <Row label="Zimo counts as a tai" desc="Self-draw adds one tai.">
@@ -137,13 +137,13 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
 
           <section className="card p-4">
             <h3 className="section-title mb-1">Advanced</h3>
-            <Row label="Ping wu (平胡) tai" desc="Tai awarded for a no-tai 'flat' hand.">
+            <Row label="Ping hu (平胡) tai" desc="Four chows, a plain pair, a two-sided wait and no flowers or animals. With bonus tiles it is small ping hu, 1 tai.">
               <Stepper value={rules.pingWuTai} min={0} max={6} onChange={v => set('pingWuTai', v)} />
             </Row>
-            <Row label="Instant kong payment">
+            <Row label="Instant kong payment" desc="Everyone pays a kong straight away: 2 base exposed, 4 concealed.">
               <Toggle value={rules.instantKongPayments} onChange={v => set('instantKongPayments', v)} />
             </Row>
-            <Row label="Instant flower payment">
+            <Row label="Instant flower payment" desc="Everyone pays straight away for cat + rat, rooster + centipede or both your seat flowers (2 base), and for a full set of four (4 base).">
               <Toggle value={rules.instantFlowerPayments} onChange={v => set('instantFlowerPayments', v)} />
             </Row>
           </section>

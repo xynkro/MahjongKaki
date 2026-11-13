@@ -18,8 +18,8 @@ export const DEFAULT_RULES: RulesConfig = {
   taiCap: 5,
   zimoAsTai: false,
   shooterMode: 'standard',
-  concealedHandTai: 1,
-  anyFlowerScores: true,
+  concealedHandTai: 0, // not a Singapore tai; tables that count it can set 1
+  anyFlowerScores: false, // Singapore: only your seat's flower and season score
   noFlowerBonus: true,
   pingWuTai: 4,
   instantKongPayments: true,

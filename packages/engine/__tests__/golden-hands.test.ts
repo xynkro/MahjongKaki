@@ -27,7 +27,9 @@ function makeCtx(overrides: Partial<WinContext> = {}): WinContext {
     seatWind: 'east',
     prevailingWind: 'east',
     winType: 'discard',
-    winTile: suit('dot', 5),
+    // Bamboo 2 completes the bamboo 2-3-4 chow on its open end (held 3-4, waiting on 2 or 5). The
+    // standard hand below keeps that chow concealed, so it is a two-sided ping hu shape.
+    winTile: suit('bamboo', 2),
     isKongReplacement: false,
     isLastTile: false,
     isRobbingKong: false,
@@ -54,27 +56,27 @@ function getTaiForElement(elements: { id: string; tai: number }[], id: string): 
 describe('Individual Tai Elements', () => {
   // --- Bonus Tiles ---
 
-  it('Case 1: Any flower scores +1 tai (default: anyFlowerScores=true)', () => {
+  it('Case 1: Any flower scores +1 tai when anyFlowerScores is on (Singapore default is off)', () => {
     // East seat draws orchid (South flower) — still scores because anyFlowerScores
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [flower('orchid')],
       seasons: [],
       animals: [],
     };
-    const result = scoreHand(hand, makeCtx());
+    const result = scoreHand(hand, makeCtx(), mergeRules({ anyFlowerScores: true }));
     expect(hasTaiElement(result.elements, 'flower_orchid')).toBe(true);
-    // all_chows(1) + flower(1) = 2 tai
+    // small_ping_hu(1) + flower(1) = 2 tai
     expect(result.totalTai).toBe(2);
   });
 
   it('Case 2: Matched-only flower mode — unmatched flower scores 0', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [flower('orchid')], // orchid = south, but seat is east
@@ -84,14 +86,14 @@ describe('Individual Tai Elements', () => {
     const rules = mergeRules({ anyFlowerScores: false });
     const result = scoreHand(hand, makeCtx(), rules);
     expect(hasTaiElement(result.elements, 'flower_matched_orchid')).toBe(false);
-    // only all_chows(1)
+    // only small_ping_hu(1)
     expect(result.totalTai).toBe(1);
   });
 
   it('Case 3: Matched flower in matched-only mode scores +1', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [flower('plum')], // plum = east = seat wind
@@ -101,21 +103,21 @@ describe('Individual Tai Elements', () => {
     const rules = mergeRules({ anyFlowerScores: false });
     const result = scoreHand(hand, makeCtx({ seatWind: 'east' }), rules);
     expect(hasTaiElement(result.elements, 'flower_matched_plum')).toBe(true);
-    expect(result.totalTai).toBe(2); // all_chows(1) + matched flower(1)
+    expect(result.totalTai).toBe(2); // small_ping_hu(1) + matched flower(1)
   });
 
   it('Case 4: Complete flower set gives +1 extra', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [flower('plum'), flower('orchid'), flower('chrysanthemum'), flower('bamboo_flower')],
       seasons: [],
       animals: [],
     };
-    const result = scoreHand(hand, makeCtx());
-    // 4 flowers (4 tai) + flower set bonus (1) + all_chows (1) = 6 tai, capped at 5
+    const result = scoreHand(hand, makeCtx(), mergeRules({ anyFlowerScores: true }));
+    // 4 flowers (4 tai) + flower set bonus (1) + small_ping_hu (1) = 6 tai, capped at 5
     expect(result.totalTai).toBe(6);
     expect(result.cappedTai).toBe(5);
     expect(hasTaiElement(result.elements, 'flower_set')).toBe(true);
@@ -124,7 +126,7 @@ describe('Individual Tai Elements', () => {
   it('Case 5: Animal tile scores +1 each', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [],
@@ -134,14 +136,14 @@ describe('Individual Tai Elements', () => {
     const result = scoreHand(hand, makeCtx());
     expect(hasTaiElement(result.elements, 'animal_cat')).toBe(true);
     expect(hasTaiElement(result.elements, 'animal_rat')).toBe(true);
-    // all_chows(1) + 2 animals(2) = 3
+    // small_ping_hu(1) + 2 animals(2) = 3
     expect(result.totalTai).toBe(3);
   });
 
   it('Case 6: Complete animal set gives +1 extra', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [],
@@ -149,7 +151,7 @@ describe('Individual Tai Elements', () => {
       animals: [animal('cat'), animal('rat'), animal('rooster'), animal('centipede')],
     };
     const result = scoreHand(hand, makeCtx());
-    // all_chows(1) + 4 animals(4) + animal set(1) = 6, capped 5
+    // small_ping_hu(1) + 4 animals(4) + animal set(1) = 6, capped 5
     expect(result.totalTai).toBe(6);
     expect(result.cappedTai).toBe(5);
     expect(hasTaiElement(result.elements, 'animal_set')).toBe(true);
@@ -158,23 +160,23 @@ describe('Individual Tai Elements', () => {
   it('Case 7: No-flower bonus (+1 when zero bonus tiles)', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [],
       seasons: [],
       animals: [],
     };
-    const result = scoreHand(hand, makeCtx());
+    // Won on the middle dot 5 (dot 4-5-6), so not ping hu: no_flowers stands alone.
+    const result = scoreHand(hand, makeCtx({ winTile: suit('dot', 5) }));
     expect(hasTaiElement(result.elements, 'no_flowers')).toBe(true);
-    // all_chows(1) + no_flowers(1) = 2
-    expect(result.totalTai).toBe(2);
+    expect(result.totalTai).toBe(1);
   });
 
   it('Case 8: No-flower bonus disabled when toggle off', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [],
@@ -182,9 +184,9 @@ describe('Individual Tai Elements', () => {
       animals: [],
     };
     const rules = mergeRules({ noFlowerBonus: false });
-    const result = scoreHand(hand, makeCtx(), rules);
+    const result = scoreHand(hand, makeCtx({ winTile: suit('dot', 5) }), rules);
     expect(hasTaiElement(result.elements, 'no_flowers')).toBe(false);
-    expect(result.totalTai).toBe(1); // just all_chows
+    expect(result.totalTai).toBe(0); // middle wait: no ping hu, no other tai
   });
 
   // --- Per-Set Bonuses ---
@@ -192,7 +194,7 @@ describe('Individual Tai Elements', () => {
   it('Case 9: Dragon pung scores +1', () => {
     const hand: Hand = {
       melds: [
-        pung(dragon('red')), chow('dot', 1), chow('dot', 4), chow('bamboo', 2),
+        pung(dragon('red')), chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false),
         eyes(suit('character', 5)),
       ],
       flowers: [],
@@ -207,7 +209,7 @@ describe('Individual Tai Elements', () => {
   it('Case 10: Seat wind pung scores +1', () => {
     const hand: Hand = {
       melds: [
-        pung(wind('east')), chow('dot', 1), chow('dot', 4), chow('bamboo', 2),
+        pung(wind('east')), chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false),
         eyes(suit('character', 5)),
       ],
       flowers: [],
@@ -221,7 +223,7 @@ describe('Individual Tai Elements', () => {
   it('Case 11: Prevailing wind pung scores +1', () => {
     const hand: Hand = {
       melds: [
-        pung(wind('south')), chow('dot', 1), chow('dot', 4), chow('bamboo', 2),
+        pung(wind('south')), chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false),
         eyes(suit('character', 5)),
       ],
       flowers: [],
@@ -236,7 +238,7 @@ describe('Individual Tai Elements', () => {
   it('Case 12: Seat = prevailing wind pung stacks to +2', () => {
     const hand: Hand = {
       melds: [
-        pung(wind('east')), chow('dot', 1), chow('dot', 4), chow('bamboo', 2),
+        pung(wind('east')), chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false),
         eyes(suit('character', 5)),
       ],
       flowers: [],
@@ -259,7 +261,7 @@ describe('Individual Tai Elements', () => {
       melds: [
         pung(dragon('red')), pung(dragon('green')),
         eyes(dragon('white')),
-        chow('dot', 1), chow('bamboo', 2),
+        chow('dot', 1), chow('bamboo', 2, false),
       ],
       flowers: [],
       seasons: [],
@@ -273,10 +275,10 @@ describe('Individual Tai Elements', () => {
 
   // --- Hand Shapes ---
 
-  it('Case 14: All Chows (Ping Hu) = 1 tai', () => {
+  it('Case 14: Small ping hu (ping hu shape with a flower) = 1 tai', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [flower('plum')],
@@ -284,8 +286,8 @@ describe('Individual Tai Elements', () => {
       animals: [],
     };
     const result = scoreHand(hand, makeCtx());
-    expect(hasTaiElement(result.elements, 'all_chows')).toBe(true);
-    expect(getTaiForElement(result.elements, 'all_chows')).toBe(1);
+    expect(hasTaiElement(result.elements, 'small_ping_hu')).toBe(true);
+    expect(getTaiForElement(result.elements, 'small_ping_hu')).toBe(1);
   });
 
   it('Case 15: All Pungs = 2 tai', () => {
@@ -353,7 +355,7 @@ describe('Individual Tai Elements', () => {
     expect(hasTaiElement(result.elements, 'half_terminals')).toBe(true);
   });
 
-  it('Case 19: Ping Wu = 4 tai (all chow, concealed, no bonus tiles)', () => {
+  it('Case 19: Ping hu = 4 tai (four chows, plain pair, two-sided wait, no bonus tiles)', () => {
     const hand: Hand = {
       melds: [
         chow('dot', 1, false), chow('dot', 4, false),
@@ -365,22 +367,33 @@ describe('Individual Tai Elements', () => {
       animals: [],
     };
     const result = scoreHand(hand, makeCtx());
-    expect(hasTaiElement(result.elements, 'ping_wu')).toBe(true);
-    expect(getTaiForElement(result.elements, 'ping_wu')).toBe(4);
-    // Should NOT also have all_chows (ping_wu supersedes it)
-    expect(hasTaiElement(result.elements, 'all_chows')).toBe(false);
-    // ping_wu(4) + no_flowers(1) = 5, but no_flowers is subsumed by ping_wu's requirement
-    // Actually, no_flowers still fires separately as a bonus
-    // Wait — ping_wu already requires no bonus tiles. If noFlowerBonus fires too,
-    // that's double-counting. Let me check: the no_flowers element fires when
-    // totalBonusTiles === 0, which is a prerequisite for ping_wu. These don't
-    // double-count because no_flowers is "you drew zero bonus tiles" and ping_wu
-    // is "your hand shape + concealed + no bonus tiles". They're separate scoring axes.
-    // This is correct per source — both fire.
-    expect(result.cappedTai).toBe(5);
+    expect(hasTaiElement(result.elements, 'ping_hu')).toBe(true);
+    expect(getTaiForElement(result.elements, 'ping_hu')).toBe(4);
+    // Ping hu already requires no bonus tiles, so the no-flower tai is not added on top.
+    expect(hasTaiElement(result.elements, 'no_flowers')).toBe(false);
+    expect(result.cappedTai).toBe(4);
   });
 
-  it('Case 20: Ping Wu with flowers does NOT fire (becomes all_chows)', () => {
+  it('Case 19b: ping hu needs a two-sided wait and a pair that scores nothing', () => {
+    const base: Hand = {
+      melds: [chow('dot', 1, false), chow('dot', 4, false), chow('bamboo', 2, false), chow('character', 7, false), eyes(suit('dot', 9))],
+      flowers: [], seasons: [], animals: [],
+    };
+    const ids = (h: Hand, w: ReturnType<typeof suit>) => scoreHand(h, makeCtx({ winTile: w })).elements.map(e => e.id);
+    expect(ids(base, suit('bamboo', 4))).toContain('ping_hu');    // held 2-3, won on 4: two-sided
+    expect(ids(base, suit('dot', 3))).not.toContain('ping_hu');   // held 1-2, won on 3: edge wait
+    expect(ids(base, suit('character', 7))).not.toContain('ping_hu'); // held 8-9, won on 7: edge wait
+    expect(ids(base, suit('dot', 5))).not.toContain('ping_hu');   // held 4 and 6, won on 5: middle wait
+    expect(ids(base, suit('dot', 9))).not.toContain('ping_hu');   // won on the pair
+    const dragonPair: Hand = { ...base, melds: [...base.melds.slice(0, 4), eyes(dragon('red'))] };
+    expect(ids(dragonPair, suit('bamboo', 4))).not.toContain('ping_hu');
+    const seatWindPair: Hand = { ...base, melds: [...base.melds.slice(0, 4), eyes(wind('east'))] };
+    expect(ids(seatWindPair, suit('bamboo', 4))).not.toContain('ping_hu');
+    const otherWindPair: Hand = { ...base, melds: [...base.melds.slice(0, 4), eyes(wind('north'))] };
+    expect(ids(otherWindPair, suit('bamboo', 4))).toContain('ping_hu');
+  });
+
+  it('Case 20: ping hu with a flower drops to small ping hu', () => {
     const hand: Hand = {
       melds: [
         chow('dot', 1, false), chow('dot', 4, false),
@@ -392,10 +405,10 @@ describe('Individual Tai Elements', () => {
       animals: [],
     };
     const result = scoreHand(hand, makeCtx());
-    expect(hasTaiElement(result.elements, 'ping_wu')).toBe(false);
-    expect(hasTaiElement(result.elements, 'all_chows')).toBe(true);
-    // all_chows(1) + flower(1) + concealed_hand(1) = 3
-    expect(result.totalTai).toBe(3);
+    expect(hasTaiElement(result.elements, 'ping_hu')).toBe(false);
+    expect(hasTaiElement(result.elements, 'small_ping_hu')).toBe(true);
+    // small_ping_hu(1) + seat flower plum(1); no concealed-hand tai by default
+    expect(result.totalTai).toBe(2);
   });
 
   // --- Win Circumstances ---
@@ -403,7 +416,7 @@ describe('Individual Tai Elements', () => {
   it('Case 21: Zimo as tai (+1) when toggle on', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [flower('plum')],
@@ -418,7 +431,7 @@ describe('Individual Tai Elements', () => {
   it('Case 22: Zimo as payout modifier (default) — no tai element', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [flower('plum')],
@@ -432,7 +445,7 @@ describe('Individual Tai Elements', () => {
   it('Case 23: Kong replacement win = +1 tai', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [],
@@ -446,7 +459,7 @@ describe('Individual Tai Elements', () => {
   it('Case 24: Last tile win = +1 tai', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [],
@@ -460,7 +473,7 @@ describe('Individual Tai Elements', () => {
   it('Case 25: Robbing the kong = +1 tai', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [],
@@ -600,15 +613,15 @@ describe('Stacking Combinations', () => {
   it('Case 33: Multiple flowers + season + animal stacking', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [flower('plum'), flower('orchid')],
       seasons: [season('spring')],
       animals: [animal('cat')],
     };
-    const result = scoreHand(hand, makeCtx());
-    // all_chows(1) + 2 flowers(2) + 1 season(1) + 1 animal(1) = 5
+    const result = scoreHand(hand, makeCtx(), mergeRules({ anyFlowerScores: true }));
+    // small_ping_hu(1) + 2 flowers(2) + 1 season(1) + 1 animal(1) = 5
     expect(result.totalTai).toBe(5);
   });
 
@@ -641,7 +654,7 @@ describe('Payout Calculations', () => {
   it('Case 35: Discard win at 10/20¢, 1 tai — shooter 2x, others 1x', () => {
     const scoring = scoreHand({
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [flower('plum')],
@@ -667,7 +680,7 @@ describe('Payout Calculations', () => {
   it('Case 36: Zimo at $1/$2, 3 tai — all pay double', () => {
     const scoring = scoreHand({
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false),
         pung(dragon('red')),
         eyes(suit('character', 5)),
       ],
@@ -695,7 +708,7 @@ describe('Payout Calculations', () => {
   it('Case 37: Shooter-pays-all mode', () => {
     const scoring = scoreHand({
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [flower('plum')],
@@ -854,7 +867,7 @@ describe('Dispute-Prone Edge Cases', () => {
   it('Case 44: Robbing the kong + last tile — both score +1 each', () => {
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [],
@@ -865,23 +878,23 @@ describe('Dispute-Prone Edge Cases', () => {
     const result = scoreHand(hand, ctx);
     expect(hasTaiElement(result.elements, 'robbing_kong')).toBe(true);
     expect(hasTaiElement(result.elements, 'last_tile')).toBe(true);
-    // all_chows(1) + robbing(1) + last_tile(1) + no_flowers(1) = 4
-    expect(result.totalTai).toBe(4);
+    // ping_hu(4) + robbing(1) + last_tile(1) = 6 (no_flowers is folded into ping hu)
+    expect(result.totalTai).toBe(6);
   });
 
   it('Case 45: Flower set + seat flower — set bonus is EXTRA, not replacing individual', () => {
     // All 4 flowers, seat is east (plum matches)
     const hand: Hand = {
       melds: [
-        chow('dot', 1), chow('dot', 4), chow('bamboo', 2), chow('character', 5),
+        chow('dot', 1), chow('dot', 4), chow('bamboo', 2, false), chow('character', 5),
         eyes(suit('dot', 9)),
       ],
       flowers: [flower('plum'), flower('orchid'), flower('chrysanthemum'), flower('bamboo_flower')],
       seasons: [],
       animals: [],
     };
-    const result = scoreHand(hand, makeCtx({ seatWind: 'east' }));
-    // anyFlowerScores=true: 4 individual flowers(4) + flower_set(1) + all_chows(1) = 6
+    const result = scoreHand(hand, makeCtx({ seatWind: 'east' }), mergeRules({ anyFlowerScores: true }));
+    // anyFlowerScores=true: 4 individual flowers(4) + flower_set(1) + small_ping_hu(1) = 6
     expect(result.totalTai).toBe(6);
     expect(result.cappedTai).toBe(5);
   });
@@ -897,9 +910,10 @@ describe('Dispute-Prone Edge Cases', () => {
       seasons: [],
       animals: [],
     };
-    const result = scoreHand(hand, makeCtx());
+    const result = scoreHand(hand, makeCtx(), mergeRules({ concealedHandTai: 1 }));
     expect(hasTaiElement(result.elements, 'concealed_hand')).toBe(false);
-    expect(hasTaiElement(result.elements, 'ping_wu')).toBe(false);
+    // Singapore ping hu allows exposed chows.
+    expect(hasTaiElement(result.elements, 'ping_hu')).toBe(true);
   });
 
   it('Case 47: Kong counts as pung for hand-shape checks (all pungs)', () => {
@@ -930,7 +944,7 @@ describe('Dispute-Prone Edge Cases', () => {
       animals: [],
     };
     const ctx = makeCtx({ seatWind: 'east', prevailingWind: 'east' });
-    const result = scoreHand(hand, ctx);
+    const result = scoreHand(hand, ctx, mergeRules({ anyFlowerScores: true, concealedHandTai: 1 }));
     // concealed(1) + seat_wind(1) + prevailing_wind(1) + dragon(1) + flowers(2) = 6, capped 5
     expect(result.cappedTai).toBe(5);
   });
@@ -994,7 +1008,7 @@ describe('Thirteen Wonders', () => {
 
   it('Case 53: flower tiles still count, but the cap still holds', () => {
     const hand = wonders({ flowers: [flower('plum')] });
-    expect(hasTaiElement(scoreHand(hand, makeCtx()).elements, 'flower_plum')).toBe(true);
+    expect(hasTaiElement(scoreHand(hand, makeCtx()).elements, 'flower_matched_plum')).toBe(true);
     expect(scoreHand(hand, makeCtx()).cappedTai).toBe(5);
     expect(scoreHand(hand, makeCtx(), mergeRules({ taiCap: null })).totalTai).toBe(14);
   });

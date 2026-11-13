@@ -137,13 +137,18 @@ export function Calculator({ onSendToChips }: CalculatorProps = {}) {
 
   const scoring = useMemo(() => {
     if (melds.length === 0) return null;
-    const hand: Hand = { melds, flowers, seasons, animals };
-    const ctx: WinContext = {
-      seatWind, prevailingWind, winType,
-      winTile: melds[melds.length - 1].tiles[0],
-      isKongReplacement, isLastTile, isRobbingKong,
-    };
-    return scoreHand(hand, ctx, rules);
+    // The last set added is taken as the one the winning tile finished, so it counts as concealed.
+    // Ping hu depends on which of its tiles won, so try each and keep the best.
+    const last = melds[melds.length - 1];
+    const scored = last.type === 'chow' ? [...melds.slice(0, -1), { ...last, exposed: false }] : melds;
+    const hand: Hand = { melds: scored, flowers, seasons, animals };
+    let best: ReturnType<typeof scoreHand> | null = null;
+    for (const winTile of last.tiles) {
+      const ctx: WinContext = { seatWind, prevailingWind, winType, winTile, isKongReplacement, isLastTile, isRobbingKong };
+      const res = scoreHand(hand, ctx, rules);
+      if (!best || res.totalTai > best.totalTai) best = res;
+    }
+    return best;
   }, [melds, flowers, seasons, animals,
       seatWind, prevailingWind, winType,
       isKongReplacement, isLastTile, isRobbingKong, rules]);

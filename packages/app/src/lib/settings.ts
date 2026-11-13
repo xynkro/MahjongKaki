@@ -5,13 +5,25 @@ import { useSyncExternalStore } from 'react';
 import { DEFAULT_RULES, mergeRules, type RulesConfig } from '@mahjongkaki/engine';
 
 const KEY = 'mk_rules';
+// Bumped when the defaults move. v2 (Nov 2026): Singapore rules, so only your seat's flowers
+// score and there is no concealed-hand tai. Saved rules from before move to the new defaults once.
+const VERSION_KEY = 'mk_rules_v';
+const VERSION = 2;
+
 let rules: RulesConfig = load();
 const listeners = new Set<() => void>();
 
 function load(): RulesConfig {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? mergeRules(JSON.parse(raw)) : DEFAULT_RULES;
+    if (!raw) return DEFAULT_RULES;
+    let saved = mergeRules(JSON.parse(raw));
+    if (Number(localStorage.getItem(VERSION_KEY) ?? 1) < VERSION) {
+      saved = { ...saved, anyFlowerScores: DEFAULT_RULES.anyFlowerScores, concealedHandTai: DEFAULT_RULES.concealedHandTai };
+      localStorage.setItem(KEY, JSON.stringify(saved));
+      localStorage.setItem(VERSION_KEY, String(VERSION));
+    }
+    return saved;
   } catch {
     return DEFAULT_RULES;
   }
@@ -22,7 +34,7 @@ export function getRules(): RulesConfig { return rules; }
 
 export function setRule<K extends keyof RulesConfig>(key: K, value: RulesConfig[K]): void {
   rules = mergeRules({ ...rules, [key]: value });
-  try { localStorage.setItem(KEY, JSON.stringify(rules)); } catch { /* ignore */ }
+  try { localStorage.setItem(KEY, JSON.stringify(rules)); localStorage.setItem(VERSION_KEY, String(VERSION)); } catch { /* ignore */ }
   emit();
 }
 

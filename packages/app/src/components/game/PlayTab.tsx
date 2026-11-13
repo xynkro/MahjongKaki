@@ -15,6 +15,7 @@ import { ClaimOverlay } from './ClaimOverlay';
 import { coachClaim } from '../../lib/coach';
 import { useDisplay } from '../../lib/display';
 import { RoundResult } from './RoundResult';
+import { STAKE_PRESETS } from '@mahjongkaki/engine';
 import { Scoreboard, points } from './Scoreboard';
 import { type MatchState, newMatch, advanceMatch, handDeltas } from './match';
 import { db } from '../../lib/db';
@@ -298,6 +299,7 @@ export function PlayTab() {
           match={match}
           deltas={deltas ?? [0, 0, 0, 0]}
           amount={match.stakeIndex < 0 ? points : undefined}
+          stakeBase={match.stakeIndex < 0 ? 1 : STAKE_PRESETS[match.stakeIndex].base}
           onNextHand={nextHand}
           onEndMatch={endMatch}
         />

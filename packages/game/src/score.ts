@@ -125,15 +125,22 @@ export function detectHandFromTiles(
   let best: DetectedHand | null = null;
   for (const d of decomps) {
     const melds = decompToMelds(d, !opts.concealed);
-    const scoring = scoreHand(
-      { melds, ...opts.bonus },
-      { ...opts.ctx, winTile: indexToTile(d.pair) },
-      opts.rules ?? DEFAULT_RULES,
-    );
-    const beats = !best
-      || scoring.cappedTai > best.scoring.cappedTai
-      || (scoring.cappedTai === best.scoring.cappedTai && scoring.totalTai > best.scoring.totalTai);
-    if (beats) best = { melds, scoring, readings: decomps.length };
+    // Tiles alone don't say which one won the hand, and ping hu depends on it, so try each tile as the
+    // winning one and keep the best: any way it could have been won counts. The winning tile always
+    // lands in the concealed part, so for an "exposed" hand also try each chow as the concealed one.
+    const variants = opts.concealed ? [melds] : [melds, ...melds.flatMap((m, i) =>
+      m.type === 'chow' ? [melds.map((x, j) => (j === i ? { ...x, exposed: false } : x))] : [])];
+    for (const scored of variants) for (const w of new Set(tiles)) {
+      const scoring = scoreHand(
+        { melds: scored, ...opts.bonus },
+        { ...opts.ctx, winTile: indexToTile(w) },
+        opts.rules ?? DEFAULT_RULES,
+      );
+      const beats = !best
+        || scoring.cappedTai > best.scoring.cappedTai
+        || (scoring.cappedTai === best.scoring.cappedTai && scoring.totalTai > best.scoring.totalTai);
+      if (beats) best = { melds, scoring, readings: decomps.length };
+    }
   }
   return best;
 }
@@ -144,7 +151,7 @@ export function scoreWinForSeat(state: GameState, seat: number): ScoringResult |
   const winTileIdx =
     state.winType === 'discard' && state.lastDiscard
       ? state.lastDiscard.tile
-      : concealed[concealed.length - 1] ?? 0;
+      : state.lastDraw?.player === seat ? state.lastDraw.tile : concealed[concealed.length - 1] ?? 0;
   return scoreWinningHand(
     concealed, state.melds[seat], state.flowers[seat],
     seatWindForSeat(seat, state.dealerSeat), state.prevailingWind,
