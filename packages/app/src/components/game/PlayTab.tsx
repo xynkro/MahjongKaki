@@ -12,6 +12,7 @@ import { ALL_PROFILES, aiDecide } from '@mahjongkaki/ai';
 import { GameSetup, type SpeedSetting, type MatchConfig } from './GameSetup';
 import { GameBoard } from './GameBoard';
 import { ClaimOverlay } from './ClaimOverlay';
+import { GameOptions } from './GameOptions';
 import { coachClaim } from '../../lib/coach';
 import { useDisplay } from '../../lib/display';
 import { RoundResult } from './RoundResult';
@@ -46,6 +47,7 @@ export function PlayTab() {
   const [deltas, setDeltas] = useState<number[] | null>(null);
   const [resumeChecked, setResumeChecked] = useState(false);
   const [confirmEnd, setConfirmEnd] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
   // The deal intro is playing: hold the AI until it finishes.
   const [dealing, setDealing] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -152,7 +154,7 @@ export function PlayTab() {
 
   // Game loop + end-of-hand handling.
   useEffect(() => {
-    if (!gameState || !match || view !== 'playing' || confirmEnd || dealing) return; // paused behind the confirm or the deal
+    if (!gameState || !match || view !== 'playing' || confirmEnd || dealing || optionsOpen) return; // paused behind the confirm, the deal or Options
     if (timerRef.current) clearTimeout(timerRef.current);
 
     if (gameState.phase === 'finished') {
@@ -187,7 +189,7 @@ export function PlayTab() {
         return () => { if (timerRef.current) clearTimeout(timerRef.current); };
       }
     }
-  }, [gameState, match, view, confirmEnd, dealing]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [gameState, match, view, confirmEnd, dealing, optionsOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function resolveAiClaims() {
     setGameState(prev => {
@@ -309,6 +311,9 @@ export function PlayTab() {
 
   if (!gameState) return null;
 
+  const fast = match.speed === 'fast' || match.speed === 'instant';
+  const setFast = (on: boolean) => setMatch(m => (m ? { ...m, speed: on ? 'fast' : 'normal' } : m));
+
   const humanActions = getAvailableActions(gameState, gameState.humanSeat);
   const humanClaims = gameState.phase === 'claim'
     ? gameState.pendingClaims.filter(c => c.player === gameState.humanSeat)
@@ -328,6 +333,9 @@ export function PlayTab() {
           animateDiscards={speedMs >= 1000}
           dealIntro={dealing}
           onDealDone={() => setDealing(false)}
+          fast={fast}
+          onToggleFast={() => setFast(!fast)}
+          onOptions={() => setOptionsOpen(true)}
         />
       </div>
       {showClaimOverlay && (
@@ -338,6 +346,19 @@ export function PlayTab() {
           onSkip={handleSkipClaim}
           tip={coach ? coachClaim(gameState.hands[gameState.humanSeat], gameState.melds[gameState.humanSeat], humanClaims) : null}
         />
+      )}
+      {optionsOpen && (
+        <div className="app-full z-50 bg-bg flex flex-col" role="dialog" aria-modal="true" aria-label="Game options">
+          <div className="flex-1 overflow-y-auto px-4" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
+            <div className="max-w-lg mx-auto pb-4">
+              <h2 className="font-display text-[26px] text-ink mb-3">Options</h2>
+              <GameOptions inGame matchRules={gameState.rules} fast={fast} onFast={setFast} />
+            </div>
+          </div>
+          <div className="border-t border-line bg-surface px-4 pt-3" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
+            <button autoFocus onClick={() => setOptionsOpen(false)} className="btn-primary w-full max-w-lg mx-auto block h-12 rounded-xl text-[16px] font-semibold">Back to the game</button>
+          </div>
+        </div>
       )}
       {confirmEnd && (
         <div className="app-full z-50 flex items-center justify-center p-5 bg-black/75 backdrop-blur-sm">

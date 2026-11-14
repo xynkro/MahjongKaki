@@ -5,7 +5,7 @@ import { useDisplay, setDisplay } from '../lib/display';
 import { haptics, sound, setHapticsEnabled, hapticsEnabled } from '../lib/haptics';
 import { useTheme, setTheme } from '../lib/theme';
 
-function Row({ label, desc, children }: { label: string; desc?: string; children: ReactNode }) {
+export function Row({ label, desc, children }: { label: string; desc?: string; children: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3 py-2">
       <div className="min-w-0">
@@ -17,7 +17,7 @@ function Row({ label, desc, children }: { label: string; desc?: string; children
   );
 }
 
-function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+export function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
       role="switch"
@@ -32,7 +32,7 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
   );
 }
 
-function Segmented<T extends string | number | null>({
+export function Segmented<T extends string | number | null>({
   options, value, onChange,
 }: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void }) {
   return (
@@ -52,7 +52,7 @@ function Segmented<T extends string | number | null>({
   );
 }
 
-function Stepper({ value, min, max, onChange }: { value: number; min: number; max: number; onChange: (v: number) => void }) {
+export function Stepper({ value, min, max, onChange }: { value: number; min: number; max: number; onChange: (v: number) => void }) {
   const step = (d: number) => { const n = Math.max(min, Math.min(max, value + d)); if (n !== value) { haptics.tap(); onChange(n); } };
   return (
     <div className="flex items-center gap-3">
@@ -159,6 +159,12 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
             </Row>
             <Row label="Beginner tile labels" desc="Numbers on the suit tiles, and English names with pinyin (East, dōng) on the winds and dragons.">
               <Toggle value={display.tileMode === 'beginner'} onChange={v => setDisplay('tileMode', v ? 'beginner' : 'classic')} />
+            </Row>
+            <Row label="3D table" desc="Play on a table in perspective, with the wall and everyone's tiles. Off: a flat list of who threw what, with bigger tiles.">
+              <Toggle value={display.table3d} onChange={v => setDisplay('table3d', v)} />
+            </Row>
+            <Row label="Turn guide" desc="One line in games saying whose turn it is and what you can do.">
+              <Toggle value={display.turnGuide} onChange={v => setDisplay('turnGuide', v)} />
             </Row>
             <Row label="Coach in games" desc="On your turn against the AI, suggests a tile to throw and says why.">
               <Toggle value={display.coach} onChange={v => setDisplay('coach', v)} />

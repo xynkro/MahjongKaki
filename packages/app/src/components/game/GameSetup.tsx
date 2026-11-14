@@ -4,6 +4,7 @@ import { STAKE_PRESETS } from '@mahjongkaki/engine';
 import { haptics } from '../../lib/haptics';
 import { useDisplay } from '../../lib/display';
 import { VideoIntro, CLIPS } from '../../learn/VideoIntro';
+import { GameOptions } from './GameOptions';
 
 export type SpeedSetting = 'slow' | 'normal' | 'fast' | 'instant';
 
@@ -122,6 +123,11 @@ export function GameSetup({ onStart, onOnline }: GameSetupProps) {
           )}
         </>
       )}
+
+      <div>
+        <h2 className="section-title mb-2 px-1">Game setup: switch things on or off</h2>
+        <GameOptions />
+      </div>
 
       <button type="button"
         onClick={() => { haptics.success(); onStart({ difficulty, speed, humanSeat, stakeIndex: money ? stakeIndex : -1 }); }}

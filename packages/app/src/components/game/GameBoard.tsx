@@ -8,6 +8,9 @@ import { TileRow } from './TileRow';
 import { TileFace } from './TileFace';
 import { NumbersCard } from './NumbersCard';
 import { haptics, sound } from '../../lib/haptics';
+import { Table3D } from './Table3D';
+import { turnGuide } from '../../lib/guide';
+import { useImmersive, useLandscape } from '../../lib/immersive';
 import { WallRing, useDealIntro, DiceFace, rollDice, dealtCount, breakSeat, wallUsage, totalTiles } from './Wall';
 
 const WIND_CHARS: Record<Wind, string> = { east: '東', south: '南', west: '西', north: '北' };
@@ -38,6 +41,11 @@ interface GameBoardProps {
   /** Play the wall-building, dice and deal intro; the game waits until onDealDone. */
   dealIntro?: boolean;
   onDealDone?: () => void;
+  /** Play vs AI: the Faster button (AI moves quicker; your own turns are never timed). */
+  fast?: boolean;
+  onToggleFast?: () => void;
+  /** Opens the game options (view, guide, coach…). */
+  onOptions?: () => void;
 }
 
 function seatWind(seat: number, dealerSeat: number): Wind {
@@ -60,9 +68,33 @@ const ivoryTile = 'relative rounded-[6px] flex items-center justify-center overf
 function sentenceCase(t: string) { return t.charAt(0).toUpperCase() + t.slice(1); }
 
 /** The most recent throw, large, with who threw it in words. */
-function LastThrown({ last, takenBy, who, wind, wallLeft, animCls }: {
+function LastThrown({ last, takenBy, who, wind, wallLeft, animCls, compact }: {
   last: { tile: number; player: number } | null; takenBy: string | null; who: string; wind: string; wallLeft: number; animCls: string;
+  /** Floating over the 3D table: smaller, and no wall count (the table shows it). */
+  compact?: boolean;
 }) {
+  if (compact) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg bg-black/70 px-2 py-1 shadow-lg">
+        {last ? (
+          <>
+            <div key={`${last.player}:${last.tile}:${wallLeft}`} className={animCls}>
+              <div style={{ backgroundImage: IVORY }} className={`${ivoryTile} w-[40px] h-[56px] ring-[3px] ring-amber-400`}>
+                <TileFace index={last.tile} size="md" />
+              </div>
+            </div>
+            <div className="min-w-0 leading-tight">
+              <div className="text-[12px] text-amber-100/70">Just thrown by</div>
+              <div className="text-[14px] font-bold text-amber-50 truncate">{wind} {who}</div>
+              <div className="text-[13px] font-semibold text-amber-200 truncate">{sentenceCase(tileName(last.tile))}</div>
+            </div>
+          </>
+        ) : takenBy ? (
+          <div className="text-[13px] font-semibold text-amber-50 leading-snug">Taken by {takenBy}</div>
+        ) : null}
+      </div>
+    );
+  }
   return (
     <div className="shrink-0 flex items-center gap-3 rounded-lg bg-black/30 px-2.5 py-1 min-h-[80px]">
       {last ? (
@@ -149,15 +181,25 @@ function BigTile({ tile, cls }: { tile: number; cls: string }) {
 
 export function GameBoard({
   state, availableActions, onDiscard, onDeclareKong, onTsumo, onQuit, animateDiscards = true, seatNames, statusText, allowCoach = true,
-  dealIntro = false, onDealDone,
+  dealIntro = false, onDealDone, fast, onToggleFast, onOptions,
 }: GameBoardProps) {
+  useImmersive(true);
+  const landscape = useLandscape();
+  // Until they've tried it once, suggest turning the phone for the bigger table.
+  const [seenSideways, setSeenSideways] = useState(() => { try { return localStorage.getItem('mk_seen_landscape') === '1'; } catch { return true; } });
+  useEffect(() => {
+    if (landscape && !seenSideways) {
+      setSeenSideways(true);
+      try { localStorage.setItem('mk_seen_landscape', '1'); } catch { /* ignore */ }
+    }
+  }, [landscape, seenSideways]);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [showNumbers, setShowNumbers] = useState(false);
   const [selectedTileValue, setSelectedTileValue] = useState<number | null>(null);
 
   const hs = state.humanSeat;
   const isHumanTurn = state.currentPlayer === hs && state.phase === 'discard';
-  const { coach, drawYourself } = useDisplay();
+  const { coach, drawYourself, table3d, turnGuide: guideOn } = useDisplay();
   const [dice] = useState(rollDice);
 
   // Draw it yourself: the engine has already drawn your tile; hold it back until you tap the wall.
@@ -325,181 +367,190 @@ export function GameBoard({
     setSelectedTileValue(null);
   }
 
-  return (
-    <div className="relative flex flex-col h-full" style={{ background: 'radial-gradient(130% 100% at 50% 22%, #34160c, #190a06)' }}>
-      {/* Status bar */}
-      <div className="flex items-center justify-between px-3 py-2 bg-black/30 border-b border-amber-400/10 text-xs text-amber-100/70 backdrop-blur">
-        <button
-          onClick={onQuit}
-          aria-label="End match"
-          className="-ml-3 -my-2 w-11 h-11 grid place-items-center text-amber-100/60 active:text-amber-100 text-base leading-none active:scale-90"
-        >
-          ✕
-        </button>
-        <span className="round-badge">{WIND_CHARS[state.prevailingWind]} {WIND_EN[state.prevailingWind]} round</span>
-        <button
-          onClick={() => setShowNumbers(true)}
-          aria-label="Chinese numbers 1 to 9"
-          className="h-8 px-2 rounded-md border border-amber-400/30 text-amber-100 text-[13px] font-semibold active:scale-95"
-        >
-          一 = 1
-        </button>
-        <span className={isHumanTurn ? 'text-emerald-300 font-bold' : 'text-amber-100/70'}>
-          {statusText ?? (dealIntro ? 'Dealing' : isHumanTurn ? (awaiting ? 'Your turn: draw a tile' : 'Your turn') : `${WIND_EN[seatWind(state.currentPlayer, state.dealerSeat)]} is playing…`)}
-        </span>
+  const shortName = (seat: number) => (seat === hs ? 'You' : (seatNames?.[seat] ?? WIND_EN[seatWind(seat, state.dealerSeat)]));
+  const guide = guideOn && !dealIntro && !awaiting // the Draw card already says it
+    ? turnGuide(state, { awaiting: Boolean(awaiting), canTsumo: canAct && canTsumo, canKong: canAct && kongActions.length > 0, seatName: s => seatTitle(s) })
+    : null;
+  const status = statusText ?? (dealIntro ? 'Dealing' : isHumanTurn ? (awaiting ? 'Your turn: draw a tile' : 'Your turn') : `${WIND_EN[seatWind(state.currentPlayer, state.dealerSeat)]} is playing…`);
+  const wallProps = {
+    front: dealIntro ? (intro.step === 'flowers' ? usage.front : intro.dealt) : awaiting && !awaiting.fromBack ? Math.max(0, usage.front - 1) : undefined,
+    back: dealIntro ? (intro.step === 'flowers' ? usage.back : 0) : awaiting?.fromBack ? Math.max(0, usage.back - 1) : undefined,
+    built: dealIntro ? intro.built : undefined,
+    showBreak: !dealIntro || intro.step !== 'build',
+    glowNext: Boolean(awaiting),
+  };
+  const lastThrown = (
+    <LastThrown
+      last={liveLast}
+      takenBy={lastTaken ? seatTitle(state.currentPlayer) : null}
+      who={liveLast ? seatTitle(liveLast.player) : ''}
+      wind={liveLast ? WIND_CHARS[seatWind(liveLast.player, state.dealerSeat)] : ''}
+      wallLeft={state.wall.length + (awaiting ? 1 : 0)}
+      animCls={liveLast && animateDiscards && !table3d ? discDir(liveLast.player, hs) : ''}
+      compact={table3d}
+    />
+  );
+  const guideStrip = guide && (
+    <div className={`pointer-events-none rounded-xl bg-black/70 px-3 py-1.5 leading-snug font-semibold text-amber-50 shadow-lg ${landscape ? 'text-[13px]' : 'text-[14px]'}`} role="status" aria-live="polite">
+      {guide}
+    </div>
+  );
+  const awaitingHint = awaiting && (
+    <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center z-20">
+      <div className="rounded-full bg-black/75 px-3 py-1.5 text-[14px] font-semibold text-amber-100 shadow-lg whitespace-nowrap anim-pop">
+        Tap to draw from the glowing stack
       </div>
+    </div>
+  );
 
-      {showNumbers && <NumbersCard onClose={() => setShowNumbers(false)} />}
-
-      {/* The table: flat felt (no 3D tilt, so tiles aren't foreshortened). A "just thrown" strip on top,
-          then each player's melds and throws in their own labelled row, so who threw what reads at a glance. */}
-      <div className="flex-1 min-h-0 mx-2 mt-1 mb-2 table-frame">
-       <div className="relative isolate h-full felt rounded-[0.85rem] overflow-hidden p-1.5">
-        <div className="felt-medallion -z-10" />
-          <div
-            className={`relative h-full rounded-xl ${awaiting ? 'cursor-pointer' : ''}`}
-            onClick={awaiting ? takeFromWall : undefined}
-          >
-           <WallRing
-             state={state}
-             dice={dice}
-             built={dealIntro ? intro.built : undefined}
-             showBreak={!dealIntro || intro.step !== 'build'}
-             front={dealIntro ? (intro.step === 'flowers' ? usage.front : intro.dealt) : awaiting && !awaiting.fromBack ? Math.max(0, usage.front - 1) : undefined}
-             back={dealIntro ? (intro.step === 'flowers' ? usage.back : 0) : awaiting?.fromBack ? Math.max(0, usage.back - 1) : undefined}
-             glowNext={Boolean(awaiting)}
-           />
-           <div className="absolute inset-3.5 rounded-lg flex flex-col gap-1.5 min-h-0">
-            {dealIntro && intro.step !== 'build' ? (
-              <div className="h-full flex flex-col items-center justify-center gap-1">
-                <div className="flex gap-2"><DiceFace value={dice.a} /><DiceFace value={dice.b} /></div>
-                <div className="text-[15px] font-semibold text-amber-100/90">{dice.a} + {dice.b} = {dice.a + dice.b}</div>
+  // The table itself: 3D (walls, standing hands, throws in front of each player) or the flat rows.
+  const table = table3d ? (
+    <div className={`relative h-full ${awaiting ? 'cursor-pointer' : ''}`} onClick={awaiting ? takeFromWall : undefined}>
+      <Table3D
+        state={state}
+        dice={dice}
+        {...wallProps}
+        handCount={seat => seatCount(seat) ?? state.hands[seat].length}
+        seatName={shortName}
+        lastIdx={liveLast ? lastIdx : -1}
+        showDice={dealIntro && intro.step !== 'build'}
+        compact={!landscape}
+        hideFlowers={dealIntro && intro.step !== 'flowers'}
+      />
+      {!landscape && awaitingHint}
+    </div>
+  ) : (
+    <div className="flex-1 min-h-0 h-full table-frame">
+     <div className="relative isolate h-full felt rounded-[0.85rem] overflow-hidden p-1.5">
+      <div className="felt-medallion -z-10" />
+        <div
+          className={`relative h-full rounded-xl ${awaiting ? 'cursor-pointer' : ''}`}
+          onClick={awaiting ? takeFromWall : undefined}
+        >
+         <WallRing state={state} dice={dice} {...wallProps} />
+         <div className="absolute inset-3.5 rounded-lg flex flex-col gap-1.5 min-h-0">
+          {dealIntro && intro.step !== 'build' ? (
+            <div className="h-full flex flex-col items-center justify-center gap-1">
+              <div className="flex gap-2"><DiceFace value={dice.a} /><DiceFace value={dice.b} /></div>
+              <div className="text-[15px] font-semibold text-amber-100/90">{dice.a} + {dice.b} = {dice.a + dice.b}</div>
+            </div>
+          ) : (
+            <>
+              {lastThrown}
+              <div ref={rowsRef} className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1 pb-1">
+                {[rightSeat, acrossSeat, leftSeat, hs].map(seat => (
+                  <PlayerRow
+                    key={seat}
+                    state={state}
+                    seat={seat}
+                    title={seatTitle(seat)}
+                    short={shortName(seat)}
+                    count={seatCount(seat)}
+                    lastIdx={lastIdx}
+                  />
+                ))}
               </div>
-            ) : (
-              <>
-                <LastThrown
-                  last={liveLast}
-                  takenBy={lastTaken ? seatTitle(state.currentPlayer) : null}
-                  who={liveLast ? seatTitle(liveLast.player) : ''}
-                  wind={liveLast ? WIND_CHARS[seatWind(liveLast.player, state.dealerSeat)] : ''}
-                  wallLeft={state.wall.length + (awaiting ? 1 : 0)}
-                  animCls={liveLast && animateDiscards ? discDir(liveLast.player, hs) : ''}
-                />
-                <div ref={rowsRef} className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1 pb-1">
-                  {[rightSeat, acrossSeat, leftSeat, hs].map(seat => (
-                    <PlayerRow
-                      key={seat}
-                      state={state}
-                      seat={seat}
-                      title={seatTitle(seat)}
-                      short={seat === hs ? 'You' : (seatNames?.[seat] ?? WIND_EN[seatWind(seat, state.dealerSeat)])}
-                      count={seatCount(seat)}
-                      lastIdx={lastIdx}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-           </div>
-           {awaiting && (
-             <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center z-20">
-               <div className="rounded-full bg-black/75 px-3 py-1.5 text-[14px] font-semibold text-amber-100 shadow-lg whitespace-nowrap anim-pop">
-                 Tap to draw from the glowing stack
-               </div>
-             </div>
-           )}
-          </div>
-       </div>
-      </div>
-
-      {/* Player area */}
-      <div className={`border-t border-slate-700/50 bg-slate-900/50 px-2 pt-2 pb-2 backdrop-blur transition-shadow duration-500 ${isHumanTurn ? 'glow-turn' : ''}`}>
-        <div className="flex items-center gap-2 mb-1.5 min-h-[20px]">
-          <span className="text-xs font-bold text-emerald-400">{WIND_CHARS[seatWind(hs, state.dealerSeat)]} You, {WIND_EN[seatWind(hs, state.dealerSeat)]}</span>
-          {flowerCount > 0 && (
-            <span key={flowerPop?.nonce ?? 'f'} className={`text-[12px] text-amber-400 inline-block ${flowerPop ? 'anim-badge' : ''}`}>
-              ✿ {flowerCount}
-            </span>
+            </>
           )}
-          {state.melds[hs].length > 0 && (
-            <div className="flex">
-              <TileRow tiles={state.melds[hs].flatMap(meldToIndices)} size="sm" sortTiles={false} animateEntrance={false} />
-            </div>
-          )}
+         </div>
+         {awaitingHint}
         </div>
+     </div>
+    </div>
+  );
 
-        {dealIntro && (
-          <DealCard
-            step={intro.step}
-            state={state}
-            dice={dice}
-            ready={intro.ready}
-            last={intro.last}
-            onNext={() => { haptics.tap(); if (intro.last) onDealDone?.(); else intro.next(); }}
-            onSkip={() => onDealDone?.()}
-          />
-        )}
-        {awaiting && (
-          <div className="mb-2 flex items-center gap-2 rounded-xl bg-surface border border-line px-2.5 py-2 anim-pop" role="status">
-            <p className="flex-1 text-[13px] leading-snug text-ink">
-              <span className="font-semibold text-accent">Your turn. </span>
-              Take the next tile from the wall, then throw one.
-            </p>
-            <button onClick={takeFromWall} className="shrink-0 btn-primary h-10 px-3 rounded-lg text-[13px] font-semibold active:scale-95">Draw</button>
-          </div>
-        )}
-        {tip && (
-          <div className="mb-2 flex items-center gap-2 rounded-xl bg-surface border border-line px-2.5 py-2 anim-pop" role="status">
-            <span className="w-7 h-9 shrink-0 rounded-[5px] overflow-hidden border border-[#C6AE84]" style={{ background: '#F6EDDA' }}>
-              <TileFace index={tip.tile} size="sm" />
-            </span>
-            <p className="flex-1 text-[13px] leading-snug text-ink"><span className="font-semibold text-accent">Coach: </span>{tip.text}</p>
-            <button onClick={() => setDisplay('coach', false)} className="shrink-0 text-[12px] text-mute px-1.5 py-1 active:scale-95" aria-label="Turn the coach off">Hide</button>
-          </div>
-        )}
-        <TileRow
-          tiles={myTiles}
-          onTileClick={canAct ? handleTileClick : undefined}
-          onThrow={canAct ? handleThrow : undefined}
-          selectedTiles={canAct && selectedIdx !== null ? new Set([selectedIdx]) : undefined}
-          highlightTiles={drawnTile !== undefined ? new Set([drawnTile]) : undefined}
-          drawnTile={drawnTile}
+  const cards = (
+    <>
+      {dealIntro && (
+        <DealCard
+          step={intro.step}
+          state={state}
+          dice={dice}
+          ready={intro.ready}
+          last={intro.last}
+          onNext={() => { haptics.tap(); if (intro.last) onDealDone?.(); else intro.next(); }}
+          onSkip={() => onDealDone?.()}
         />
-
-        {/* Reserved 44px row: buttons appear inside it, so selecting a tile never shifts the hand */}
-        <div className="mt-2 h-11">
-          {showActions && (
-            <div className="anim-pop flex gap-2 justify-center">
-              {selectedTileValue !== null && (
-                <button
-                  onClick={() => { haptics.select(); onDiscard(selectedTileValue); setSelectedIdx(null); setSelectedTileValue(null); }}
-                  className="flex-1 min-w-0 max-w-[8.5rem] h-11 px-2 btn-primary rounded-lg text-sm font-medium active:scale-95 active:bg-emerald-600"
-                >
-                  Discard
-                </button>
-              )}
-              {kongActions.map((a, i) => (
-                <button
-                  key={i}
-                  onClick={() => { if (a.type === 'declare_kong') { haptics.select(); onDeclareKong(a.tile); } }}
-                  className="flex-1 min-w-0 max-w-[8.5rem] h-11 px-2 bg-amber-600 text-white rounded-lg text-sm font-medium active:scale-95 active:bg-amber-500"
-                >
-                  Kong
-                </button>
-              ))}
-              {canTsumo && (
-                <button
-                  onClick={() => { haptics.select(); onTsumo(); }}
-                  className="anim-tsumo flex-1 min-w-0 max-w-[8.5rem] h-11 px-2 bg-red-600 text-white rounded-lg text-sm font-bold shadow-[0_0_18px_rgba(218,90,68,0.5)] active:scale-95 active:bg-red-500"
-                >
-                  Tsumo!
-                </button>
-              )}
-            </div>
-          )}
+      )}
+      {awaiting && (
+        <div className="mb-2 flex items-center gap-2 rounded-xl bg-surface border border-line px-2.5 py-2 anim-pop" role="status">
+          <p className="flex-1 text-[13px] leading-snug text-ink">
+            <span className="font-semibold text-accent">Your turn. </span>
+            Take the next tile from the wall, then throw one.
+          </p>
+          <button onClick={takeFromWall} className="shrink-0 btn-primary h-10 px-3 rounded-lg text-[13px] font-semibold active:scale-95">Draw</button>
         </div>
-      </div>
+      )}
+      {tip && (
+        <div className="mb-2 flex items-center gap-2 rounded-xl bg-surface border border-line px-2.5 py-2 anim-pop" role="status">
+          <span className="w-7 h-9 shrink-0 rounded-[5px] overflow-hidden border border-[#C6AE84]" style={{ background: '#F6EDDA' }}>
+            <TileFace index={tip.tile} size="sm" />
+          </span>
+          <p className="flex-1 text-[13px] leading-snug text-ink"><span className="font-semibold text-accent">Coach: </span>{tip.text}</p>
+          <button onClick={() => setDisplay('coach', false)} className="shrink-0 text-[12px] text-mute px-1.5 py-1 active:scale-95" aria-label="Turn the coach off">Hide</button>
+        </div>
+      )}
+    </>
+  );
 
+  const hand = (
+    <TileRow
+      tiles={myTiles}
+      onTileClick={canAct ? handleTileClick : undefined}
+      onThrow={canAct ? handleThrow : undefined}
+      selectedTiles={canAct && selectedIdx !== null ? new Set([selectedIdx]) : undefined}
+      highlightTiles={drawnTile !== undefined ? new Set([drawnTile]) : undefined}
+      drawnTile={drawnTile}
+      nowrap={landscape}
+    />
+  );
+
+  const actions = showActions && (
+    <div className="anim-pop flex gap-2 justify-center">
+      {selectedTileValue !== null && (
+        <button
+          onClick={() => { haptics.select(); onDiscard(selectedTileValue); setSelectedIdx(null); setSelectedTileValue(null); }}
+          className="flex-1 min-w-0 max-w-[8.5rem] h-11 px-3 btn-primary rounded-lg text-sm font-medium active:scale-95 active:bg-emerald-600"
+        >
+          Discard
+        </button>
+      )}
+      {kongActions.map((a, i) => (
+        <button
+          key={i}
+          onClick={() => { if (a.type === 'declare_kong') { haptics.select(); onDeclareKong(a.tile); } }}
+          className="flex-1 min-w-0 max-w-[8.5rem] h-11 px-3 bg-amber-600 text-white rounded-lg text-sm font-medium active:scale-95 active:bg-amber-500"
+        >
+          Kong
+        </button>
+      ))}
+      {canTsumo && (
+        <button
+          onClick={() => { haptics.select(); onTsumo(); }}
+          className="anim-tsumo flex-1 min-w-0 max-w-[8.5rem] h-11 px-3 bg-red-600 text-white rounded-lg text-sm font-bold shadow-[0_0_18px_rgba(218,90,68,0.5)] active:scale-95 active:bg-red-500"
+        >
+          Tsumo!
+        </button>
+      )}
+    </div>
+  );
+
+  const iconBtn = 'h-9 px-2.5 rounded-lg bg-black/45 border border-amber-400/30 text-amber-100 text-[13px] font-semibold active:scale-95';
+  const controls = (
+    <>
+      <button onClick={onQuit} aria-label="End match" className={`${iconBtn} w-9 px-0`}>✕</button>
+      {onOptions && <button onClick={() => { haptics.tap(); onOptions(); }} className={iconBtn}>Options</button>}
+      {onToggleFast && (
+        <button onClick={() => { haptics.tap(); onToggleFast(); }} aria-pressed={fast} className={`${iconBtn} ${fast ? 'bg-amber-400 text-[#2a1a0c] border-amber-300' : ''}`}>
+          {fast ? 'Fast ✓' : 'Faster'}
+        </button>
+      )}
+      <button onClick={() => setShowNumbers(true)} aria-label="Chinese numbers 1 to 9" className={iconBtn}>一 = 1</button>
+    </>
+  );
+
+  const overlays = (
+    <>
       {/* Flower pop — the hero moment */}
       {flowerPop && (
         <div key={flowerPop.nonce} className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center">
@@ -528,8 +579,6 @@ export function GameBoard({
           </div>
         </div>
       )}
-
-      {/* Big centre-stage flashes — draw (settles toward hand) + discard (shrinks to pool) */}
       {drawFlash && (
         <div key={`draw${drawFlash.nonce}`} className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center">
           <BigTile tile={drawFlash.tile} cls="anim-drawbig" />
@@ -540,6 +589,81 @@ export function GameBoard({
           <BigTile tile={discardFlash.tile} cls="anim-discardbig" />
         </div>
       )}
+      {showNumbers && <NumbersCard onClose={() => setShowNumbers(false)} />}
+    </>
+  );
+
+  const bg = { background: 'radial-gradient(130% 100% at 50% 22%, #34160c, #190a06)' };
+
+  // Sideways phone: the table fills the screen, the hand runs along the bottom, everything else floats.
+  if (landscape) {
+    return (
+      <div className="relative h-full overflow-hidden" style={{ ...bg, paddingLeft: 'env(safe-area-inset-left)', paddingRight: 'env(safe-area-inset-right)' }}>
+        <div className="absolute inset-x-0 top-0" style={{ bottom: 84 }}>{table}</div>
+        <div className="absolute left-2 top-2 z-20 flex gap-1.5" style={{ marginLeft: 'env(safe-area-inset-left)' }}>{controls}</div>
+        <div className="absolute right-2 top-2 z-20 text-right" style={{ marginRight: 'env(safe-area-inset-right)' }}>
+          <span className={`inline-block rounded-lg bg-black/45 px-2 py-1 text-[13px] font-semibold ${isHumanTurn ? 'text-emerald-300' : 'text-amber-100/80'}`}>{status}</span>
+        </div>
+        {table3d && (liveLast || lastTaken) && !dealIntro && (
+          <div className="absolute left-2 top-14 z-20 w-[190px]">{lastThrown}</div>
+        )}
+        {(dealIntro || awaiting || tip || guideStrip) && (
+          <div className="absolute right-2 top-12 z-20 w-[min(220px,28vw)] max-h-[64%] overflow-y-auto" style={{ marginRight: 'env(safe-area-inset-right)' }}>
+            {guideStrip && <div className="mb-2">{guideStrip}</div>}
+            {cards}
+          </div>
+        )}
+        {showActions && <div className="absolute right-2 z-30 w-[190px]" style={{ bottom: 90, marginRight: 'env(safe-area-inset-right)' }}>{actions}</div>}
+        <div className={`absolute inset-x-0 bottom-0 z-20 h-[84px] flex items-end justify-center px-2 pb-1.5 ${isHumanTurn ? 'glow-turn' : ''}`}>
+          <div className="min-w-0">{hand}</div>
+        </div>
+        {overlays}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative flex flex-col h-full" style={bg}>
+      {/* Status bar */}
+      <div className="flex items-center justify-between gap-1.5 px-2 py-1.5 bg-black/30 border-b border-amber-400/10 text-xs text-amber-100/70 backdrop-blur">
+        <div className="flex gap-1.5">{controls}</div>
+        <span className={`text-right leading-tight ${isHumanTurn ? 'text-emerald-300 font-bold' : 'text-amber-100/70'}`}>{status}</span>
+      </div>
+
+      <div className="relative flex-1 min-h-0 mx-1 mt-1 mb-1">
+        {table}
+        {table3d && (liveLast || lastTaken) && !dealIntro && (
+          <div className="pointer-events-none absolute left-1 top-1 z-10 w-[176px]">{lastThrown}</div>
+        )}
+        {table3d && !seenSideways && (
+          <div className="pointer-events-none absolute right-1 bottom-1 z-10 rounded-full bg-black/60 px-2.5 py-1 text-[12px] font-semibold text-amber-100">
+            ⟳ Turn your phone sideways for a bigger table
+          </div>
+        )}
+      </div>
+
+      {/* Player area */}
+      <div className={`border-t border-slate-700/50 bg-slate-900/50 px-2 pt-2 pb-2 backdrop-blur transition-shadow duration-500 ${isHumanTurn ? 'glow-turn' : ''}`}>
+        <div className="flex items-center gap-2 mb-1.5 min-h-[20px]">
+          <span className="text-xs font-bold text-emerald-400">{WIND_CHARS[seatWind(hs, state.dealerSeat)]} You, {WIND_EN[seatWind(hs, state.dealerSeat)]}{state.dealerSeat === hs ? ' · dealer' : ''}</span>
+          {flowerCount > 0 && (
+            <span key={flowerPop?.nonce ?? 'f'} className={`text-[12px] text-amber-400 inline-block ${flowerPop ? 'anim-badge' : ''}`}>
+              ✿ {flowerCount}
+            </span>
+          )}
+          {state.melds[hs].length > 0 && (
+            <div className="flex">
+              <TileRow tiles={state.melds[hs].flatMap(meldToIndices)} size="sm" sortTiles={false} animateEntrance={false} />
+            </div>
+          )}
+        </div>
+        {guideStrip && <div className="mb-2">{guideStrip}</div>}
+        {cards}
+        {hand}
+        {/* Reserved 44px row: buttons appear inside it, so selecting a tile never shifts the hand */}
+        <div className="mt-2 h-11">{actions}</div>
+      </div>
+      {overlays}
     </div>
   );
 }

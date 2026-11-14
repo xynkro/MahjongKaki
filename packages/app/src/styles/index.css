@@ -424,3 +424,25 @@
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; }
 }
+
+/* Sideways phone during a game: the table gets the whole screen. */
+@media (orientation: landscape) and (max-height: 540px) {
+  [data-immersive='1'] .app-shell-header,
+  [data-immersive='1'] .app-shell-nav { display: none; }
+}
+/* 3D table: the seat whose turn it is, and the latest throw. */
+.table-turn { box-shadow: 0 0 0 3px rgba(244, 199, 106, 0.45), 0 0 18px rgba(244, 199, 106, 0.6); }
+.table-last { box-shadow: 0 0 14px rgba(244, 199, 106, 0.9); }
+/* Sideways phone: the call/skip panel floats just above the hand (never over it) instead of squeezing the table. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .claim-sheet { position: fixed; left: 0; right: 0; margin: 0 auto; bottom: 92px; max-height: calc(100% - 140px); overflow-y: auto; width: min(620px, 92vw); border: 1px solid var(--line); border-radius: 16px; z-index: 45; padding: 10px 12px; }
+}
+/* 3D table: the stack you draw from next, pulsing gold. */
+.wall-next-3d { animation: wallNext3d 0.9s ease-in-out infinite; }
+@keyframes wallNext3d {
+  0%, 100% { background: #3f8f66; box-shadow: 0 0 0 3px #f4c76a, 0 0 16px 4px rgba(244, 199, 106, 0.8); }
+  50% { background: #6cbf91; box-shadow: 0 0 0 5px #ffe08a, 0 0 30px 10px rgba(255, 211, 106, 0.9); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wall-next-3d { animation: none; background: #6cbf91; box-shadow: 0 0 0 4px #f4c76a, 0 0 18px 6px rgba(244, 199, 106, 0.85); }
+}

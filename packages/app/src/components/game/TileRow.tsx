@@ -16,6 +16,8 @@ interface TileRowProps {
   drawnTile?: number;
   /** Corner numbers on suit tiles: undefined follows the setting, false hides, true forces. */
   tag?: boolean;
+  /** One line that never wraps (sideways phone): tiles shrink a little on narrow screens. */
+  nowrap?: boolean;
 }
 
 const THROW_DISTANCE = 52; // px dragged up to commit a discard
@@ -31,9 +33,11 @@ export function TileRow({
   animateEntrance = true,
   drawnTile,
   tag,
+  nowrap,
 }: TileRowProps) {
   const displayTiles = sortTiles ? [...tiles].sort((a, b) => a - b) : tiles;
-  const sizeClass = size === 'sm' ? 'w-9 h-12' : size === 'lg' ? 'w-14 h-[78px]' : 'w-[46px] h-[68px]'; // 46px: 7 a row on a 375px phone
+  const sizeClass = size === 'sm' ? 'w-9 h-12' : size === 'lg' ? 'w-14 h-[78px]'
+    : nowrap ? 'w-[min(46px,6.3vw)] h-[min(68px,9.3vw)]' : 'w-[46px] h-[68px]'; // 46px: 7 a row on a 375px phone
 
   const start = useRef<{ idx: number; x: number; y: number; moved: boolean; dy: number } | null>(null);
   const [drag, setDrag] = useState<{ idx: number; dx: number; dy: number } | null>(null);
@@ -41,7 +45,7 @@ export function TileRow({
   const seen = new Map<number, number>();
 
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className={`flex gap-1 ${nowrap ? 'flex-nowrap' : 'flex-wrap'}`}>
       {displayTiles.map((tile, i) => {
         // Keyed by tile, not slot: otherwise the next tile inherits a thrown tile's
         // element and slides back from where the drag released.

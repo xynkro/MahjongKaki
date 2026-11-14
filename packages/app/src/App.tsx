@@ -33,7 +33,7 @@ export function App() {
   return (
     <div className="app-full flex flex-col bg-bg">
       <header
-        className="relative pb-3 border-b border-line"
+        className="app-shell-header relative pb-3 border-b border-line"
         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}
       >
         <div className="relative flex items-center justify-center">
@@ -67,7 +67,7 @@ export function App() {
         </div>
       </main>
 
-      <nav className="flex border-t border-line bg-surface pb-safe">
+      <nav className="app-shell-nav flex border-t border-line bg-surface pb-safe">
         {TABS.map(t => {
           const active = tab === t.id;
           return (

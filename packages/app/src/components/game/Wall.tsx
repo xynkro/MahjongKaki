@@ -64,8 +64,22 @@ interface RingProps {
   glowNext?: boolean;
 }
 
-/** The four walls, laid out as a frame around the discard pool. Your wall is the bottom one. */
-export function WallRing({ state, dice, front, back, built, showBreak, glowNext }: RingProps) {
+export interface WallLayout {
+  /** Bottom (you), left, top, right: the seat and its stack count, clockwise on screen. */
+  sides: { seat: number; count: number }[];
+  /** Index of each side's first stack in the clockwise ring. */
+  starts: number[];
+  len: number;
+  /** Ring index where the dice split the wall. */
+  brk: number;
+  /** Tiles still standing in each stack (0, 1 or 2), by ring index. */
+  left: number[];
+  /** The stack the next normal draw comes from. */
+  next: number;
+}
+
+/** Where every stack of the wall is and how many tiles each still holds. Shared by the flat and 3D tables. */
+export function wallLayout(state: GameState, dice: Dice, front?: number, back?: number): WallLayout {
   const hs = state.humanSeat;
   const total = totalTiles(state);
   // Clockwise on screen, each side starting at its owner's right-hand end.
@@ -85,11 +99,16 @@ export function WallRing({ state, dice, front, back, built, showBreak, glowNext 
   const f = front ?? usage.front;
   const bk = back ?? usage.back;
 
-  // Tiles still standing in each stack (0, 1 or 2), indexed clockwise.
   const left = new Array<number>(len).fill(2);
   for (let k = 0; 2 * k < f; k++) left[(brk + k) % len] -= Math.min(2, f - 2 * k);
   for (let k = 0; 2 * k < bk; k++) left[(brk - 1 - k + len * 2) % len] -= Math.min(2, bk - 2 * k);
   const next = (brk + Math.floor(f / 2)) % len;
+  return { sides, starts, len, brk, left, next };
+}
+
+/** The four walls, laid out as a frame around the discard pool. Your wall is the bottom one. */
+export function WallRing({ state, dice, front, back, built, showBreak, glowNext }: RingProps) {
+  const { sides, starts, len, brk, left, next } = wallLayout(state, dice, front, back);
 
   const stack = (i: number, side: 'top' | 'bottom' | 'left' | 'right') => {
     const horizontal = side === 'top' || side === 'bottom';

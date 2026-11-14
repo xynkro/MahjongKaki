@@ -15,9 +15,13 @@ export interface DisplayConfig {
   drawYourself: boolean;
   /** Play vs AI: show the wall being built, the dice and the deal at the start of each hand. */
   showDeal: boolean;
+  /** Play: the table in perspective (walls, standing hands). Off = the flat rows view. */
+  table3d: boolean;
+  /** Play: one plain sentence saying whose turn it is and what to do next. */
+  turnGuide: boolean;
 }
 
-const DEFAULT: DisplayConfig = { tileMode: 'beginner', tooltips: true, coach: true, money: false, drawYourself: true, showDeal: true };
+const DEFAULT: DisplayConfig = { tileMode: 'beginner', tooltips: true, coach: true, money: false, drawYourself: true, showDeal: true, table3d: true, turnGuide: true };
 const KEY = 'mk_display';
 
 let cfg: DisplayConfig = load();
