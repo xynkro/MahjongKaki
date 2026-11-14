@@ -2,21 +2,68 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1d17">
 <title>MahjongKaki has moved</title>
 <link rel="canonical" href="https://mahjongkaki.web.app/">
 <script>
-  // Keep whatever came after /MahjongKaki/ (a room link, a page) when sending people on.
+  // In a browser tab, send people straight on, keeping whatever came after /MahjongKaki/ (a room link, a page).
+  // In a home-screen app installed from this old address, don't: the phone opens another site in a small
+  // browser window whose toolbar covers the app's buttons. Ask them to swap the icon instead.
   (function () {
+    var installed = navigator.standalone === true ||
+      (window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches));
+    if (installed) { document.documentElement.className = 'installed'; return; }
     var rest = location.pathname.replace(/^\/MahjongKaki\/?/, '');
     if (rest === 'index.html' || rest === '404.html') rest = '';
     location.replace('https://mahjongkaki.web.app/' + rest + location.search + location.hash);
   })();
 </script>
-<meta http-equiv="refresh" content="1; url=https://mahjongkaki.web.app/">
-<style>body{font:17px/1.5 system-ui,sans-serif;background:#0f1d17;color:#efe6d2;display:grid;place-items:center;min-height:100vh;margin:0;padding:0 16px;text-align:center}a{color:#e2b866}</style>
+<noscript><meta http-equiv="refresh" content="0; url=https://mahjongkaki.web.app/"></noscript>
+<style>
+  body{font:17px/1.5 system-ui,-apple-system,sans-serif;background:#0f1d17;color:#efe6d2;margin:0;
+    padding:calc(env(safe-area-inset-top) + 28px) 20px calc(env(safe-area-inset-bottom) + 28px)}
+  main{max-width:440px;margin:0 auto}
+  a{color:#e2b866}
+  h1{font-size:26px;line-height:1.2;margin:0 0 10px}
+  .k{color:#e2b866}
+  .moving{display:block}.steps{display:none}
+  .installed .moving{display:none}.installed .steps{display:block}
+  ol{padding-left:1.3em;margin:18px 0}
+  li{margin:0 0 14px}
+  .addr{display:flex;gap:8px;align-items:center;background:#16291f;border:1px solid #2c4636;border-radius:12px;padding:10px 12px;margin:6px 0 0}
+  .addr b{flex:1;font-weight:600;color:#fff}
+  button{font:inherit;font-size:15px;font-weight:600;border:0;border-radius:10px;padding:8px 12px;background:#e2b866;color:#1a1408}
+  .note{color:#b9b09c;font-size:15px}
+</style>
 </head>
 <body>
-<p>MahjongKaki now lives at <a href="https://mahjongkaki.web.app/">mahjongkaki.web.app</a>.</p>
+<main>
+  <p class="moving">MahjongKaki now lives at <a href="https://mahjongkaki.web.app/">mahjongkaki.web.app</a>.</p>
+
+  <div class="steps">
+    <h1>Mahjong<span class="k">Kaki</span> has moved</h1>
+    <p>This icon opens the old address, so the app can’t open full screen. Swap it for the new one. It takes a minute.</p>
+    <ol>
+      <li>Open <b>Safari</b> and go to:
+        <div class="addr"><b>mahjongkaki.web.app</b><button type="button" id="copy">Copy</button></div>
+      </li>
+      <li>Tap the <b>Share</b> button (a square with an arrow), then <b>Add to Home Screen</b>. Leave “Open as Web App” switched on.</li>
+      <li>Open the new icon and check it fills the screen. Then delete this old one: press and hold it and choose the option to remove it.</li>
+    </ol>
+    <p class="note">On Android, open the address in Chrome, tap the ⋮ menu, then <b>Add to Home screen</b>.</p>
+    <p class="note"><a href="https://mahjongkaki.web.app/">Or just continue in the browser for now</a>.</p>
+    <p class="note">Lessons you finished on the old address don’t carry over, sorry. Everything else is the same.</p>
+  </div>
+</main>
+<script>
+  var copy = document.getElementById('copy');
+  copy.addEventListener('click', function () {
+    var done = function () { copy.textContent = 'Copied'; };
+    var failed = function () { copy.textContent = 'Type it in'; };
+    if (navigator.clipboard) navigator.clipboard.writeText('https://mahjongkaki.web.app/').then(done, failed);
+    else failed();
+  });
+</script>
 </body>
 </html>
