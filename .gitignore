@@ -21,7 +21,9 @@ functions/node_modules/
 .vscode/
 .idea/
 *.swp
-.claude/
+.claude/*
+!.claude/skills/
+!.claude/CLAUDE.md
 .claude-flow/
 .swarm/
 ruvector.db
